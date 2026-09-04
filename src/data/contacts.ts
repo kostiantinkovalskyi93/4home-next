@@ -14,4 +14,16 @@ export const CONTACTS = {
     label: "@mebli.4home",
     href: "https://www.instagram.com/mebli.4home/",
   },
+
+  viber: {
+    label: "Viber",
+    display: "+380 99 300 22 45",
+    href: "viber://chat?number=%2B380993002245",
+  },
+
+  telegram: {
+    label: "Telegram",
+    display: "@besteraffilate",
+    href: "https://t.me/besteraffilate",
+  },
 } as const;

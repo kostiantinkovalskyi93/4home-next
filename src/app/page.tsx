@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { Header } from "@/components/layout/Header";
+import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
 
@@ -169,21 +171,42 @@ const materials = [
 ];
 
 const aboutFacts = [
+  { number: "01", title: "Індивідуальні розміри" },
+  { number: "02", title: "Погодження до виготовлення" },
+  { number: "03", title: "Доставка та встановлення" },
+  { number: "04", title: "Київ та передмістя" },
+];
+
+const faqItems = [
   {
-    number: "01",
-    title: "Індивідуальні розміри",
+    question: "Скільки коштують меблі на замовлення?",
+    answer:
+      "Вартість залежить від розмірів, конструкції, матеріалів, фурнітури та складності проєкту. Точний прорахунок можна зробити після уточнення основних параметрів.",
   },
   {
-    number: "02",
-    title: "Погодження до виготовлення",
+    question: "Чи можна зробити попередній прорахунок за фото та розмірами?",
+    answer:
+      "Так. Для попереднього прорахунку можна надіслати фото приміщення, приблизні розміри та опис того, які меблі потрібні.",
   },
   {
-    number: "03",
-    title: "Доставка та встановлення",
+    question: "Чи виїжджаєте на замір?",
+    answer:
+      "Так. Для точного проєктування уточнюємо розміри приміщення та технічні особливості, які можуть впливати на конструкцію меблів.",
   },
   {
-    number: "04",
-    title: "Київ та передмістя",
+    question: "Чи можна обрати матеріали та фурнітуру?",
+    answer:
+      "Так. Матеріали, фасади, кольори, стільниці та механізми підбираються відповідно до конструкції, стилю, умов використання та бюджету.",
+  },
+  {
+    question: "Чи займаєтесь доставкою та монтажем?",
+    answer:
+      "Так. Після виготовлення меблі доставляються та встановлюються на об’єкті.",
+  },
+  {
+    question: "Чи є готові меблі в наявності?",
+    answer:
+      "Ні. 4HOME працює з індивідуальними замовленнями. Меблі створюються під конкретне приміщення, розміри та побажання замовника.",
   },
 ];
 
@@ -358,7 +381,7 @@ export default function Home() {
                 </h2>
               </div>
 
-              <div className={styles.portfolioHeaderRight}>
+              <div>
                 <p className={styles.portfolioIntro}>
                   Кілька прикладів виконаних меблів. У повному портфоліо
                   зберемо більше фотографій кожного проєкту.
@@ -375,11 +398,11 @@ export default function Home() {
               {portfolioProjects.map((project) => (
                 <article
                   key={project.number}
-                  className={`${styles.portfolioCard} ${
+                  className={
                     project.size === "featured"
                       ? styles.portfolioFeatured
                       : styles.portfolioSmall
-                  }`}
+                  }
                 >
                   <Link href="/portfolio" className={styles.portfolioLink}>
                     <div className={styles.portfolioImageWrapper}>
@@ -488,7 +511,7 @@ export default function Home() {
                 </h2>
               </div>
 
-              <div className={styles.materialsHeaderRight}>
+              <div>
                 <p className={styles.materialsIntro}>
                   Матеріали, кольори та механізми підбираються під конструкцію,
                   стиль, умови використання та бюджет майбутніх меблів.
@@ -527,7 +550,7 @@ export default function Home() {
         <section className={styles.about}>
           <div className="container">
             <div className={styles.aboutGrid}>
-              <div className={styles.aboutIntro}>
+              <div>
                 <p className={styles.aboutEyebrow}>ПРО 4HOME</p>
 
                 <h2 className={styles.aboutTitle}>
@@ -575,6 +598,102 @@ export default function Home() {
                   <p className={styles.aboutFactText}>{fact.title}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.faq}>
+          <div className="container">
+            <div className={styles.faqGrid}>
+              <div className={styles.faqHeader}>
+                <p className={styles.faqEyebrow}>ПОШИРЕНІ ПИТАННЯ</p>
+
+                <h2 className={styles.faqTitle}>
+                  Відповіді перед
+                  <br />
+                  початком проєкту
+                </h2>
+
+                <p className={styles.faqIntro}>
+                  Зібрали основні питання, які виникають перед замовленням
+                  меблів.
+                </p>
+              </div>
+
+              <FaqAccordion items={faqItems} />
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.finalCta}>
+          <div className="container">
+            <div className={styles.finalCtaGrid}>
+              <div className={styles.finalCtaMain}>
+                <p className={styles.finalCtaEyebrow}>
+                  ГОТОВІ ОБГОВОРИТИ ПРОЄКТ?
+                </p>
+
+                <h2 className={styles.finalCtaTitle}>
+                  Розкажіть, які меблі
+                  <br />
+                  вам потрібні
+                </h2>
+              </div>
+
+              <div className={styles.finalCtaContent}>
+                <p className={styles.finalCtaText}>
+                  Надішліть фото, приблизні розміри або коротко опишіть задачу.
+                  Цього достатньо, щоб почати обговорення майбутнього проєкту.
+                </p>
+
+                <div className={styles.finalCtaActions}>
+                  <Link href="/contacts" className={styles.finalCtaPrimary}>
+                    Розрахувати вартість
+                    <span aria-hidden="true">→</span>
+                  </Link>
+
+                  <a
+                    href={CONTACTS.phone.href}
+                    className={styles.finalCtaSecondary}
+                  >
+                    Зателефонувати
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.finalContacts}>
+              <a
+                href={CONTACTS.phone.href}
+                className={styles.finalContactItem}
+              >
+                <span className={styles.finalContactLabel}>Телефон</span>
+                <span className={styles.finalContactValue}>
+                  {CONTACTS.phone.display}
+                </span>
+              </a>
+
+              <a
+                href={CONTACTS.email.href}
+                className={styles.finalContactItem}
+              >
+                <span className={styles.finalContactLabel}>Email</span>
+                <span className={styles.finalContactValue}>
+                  {CONTACTS.email.display}
+                </span>
+              </a>
+
+              <a
+                href={CONTACTS.instagram.href}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.finalContactItem}
+              >
+                <span className={styles.finalContactLabel}>Instagram</span>
+                <span className={styles.finalContactValue}>
+                  {CONTACTS.instagram.label}
+                </span>
+              </a>
             </div>
           </div>
         </section>

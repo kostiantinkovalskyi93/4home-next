@@ -1,0 +1,408 @@
+.footer {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-top: 1px solid var(--color-border);
+}
+
+.inner {
+  padding-top: 54px;
+  padding-bottom: 22px;
+}
+
+/* ========================================
+   MAIN LAYOUT
+======================================== */
+
+.main {
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 1.1fr)
+    minmax(220px, 0.75fr)
+    minmax(280px, 0.9fr);
+
+  gap: 64px;
+
+  padding-bottom: 44px;
+}
+
+/* ========================================
+   BRAND
+======================================== */
+
+.brand {
+  align-self: start;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+
+  width: 124px;
+
+  margin-bottom: 20px;
+}
+
+.logoImage {
+  display: block;
+
+  width: 100%;
+  height: auto;
+}
+
+.brandText {
+  color: var(--color-text-muted);
+
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* ========================================
+   COLUMN LABELS
+======================================== */
+
+.columnLabel {
+  margin-bottom: 20px;
+
+  color: var(--color-accent);
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ========================================
+   NAVIGATION
+======================================== */
+
+.navigation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  column-gap: 32px;
+  row-gap: 14px;
+}
+
+.navLink {
+  width: fit-content;
+
+  color: var(--color-text);
+
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.navLink:hover {
+  color: var(--color-accent);
+  transform: translateX(2px);
+}
+
+/* ========================================
+   CONTACTS
+======================================== */
+
+.primaryContacts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  margin-bottom: 22px;
+}
+
+.contactLink {
+  color: var(--color-text);
+
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
+
+  transition: color 180ms ease;
+}
+
+.contactLink:hover {
+  color: var(--color-accent);
+}
+
+/* ========================================
+   SOCIAL LINKS
+======================================== */
+
+.socials {
+  border-top: 1px solid var(--color-border);
+}
+
+.socialLink {
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  border-bottom: 1px solid var(--color-border);
+
+  color: var(--color-text);
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+
+  transition:
+    color 180ms ease,
+    padding-left 180ms ease;
+}
+
+.socialArrow {
+  flex: 0 0 auto;
+
+  color: var(--color-accent);
+
+  font-size: 15px;
+  line-height: 1;
+}
+
+.socialLink:hover {
+  padding-left: 4px;
+
+  color: var(--color-accent);
+}
+
+/* ========================================
+   BOTTOM BAR
+======================================== */
+
+.bottom {
+  min-height: 48px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 32px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid var(--color-border);
+
+  color: var(--color-text-muted);
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+
+  letter-spacing: 0.02em;
+}
+
+/* ========================================
+   FOCUS
+======================================== */
+
+.logo:focus-visible,
+.navLink:focus-visible,
+.contactLink:focus-visible,
+.socialLink:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1000px) {
+  .inner {
+    padding-top: 48px;
+  }
+
+  .main {
+    grid-template-columns: 1fr 1fr;
+
+    gap: 42px 48px;
+
+    padding-bottom: 40px;
+  }
+
+  .brand {
+    grid-column: 1 / -1;
+  }
+
+  .brandText {
+    font-size: 15px;
+  }
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 650px) {
+  .inner {
+    padding-top: 34px;
+    padding-bottom: 18px;
+  }
+
+  .main {
+    grid-template-columns: 1fr;
+
+    gap: 34px;
+
+    padding-bottom: 34px;
+  }
+
+  .brand {
+    grid-column: auto;
+  }
+
+  /*
+   * На мобільному логотип Footer приховуємо.
+   * Логотип 4HOME вже постійно присутній
+   * у sticky Header, тому повтор унизу
+   * створював ефект задвоєння.
+   */
+  .logo {
+    display: none;
+  }
+
+  .brandText {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .columnLabel {
+    margin-bottom: 15px;
+  }
+
+  /* ----------------------------------------
+     MOBILE NAVIGATION
+  ---------------------------------------- */
+
+  .navigation {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    column-gap: 24px;
+    row-gap: 0;
+
+    border-top: 1px solid var(--color-border);
+  }
+
+  .navLink {
+    width: 100%;
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+
+    border-bottom: 1px solid var(--color-border);
+
+    font-size: 14px;
+  }
+
+  .navLink:last-child {
+    grid-column: 1 / -1;
+  }
+
+  /* ----------------------------------------
+     MOBILE CONTACTS
+  ---------------------------------------- */
+
+  .primaryContacts {
+    gap: 10px;
+
+    margin-bottom: 20px;
+  }
+
+  .contactLink {
+    font-size: 16px;
+  }
+
+  .socialLink {
+    min-height: 46px;
+
+    font-size: 14px;
+  }
+
+  /* ----------------------------------------
+     MOBILE BOTTOM
+  ---------------------------------------- */
+
+  .bottom {
+    min-height: 0;
+
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding-top: 16px;
+
+    font-size: 10px;
+  }
+
+  .bottom p:last-child {
+    max-width: 180px;
+
+    text-align: right;
+  }
+}
+
+/* ========================================
+   VERY SMALL MOBILE
+======================================== */
+
+@media (max-width: 390px) {
+  .inner {
+    padding-top: 32px;
+  }
+
+  .main {
+    gap: 30px;
+
+    padding-bottom: 30px;
+  }
+
+  .navigation {
+    column-gap: 18px;
+  }
+
+  .contactLink {
+    font-size: 15px;
+  }
+
+  .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 5px;
+  }
+
+  .bottom p:last-child {
+    max-width: none;
+
+    text-align: left;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .navLink,
+  .contactLink,
+  .socialLink {
+    transition: none;
+  }
+}
