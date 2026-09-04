@@ -1,150 +1,282 @@
-.page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
+.hero {
+  min-height: calc(100vh - 76px);
 
   display: flex;
-  flex: 1;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+
+  background: var(--color-dark);
+  color: #ffffff;
 }
 
-.main {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+.heroInner {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.9fr)
+    minmax(0, 1.1fr);
+
+  align-items: center;
+
+  gap: 72px;
+
+  padding-block: 72px;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
+/* ========================================
+   HERO CONTENT
+======================================== */
+
+.heroContent {
+  max-width: 570px;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
+.eyebrow {
+  margin-bottom: 20px;
+
+  color: #c89b78;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-.intro p {
-  max-width: 440px;
+.title {
+  max-width: 560px;
+
+  font-size: clamp(52px, 5vw, 78px);
+  font-weight: 700;
+  line-height: 0.98;
+
+  letter-spacing: -0.045em;
+}
+
+.description {
+  max-width: 540px;
+
+  margin-top: 28px;
+
+  color: #d6d1cc;
+
   font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
+  line-height: 1.65;
 }
 
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
+/* ========================================
+   HERO BUTTONS
+======================================== */
 
-.ctas {
+.actions {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
+  flex-wrap: wrap;
+
+  gap: 14px;
+
+  margin-top: 36px;
 }
 
-.ctas a {
-  display: flex;
-  justify-content: center;
+.primaryButton,
+.secondaryButton {
+  min-height: 52px;
+
+  display: inline-flex;
   align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
+  justify-content: center;
+
+  padding-inline: 22px;
+
+  border-radius: var(--radius-sm);
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.primaryButton {
+  background: var(--color-accent);
+  color: #ffffff;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.primaryButton:hover {
+  background: var(--color-accent-hover);
+
+  transform: translateY(-1px);
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
+.secondaryButton {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  color: #ffffff;
+}
+
+.secondaryButton:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================
+   HERO VISUAL
+======================================== */
+
+.heroVisual {
+  min-width: 0;
+
+  width: 100%;
+}
+
+.imageFrame {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 16 / 10;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+
+  background: #22201e;
+
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.heroImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ========================================
+   FOCUS STATES
+======================================== */
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 2px solid #c89b78;
+  outline-offset: 4px;
+}
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 900px) {
+  .hero {
+    min-height: auto;
   }
 
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
+  .heroInner {
+    grid-template-columns: 1fr;
+
+    gap: 44px;
+
+    padding-block: 56px 64px;
+  }
+
+  .heroContent {
+    max-width: 680px;
+  }
+
+  .title {
+    max-width: 620px;
+  }
+
+  .heroVisual {
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .imageFrame {
+    aspect-ratio: 16 / 10;
   }
 }
+
+/* ========================================
+   MOBILE
+======================================== */
 
 @media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
+  .heroInner {
+    gap: 38px;
+
+    padding-block: 44px 52px;
   }
 
-  .intro {
-    gap: 16px;
+  .eyebrow {
+    margin-bottom: 18px;
+
+    font-size: 11px;
   }
 
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
+  .title {
+    max-width: 100%;
+
+    font-size: clamp(40px, 11vw, 52px);
+    line-height: 1;
+
+    letter-spacing: -0.04em;
+  }
+
+  .description {
+    margin-top: 24px;
+
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+
+    margin-top: 30px;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    min-height: 54px;
+  }
+
+  .imageFrame {
+    aspect-ratio: 4 / 3;
+
+    border-radius: 14px;
+  }
+
+  .heroImage {
+    object-position: center;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
+/* ========================================
+   VERY SMALL MOBILE
+======================================== */
+
+@media (max-width: 390px) {
+  .title {
+    font-size: 39px;
   }
 
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+  .description {
+    font-size: 15px;
   }
 }
 
-.code {
-  font-family: var(--font-geist-mono);
-  font-size: 0.9em;
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  padding: 0.1em 0.4em;
-  border-radius: 6px;
+/* ========================================
+   REDUCED MOTION
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton,
+  .secondaryButton {
+    transition: none;
+  }
 }

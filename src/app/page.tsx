@@ -1,69 +1,58 @@
 import Image from "next/image";
+import Link from "next/link";
+
+import { Header } from "@/components/layout/Header";
+
 import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Header />
+
+      <main>
+        <section className={styles.hero}>
+          <div className={`container ${styles.heroInner}`}>
+            <div className={styles.heroContent}>
+              <p className={styles.eyebrow}>4HOME • КИЇВ</p>
+
+              <h1 className={styles.title}>
+                Меблі на замовлення
+                <br />
+                у Києві
+              </h1>
+
+              <p className={styles.description}>
+                Проєктуємо, прораховуємо вартість, виготовляємо, доставляємо
+                та встановлюємо корпусні меблі за індивідуальними розмірами.
+              </p>
+
+              <div className={styles.actions}>
+                <Link href="/contacts" className={styles.primaryButton}>
+                  Розрахувати вартість
+                </Link>
+
+                <Link href="/portfolio" className={styles.secondaryButton}>
+                  Переглянути роботи
+                </Link>
+              </div>
+            </div>
+
+            <div className={styles.heroVisual}>
+              <div className={styles.imageFrame}>
+                <Image
+                  src="/images/home/hero-kitchen.webp"
+                  alt="Кухня на замовлення 4HOME"
+                  fill
+                  priority
+                  sizes="(max-width: 900px) 100vw, 55vw"
+                  className={styles.heroImage}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
-    </div>
+    </>
   );
 }
