@@ -350,10 +350,6 @@
   line-height: 1.7;
 }
 
-/* ========================================
-   CATEGORY GRID
-======================================== */
-
 .categoriesGrid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -367,22 +363,18 @@
   min-width: 0;
 }
 
-/* 01 — Кухні */
 .categoryPrimary {
   grid-column: 1 / 8;
 }
 
-/* 02 — Розпашні шафи */
 .categorySecondary {
   grid-column: 8 / 13;
 }
 
-/* 03 — Шафи-купе */
 .categoryTertiary {
   grid-column: 1 / 8;
 }
 
-/* 04 — Інші меблі */
 .categoryMinor {
   grid-column: 8 / 13;
 }
@@ -399,22 +391,18 @@
   background: var(--color-dark-soft);
 }
 
-/* Найважливіша категорія */
 .categoryPrimary .categoryImageWrapper {
   aspect-ratio: 4 / 3;
 }
 
-/* Друга за важливістю */
 .categorySecondary .categoryImageWrapper {
   aspect-ratio: 4 / 3.2;
 }
 
-/* Третя */
 .categoryTertiary .categoryImageWrapper {
   aspect-ratio: 16 / 9.5;
 }
 
-/* Найменша категорія */
 .categoryMinor .categoryImageWrapper {
   aspect-ratio: 16 / 8.3;
 }
@@ -443,7 +431,8 @@
   transition: background 300ms ease;
 }
 
-.categoryNumber {
+.categoryNumber,
+.portfolioNumber {
   position: absolute;
   top: 22px;
   left: 22px;
@@ -550,15 +539,6 @@
   transform: scale(1.035);
 }
 
-.categoryLink:hover .categoryShade {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.02) 30%,
-      rgba(0, 0, 0, 0.34) 100%
-    );
-}
-
 .categoryLink:hover .categoryArrow {
   border-color: var(--color-accent);
 
@@ -572,13 +552,229 @@
 }
 
 /* ========================================
+   PORTFOLIO
+======================================== */
+
+.portfolio {
+  padding-block: 118px 126px;
+
+  background: var(--color-bg);
+}
+
+.portfolioHeader {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(280px, 420px);
+
+  align-items: end;
+
+  gap: 72px;
+}
+
+.portfolioEyebrow {
+  margin-bottom: 18px;
+
+  color: var(--color-accent);
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.16em;
+}
+
+.portfolioTitle {
+  max-width: 720px;
+
+  color: var(--color-text);
+
+  font-size: clamp(44px, 4.7vw, 68px);
+  font-weight: 700;
+  line-height: 1;
+
+  letter-spacing: -0.045em;
+}
+
+.portfolioHeaderRight {
+  padding-bottom: 4px;
+}
+
+.portfolioIntro {
+  color: var(--color-text-muted);
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.portfolioAllLink {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 24px;
+
+  color: var(--color-accent);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  transition: gap 200ms ease;
+}
+
+.portfolioAllLink:hover {
+  gap: 16px;
+}
+
+/* ========================================
+   PORTFOLIO GRID
+======================================== */
+
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(2, auto);
+
+  column-gap: 24px;
+  row-gap: 34px;
+
+  margin-top: 70px;
+}
+
+.portfolioCard {
+  min-width: 0;
+}
+
+.portfolioFeatured {
+  grid-column: 1 / 8;
+  grid-row: 1 / 3;
+}
+
+.portfolioSmall {
+  grid-column: 8 / 13;
+}
+
+.portfolioSmall:nth-child(2) {
+  grid-row: 1;
+}
+
+.portfolioSmall:nth-child(3) {
+  grid-row: 2;
+}
+
+.portfolioLink {
+  display: block;
+}
+
+.portfolioImageWrapper {
+  position: relative;
+
+  overflow: hidden;
+
+  background: var(--color-surface-soft);
+}
+
+.portfolioFeatured .portfolioImageWrapper {
+  aspect-ratio: 4 / 3.25;
+}
+
+.portfolioSmall .portfolioImageWrapper {
+  aspect-ratio: 16 / 9;
+}
+
+.portfolioImage {
+  object-fit: cover;
+
+  transform: scale(1.001);
+
+  transition: transform 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.portfolioArrow {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+
+  z-index: 2;
+
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
+
+  background: rgba(23, 22, 21, 0.26);
+  color: #ffffff;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  font-size: 21px;
+
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    transform 220ms ease;
+}
+
+.portfolioInfo {
+  padding-top: 20px;
+}
+
+.portfolioCategory {
+  color: var(--color-accent);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.portfolioProjectTitle {
+  margin-top: 8px;
+
+  color: var(--color-text);
+
+  font-size: clamp(24px, 2vw, 34px);
+  font-weight: 600;
+  line-height: 1.1;
+
+  letter-spacing: -0.03em;
+}
+
+.portfolioLink:hover .portfolioImage {
+  transform: scale(1.035);
+}
+
+.portfolioLink:hover .portfolioArrow {
+  border-color: var(--color-accent);
+
+  background: var(--color-accent);
+
+  transform: rotate(5deg);
+}
+
+.portfolioMobileAction {
+  display: none;
+}
+
+/* ========================================
    FOCUS
 ======================================== */
 
 .primaryButton:focus-visible,
 .secondaryButton:focus-visible,
-.categoryLink:focus-visible {
-  outline: 2px solid #c89b78;
+.categoryLink:focus-visible,
+.portfolioLink:focus-visible,
+.portfolioAllLink:focus-visible,
+.portfolioMobileLink:focus-visible {
+  outline: 2px solid var(--color-accent);
   outline-offset: 4px;
 }
 
@@ -587,16 +783,18 @@
 ======================================== */
 
 @media (max-width: 1000px) {
-  .advantagesHeader {
+  .advantagesHeader,
+  .categoriesHeader,
+  .portfolioHeader {
     grid-template-columns: 1fr;
 
     max-width: 760px;
   }
 
-  .sectionIntro {
+  .sectionIntro,
+  .categoriesIntro,
+  .portfolioIntro {
     max-width: 620px;
-
-    padding-bottom: 0;
   }
 
   .advantagesGrid {
@@ -620,14 +818,9 @@
     border-left: 1px solid var(--color-border);
   }
 
-  .categoriesHeader {
-    grid-template-columns: 1fr;
-
+  .categoriesHeader,
+  .portfolioHeader {
     gap: 28px;
-  }
-
-  .categoriesIntro {
-    max-width: 620px;
   }
 }
 
@@ -648,38 +841,32 @@
     max-width: 680px;
   }
 
-  .title {
-    max-width: 620px;
-  }
-
   .heroVisual {
     width: 100%;
     max-width: 720px;
-  }
-
-  .imageFrame {
-    aspect-ratio: 16 / 10;
   }
 
   .advantages {
     padding-block: 88px 96px;
   }
 
-  .advantagesGrid {
-    margin-top: 58px;
-  }
-
   .categories {
     padding-block: 92px 100px;
   }
 
-  .categoriesGrid {
+  .portfolio {
+    padding-block: 92px 100px;
+  }
+
+  .advantagesGrid,
+  .categoriesGrid,
+  .portfolioGrid {
     margin-top: 56px;
   }
 }
 
 /* ========================================
-   MOBILE
+   MOBILE / SINGLE COLUMN
 ======================================== */
 
 @media (max-width: 760px) {
@@ -696,7 +883,59 @@
   .categoryMinor .categoryImageWrapper {
     aspect-ratio: 4 / 3;
   }
+
+  .portfolioGrid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+
+    gap: 42px;
+  }
+
+  .portfolioFeatured,
+  .portfolioSmall,
+  .portfolioSmall:nth-child(2),
+  .portfolioSmall:nth-child(3) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .portfolioFeatured .portfolioImageWrapper,
+  .portfolioSmall .portfolioImageWrapper {
+    aspect-ratio: 4 / 3;
+  }
+
+  .portfolioAllLink {
+    display: none;
+  }
+
+  .portfolioMobileAction {
+    display: block;
+
+    margin-top: 46px;
+  }
+
+  .portfolioMobileLink {
+    min-height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 18px;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    background: var(--color-surface);
+
+    font-size: 14px;
+    font-weight: 600;
+  }
 }
+
+/* ========================================
+   MOBILE
+======================================== */
 
 @media (max-width: 600px) {
   .heroInner {
@@ -705,19 +944,16 @@
     padding-block: 44px 52px;
   }
 
-  .eyebrow {
-    margin-bottom: 18px;
-
+  .eyebrow,
+  .sectionEyebrow,
+  .categoriesEyebrow,
+  .portfolioEyebrow {
     font-size: 11px;
   }
 
   .title {
-    max-width: 100%;
-
     font-size: clamp(40px, 11vw, 52px);
     line-height: 1;
-
-    letter-spacing: -0.04em;
   }
 
   .description {
@@ -731,8 +967,6 @@
     display: grid;
     grid-template-columns: 1fr;
 
-    gap: 14px;
-
     margin-top: 30px;
   }
 
@@ -744,42 +978,22 @@
 
   .imageFrame {
     aspect-ratio: 4 / 3;
-
-    border-radius: 14px;
-  }
-
-  .heroImage {
-    object-position: center;
   }
 
   .advantages {
     padding-block: 72px 78px;
   }
 
-  .advantages::before {
-    top: -130px;
-    right: -190px;
-
-    width: 340px;
-    height: 340px;
-  }
-
-  .advantagesHeader {
-    row-gap: 16px;
-  }
-
-  .sectionEyebrow {
-    font-size: 11px;
-  }
-
-  .sectionTitle {
+  .sectionTitle,
+  .categoriesTitle,
+  .portfolioTitle {
     font-size: clamp(38px, 10vw, 48px);
     line-height: 1.02;
   }
 
-  .sectionIntro {
-    margin-top: 4px;
-
+  .sectionIntro,
+  .categoriesIntro,
+  .portfolioIntro {
     font-size: 15px;
     line-height: 1.65;
   }
@@ -809,52 +1023,12 @@
     border-top: 0;
   }
 
-  .advantageCard:hover {
-    background: transparent;
-
-    transform: none;
-  }
-
   .advantageContent {
     padding-top: 32px;
   }
 
-  .advantageTitle {
-    max-width: 320px;
-
-    font-size: 21px;
-  }
-
-  .advantageDescription {
-    max-width: 360px;
-
-    margin-top: 13px;
-
-    font-size: 14px;
-  }
-
   .categories {
     padding-block: 76px 84px;
-  }
-
-  .categoriesHeader {
-    gap: 22px;
-  }
-
-  .categoriesEyebrow {
-    margin-bottom: 16px;
-
-    font-size: 11px;
-  }
-
-  .categoriesTitle {
-    font-size: clamp(38px, 10vw, 48px);
-    line-height: 1.02;
-  }
-
-  .categoriesIntro {
-    font-size: 15px;
-    line-height: 1.65;
   }
 
   .categoriesGrid {
@@ -871,22 +1045,14 @@
     font-size: 27px;
   }
 
-  .categoryDescription {
-    margin-top: 10px;
-
-    font-size: 14px;
-  }
-
-  .categoryMore {
-    margin-top: 16px;
-  }
-
-  .categoryNumber {
+  .categoryNumber,
+  .portfolioNumber {
     top: 16px;
     left: 16px;
   }
 
-  .categoryArrow {
+  .categoryArrow,
+  .portfolioArrow {
     right: 16px;
     bottom: 16px;
 
@@ -896,7 +1062,28 @@
     font-size: 20px;
   }
 
-  .categoryLink:hover .categoryImage {
+  .portfolio {
+    padding-block: 76px 84px;
+  }
+
+  .portfolioHeader {
+    gap: 22px;
+  }
+
+  .portfolioGrid {
+    margin-top: 46px;
+  }
+
+  .portfolioInfo {
+    padding-top: 16px;
+  }
+
+  .portfolioProjectTitle {
+    font-size: 26px;
+  }
+
+  .categoryLink:hover .categoryImage,
+  .portfolioLink:hover .portfolioImage {
     transform: none;
   }
 }
@@ -910,12 +1097,9 @@
     font-size: 39px;
   }
 
-  .description {
-    font-size: 15px;
-  }
-
   .sectionTitle,
-  .categoriesTitle {
+  .categoriesTitle,
+  .portfolioTitle {
     font-size: 36px;
   }
 }
@@ -929,9 +1113,11 @@
   .secondaryButton,
   .advantageCard,
   .categoryImage,
-  .categoryShade,
   .categoryArrow,
-  .categoryMore {
+  .categoryMore,
+  .portfolioImage,
+  .portfolioArrow,
+  .portfolioAllLink {
     transition: none;
   }
 }

@@ -75,6 +75,33 @@ const categories = [
   },
 ];
 
+const portfolioProjects = [
+  {
+    number: "01",
+    title: "Світла кухня",
+    category: "Кухня на замовлення",
+    image: "/images/home/portfolio/kitchen-light.webp",
+    alt: "Світла кухня на замовлення",
+    size: "featured",
+  },
+  {
+    number: "02",
+    title: "Вбудована шафа",
+    category: "Розпашні шафи",
+    image: "/images/home/portfolio/fitted-wardrobe.webp",
+    alt: "Вбудована розпашна шафа",
+    size: "small",
+  },
+  {
+    number: "03",
+    title: "Меблі для передпокою",
+    category: "Індивідуальні меблі",
+    image: "/images/home/portfolio/hall-furniture.webp",
+    alt: "Меблі для передпокою на замовлення",
+    size: "small",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -234,6 +261,91 @@ export default function Home() {
                   </Link>
                 </article>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.portfolio}>
+          <div className="container">
+            <div className={styles.portfolioHeader}>
+              <div>
+                <p className={styles.portfolioEyebrow}>НАШІ РОБОТИ</p>
+
+                <h2 className={styles.portfolioTitle}>
+                  Подивіться на
+                  <br />
+                  результат наживо
+                </h2>
+              </div>
+
+              <div className={styles.portfolioHeaderRight}>
+                <p className={styles.portfolioIntro}>
+                  Кілька прикладів виконаних меблів. У повному портфоліо
+                  зберемо більше фотографій кожного проєкту.
+                </p>
+
+                <Link href="/portfolio" className={styles.portfolioAllLink}>
+                  Усі роботи
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className={styles.portfolioGrid}>
+              {portfolioProjects.map((project) => (
+                <article
+                  key={project.number}
+                  className={`${styles.portfolioCard} ${
+                    project.size === "featured"
+                      ? styles.portfolioFeatured
+                      : styles.portfolioSmall
+                  }`}
+                >
+                  <Link href="/portfolio" className={styles.portfolioLink}>
+                    <div className={styles.portfolioImageWrapper}>
+                      <Image
+                        src={project.image}
+                        alt={project.alt}
+                        fill
+                        sizes={
+                          project.size === "featured"
+                            ? "(max-width: 760px) 100vw, 58vw"
+                            : "(max-width: 760px) 100vw, 38vw"
+                        }
+                        className={styles.portfolioImage}
+                      />
+
+                      <span className={styles.portfolioNumber}>
+                        {project.number}
+                      </span>
+
+                      <span
+                        className={styles.portfolioArrow}
+                        aria-hidden="true"
+                      >
+                        ↗
+                      </span>
+                    </div>
+
+                    <div className={styles.portfolioInfo}>
+                      <p className={styles.portfolioCategory}>
+                        {project.category}
+                      </p>
+
+                      <h3 className={styles.portfolioProjectTitle}>
+                        {project.title}
+                      </h3>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+
+            <div className={styles.portfolioMobileAction}>
+              <Link href="/portfolio" className={styles.portfolioMobileLink}>
+                Переглянути всі роботи
+                <span aria-hidden="true">→</span>
+              </Link>
             </div>
           </div>
         </section>
