@@ -102,6 +102,45 @@ const portfolioProjects = [
   },
 ];
 
+const processSteps = [
+  {
+    number: "01",
+    title: "Запит",
+    description:
+      "Надсилаєте фото, розміри або коротко описуєте, які меблі вам потрібні.",
+  },
+  {
+    number: "02",
+    title: "Замір",
+    description:
+      "Уточнюємо розміри приміщення та важливі технічні особливості майбутнього проєкту.",
+  },
+  {
+    number: "03",
+    title: "Прорахунок",
+    description:
+      "Формуємо конструкцію, підбираємо матеріали та розраховуємо вартість.",
+  },
+  {
+    number: "04",
+    title: "Погодження",
+    description:
+      "Узгоджуємо остаточний вигляд, наповнення, матеріали та деталі замовлення.",
+  },
+  {
+    number: "05",
+    title: "Виготовлення",
+    description:
+      "Після погодження проєкт переходить у виготовлення за затвердженими параметрами.",
+  },
+  {
+    number: "06",
+    title: "Доставка та монтаж",
+    description:
+      "Доставляємо меблі, виконуємо встановлення та перевіряємо готовий результат.",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -236,18 +275,13 @@ export default function Home() {
                         {category.number}
                       </span>
 
-                      <span
-                        className={styles.categoryArrow}
-                        aria-hidden="true"
-                      >
+                      <span className={styles.categoryArrow} aria-hidden="true">
                         ↗
                       </span>
                     </div>
 
                     <div className={styles.categoryContent}>
-                      <h3 className={styles.categoryTitle}>
-                        {category.title}
-                      </h3>
+                      <h3 className={styles.categoryTitle}>{category.title}</h3>
 
                       <p className={styles.categoryDescription}>
                         {category.description}
@@ -319,10 +353,7 @@ export default function Home() {
                         {project.number}
                       </span>
 
-                      <span
-                        className={styles.portfolioArrow}
-                        aria-hidden="true"
-                      >
+                      <span className={styles.portfolioArrow} aria-hidden="true">
                         ↗
                       </span>
                     </div>
@@ -344,6 +375,52 @@ export default function Home() {
             <div className={styles.portfolioMobileAction}>
               <Link href="/portfolio" className={styles.portfolioMobileLink}>
                 Переглянути всі роботи
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.process}>
+          <div className="container">
+            <div className={styles.processHeader}>
+              <div>
+                <p className={styles.processEyebrow}>ЯК МИ ПРАЦЮЄМО</p>
+
+                <h2 className={styles.processTitle}>
+                  Від першого запиту
+                  <br />
+                  до готових меблів
+                </h2>
+              </div>
+
+              <p className={styles.processIntro}>
+                Зрозумілий послідовний процес без готових шаблонів — кожне
+                замовлення проходить шлях від вашої ідеї до встановлення.
+              </p>
+            </div>
+
+            <ol className={styles.processTimeline}>
+              {processSteps.map((step) => (
+                <li key={step.number} className={styles.processStep}>
+                  <div className={styles.processMarker}>
+                    <span>{step.number}</span>
+                  </div>
+
+                  <div className={styles.processContent}>
+                    <h3 className={styles.processStepTitle}>{step.title}</h3>
+
+                    <p className={styles.processDescription}>
+                      {step.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div className={styles.processAction}>
+              <Link href="/contacts" className={styles.processButton}>
+                Обговорити проєкт
                 <span aria-hidden="true">→</span>
               </Link>
             </div>

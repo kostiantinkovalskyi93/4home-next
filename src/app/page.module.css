@@ -627,10 +627,6 @@
   gap: 16px;
 }
 
-/* ========================================
-   PORTFOLIO GRID
-======================================== */
-
 .portfolioGrid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -765,6 +761,189 @@
 }
 
 /* ========================================
+   PROCESS
+======================================== */
+
+.process {
+  padding-block: 118px 126px;
+
+  background: var(--color-surface-soft);
+}
+
+.processHeader {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(280px, 420px);
+
+  align-items: end;
+
+  gap: 72px;
+}
+
+.processEyebrow {
+  margin-bottom: 18px;
+
+  color: var(--color-accent);
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.16em;
+}
+
+.processTitle {
+  max-width: 760px;
+
+  color: var(--color-text);
+
+  font-size: clamp(44px, 4.7vw, 68px);
+  font-weight: 700;
+  line-height: 1;
+
+  letter-spacing: -0.045em;
+}
+
+.processIntro {
+  max-width: 420px;
+
+  color: var(--color-text-muted);
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ========================================
+   PROCESS TIMELINE
+======================================== */
+
+.processTimeline {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+
+  gap: 0;
+
+  margin-top: 76px;
+}
+
+.processTimeline::before {
+  content: "";
+
+  position: absolute;
+  top: 23px;
+  right: 0;
+  left: 0;
+
+  height: 1px;
+
+  background: var(--color-border);
+}
+
+.processStep {
+  position: relative;
+
+  min-width: 0;
+
+  padding-right: 24px;
+}
+
+.processMarker {
+  position: relative;
+
+  z-index: 2;
+
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+
+  background: var(--color-surface-soft);
+}
+
+.processMarker span {
+  color: var(--color-accent);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.06em;
+}
+
+.processContent {
+  padding-top: 28px;
+}
+
+.processStepTitle {
+  max-width: 180px;
+
+  color: var(--color-text);
+
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.15;
+
+  letter-spacing: -0.025em;
+}
+
+.processDescription {
+  max-width: 190px;
+
+  margin-top: 14px;
+
+  color: var(--color-text-muted);
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.processAction {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 64px;
+}
+
+.processButton {
+  min-height: 52px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 34px;
+
+  padding-inline: 22px;
+
+  border: 1px solid var(--color-text);
+  border-radius: var(--radius-sm);
+
+  color: var(--color-text);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.processButton:hover {
+  background: var(--color-text);
+  color: #ffffff;
+
+  transform: translateY(-1px);
+}
+
+/* ========================================
    FOCUS
 ======================================== */
 
@@ -773,7 +952,8 @@
 .categoryLink:focus-visible,
 .portfolioLink:focus-visible,
 .portfolioAllLink:focus-visible,
-.portfolioMobileLink:focus-visible {
+.portfolioMobileLink:focus-visible,
+.processButton:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
 }
@@ -785,7 +965,8 @@
 @media (max-width: 1000px) {
   .advantagesHeader,
   .categoriesHeader,
-  .portfolioHeader {
+  .portfolioHeader,
+  .processHeader {
     grid-template-columns: 1fr;
 
     max-width: 760px;
@@ -793,7 +974,8 @@
 
   .sectionIntro,
   .categoriesIntro,
-  .portfolioIntro {
+  .portfolioIntro,
+  .processIntro {
     max-width: 620px;
   }
 
@@ -819,8 +1001,23 @@
   }
 
   .categoriesHeader,
-  .portfolioHeader {
+  .portfolioHeader,
+  .processHeader {
     gap: 28px;
+  }
+
+  .processTimeline {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    row-gap: 56px;
+  }
+
+  .processTimeline::before {
+    display: none;
+  }
+
+  .processStep {
+    padding-right: 32px;
   }
 }
 
@@ -858,9 +1055,14 @@
     padding-block: 92px 100px;
   }
 
+  .process {
+    padding-block: 92px 100px;
+  }
+
   .advantagesGrid,
   .categoriesGrid,
-  .portfolioGrid {
+  .portfolioGrid,
+  .processTimeline {
     margin-top: 56px;
   }
 }
@@ -947,7 +1149,8 @@
   .eyebrow,
   .sectionEyebrow,
   .categoriesEyebrow,
-  .portfolioEyebrow {
+  .portfolioEyebrow,
+  .processEyebrow {
     font-size: 11px;
   }
 
@@ -986,14 +1189,16 @@
 
   .sectionTitle,
   .categoriesTitle,
-  .portfolioTitle {
+  .portfolioTitle,
+  .processTitle {
     font-size: clamp(38px, 10vw, 48px);
     line-height: 1.02;
   }
 
   .sectionIntro,
   .categoriesIntro,
-  .portfolioIntro {
+  .portfolioIntro,
+  .processIntro {
     font-size: 15px;
     line-height: 1.65;
   }
@@ -1082,6 +1287,83 @@
     font-size: 26px;
   }
 
+  .process {
+    padding-block: 76px 84px;
+  }
+
+  .processHeader {
+    gap: 22px;
+  }
+
+  .processTimeline {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 1fr;
+
+    gap: 0;
+
+    margin-top: 48px;
+  }
+
+  .processTimeline::before {
+    display: block;
+
+    top: 22px;
+    bottom: 22px;
+    left: 22px;
+
+    width: 1px;
+    height: auto;
+  }
+
+  .processStep {
+    display: grid;
+    grid-template-columns: 46px 1fr;
+
+    gap: 18px;
+
+    padding: 0 0 38px;
+  }
+
+  .processStep:last-child {
+    padding-bottom: 0;
+  }
+
+  .processMarker {
+    width: 46px;
+    height: 46px;
+  }
+
+  .processContent {
+    padding-top: 2px;
+  }
+
+  .processStepTitle {
+    max-width: none;
+
+    font-size: 21px;
+  }
+
+  .processDescription {
+    max-width: 360px;
+
+    margin-top: 10px;
+
+    font-size: 14px;
+  }
+
+  .processAction {
+    display: block;
+
+    margin-top: 48px;
+  }
+
+  .processButton {
+    width: 100%;
+    min-height: 54px;
+  }
+
   .categoryLink:hover .categoryImage,
   .portfolioLink:hover .portfolioImage {
     transform: none;
@@ -1099,7 +1381,8 @@
 
   .sectionTitle,
   .categoriesTitle,
-  .portfolioTitle {
+  .portfolioTitle,
+  .processTitle {
     font-size: 36px;
   }
 }
@@ -1117,7 +1400,8 @@
   .categoryMore,
   .portfolioImage,
   .portfolioArrow,
-  .portfolioAllLink {
+  .portfolioAllLink,
+  .processButton {
     transition: none;
   }
 }
