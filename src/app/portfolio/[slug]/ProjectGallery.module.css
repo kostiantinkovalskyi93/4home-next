@@ -1,0 +1,462 @@
+.preview {
+  display: grid;
+  gap: 14px;
+}
+
+.previewButton {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 310px;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  background: var(--color-surface-soft);
+  cursor: zoom-in;
+}
+
+.coverButton {
+  min-height: 680px;
+}
+
+.previewImage {
+  object-fit: cover;
+  transition:
+    transform 500ms ease,
+    filter 250ms ease;
+}
+
+.previewButton:hover .previewImage {
+  transform: scale(1.018);
+}
+
+.openHint {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 42px;
+  padding-inline: 15px;
+
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 999px;
+
+  background: rgba(18, 17, 16, 0.68);
+  backdrop-filter: blur(12px);
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.previewGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.moreOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(18, 17, 16, 0.64);
+  backdrop-filter: blur(2px);
+
+  color: #ffffff;
+}
+
+.moreOverlay strong {
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.moreOverlay span {
+  margin-top: 5px;
+
+  color: rgba(255, 255, 255, 0.72);
+
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ========================================
+   LIGHTBOX
+======================================== */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+
+  display: grid;
+  grid-template-rows: 72px minmax(0, 1fr) 112px;
+
+  background: rgba(10, 10, 10, 0.98);
+  color: #ffffff;
+}
+
+.topBar {
+  position: relative;
+  z-index: 3;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-inline: 28px;
+}
+
+.counter {
+  color: rgba(255, 255, 255, 0.7);
+
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.closeButton {
+  width: 44px;
+  height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+
+  cursor: pointer;
+
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.closeButton:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.stage {
+  position: relative;
+  min-height: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding-inline: 90px;
+
+  touch-action: pan-y;
+}
+
+.activeImageWrapper {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+  max-width: 1500px;
+
+  min-height: 0;
+}
+
+.activeImage {
+  object-fit: contain;
+}
+
+.navigationButton {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+
+  width: 50px;
+  height: 50px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+
+  background: rgba(15, 15, 15, 0.55);
+  color: #ffffff;
+
+  cursor: pointer;
+
+  font-size: 21px;
+
+  transform: translateY(-50%);
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.navigationButton:hover {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #171615;
+}
+
+.previousButton {
+  left: 24px;
+}
+
+.nextButton {
+  right: 24px;
+}
+
+/* ========================================
+   THUMBNAILS
+======================================== */
+
+.thumbnailsWrapper {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  padding-inline: 24px;
+}
+
+.thumbnails {
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+
+  gap: 8px;
+
+  overflow-x: auto;
+
+  padding-block: 12px;
+
+  scrollbar-width: thin;
+}
+
+.thumbnailButton {
+  position: relative;
+
+  flex: 0 0 76px;
+
+  width: 76px;
+  height: 76px;
+
+  overflow: hidden;
+
+  border: 2px solid transparent;
+  padding: 0;
+
+  background: #22201e;
+
+  cursor: pointer;
+
+  opacity: 0.54;
+
+  transition:
+    opacity 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.thumbnailButton:hover {
+  opacity: 0.86;
+}
+
+.thumbnailButtonActive {
+  border-color: #c89b78;
+  opacity: 1;
+}
+
+.thumbnailImage {
+  object-fit: cover;
+}
+
+/* ========================================
+   FOCUS
+======================================== */
+
+.previewButton:focus-visible,
+.closeButton:focus-visible,
+.navigationButton:focus-visible,
+.thumbnailButton:focus-visible {
+  outline: 2px solid #c89b78;
+  outline-offset: 3px;
+}
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1000px) {
+  .coverButton {
+    min-height: 560px;
+  }
+
+  .previewGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .previewButton {
+    min-height: 330px;
+  }
+
+  .stage {
+    padding-inline: 70px;
+  }
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 650px) {
+  .preview {
+    gap: 10px;
+  }
+
+  .coverButton {
+    min-height: 360px;
+  }
+
+  .previewGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .previewButton {
+    min-height: 170px;
+  }
+
+  .openHint {
+    right: 14px;
+    bottom: 14px;
+
+    min-height: 38px;
+
+    padding-inline: 12px;
+
+    font-size: 11px;
+  }
+
+  .moreOverlay strong {
+    font-size: 28px;
+  }
+
+  .lightbox {
+    grid-template-rows: 62px minmax(0, 1fr) 92px;
+  }
+
+  .topBar {
+    padding-inline: 16px;
+  }
+
+  .closeButton {
+    width: 40px;
+    height: 40px;
+
+    font-size: 25px;
+  }
+
+  .stage {
+    padding-inline: 0;
+  }
+
+  .activeImageWrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .navigationButton {
+    top: auto;
+    bottom: 14px;
+
+    width: 42px;
+    height: 42px;
+
+    border-color: rgba(255, 255, 255, 0.28);
+
+    background: rgba(10, 10, 10, 0.66);
+
+    transform: none;
+  }
+
+  .previousButton {
+    left: 14px;
+  }
+
+  .nextButton {
+    right: 14px;
+  }
+
+  .thumbnailsWrapper {
+    padding-inline: 12px;
+  }
+
+  .thumbnails {
+    justify-content: flex-start;
+
+    gap: 7px;
+
+    padding-block: 10px;
+  }
+
+  .thumbnailButton {
+    flex-basis: 64px;
+
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* ========================================
+   VERY SMALL MOBILE
+======================================== */
+
+@media (max-width: 390px) {
+  .coverButton {
+    min-height: 320px;
+  }
+
+  .previewButton {
+    min-height: 150px;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .previewImage,
+  .closeButton,
+  .navigationButton,
+  .thumbnailButton {
+    transition: none;
+  }
+}

@@ -1,28 +1,25 @@
 .footer {
+  border-top: 1px solid var(--color-border);
   background: var(--color-bg);
   color: var(--color-text);
-  border-top: 1px solid var(--color-border);
 }
 
-.inner {
-  padding-top: 54px;
-  padding-bottom: 22px;
+.footerContainer {
+  width: min(calc(100% - 48px), var(--container));
 }
 
-/* ========================================
-   MAIN LAYOUT
-======================================== */
-
-.main {
+.mainGrid {
   display: grid;
+
   grid-template-columns:
-    minmax(240px, 1.1fr)
-    minmax(220px, 0.75fr)
-    minmax(280px, 0.9fr);
+    minmax(220px, 0.9fr)
+    minmax(360px, 1fr)
+    minmax(320px, 1fr);
 
-  gap: 64px;
+  gap: 72px;
 
-  padding-bottom: 44px;
+  padding-top: 72px;
+  padding-bottom: 58px;
 }
 
 /* ========================================
@@ -30,38 +27,26 @@
 ======================================== */
 
 .brand {
-  align-self: start;
-}
-
-.logo {
-  display: inline-flex;
-  align-items: center;
-
-  width: 124px;
-
-  margin-bottom: 20px;
-}
-
-.logoImage {
-  display: block;
-
-  width: 100%;
-  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .brandText {
+  margin: 0;
+
   color: var(--color-text-muted);
 
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.55;
 }
 
 /* ========================================
-   COLUMN LABELS
+   SECTION TITLE
 ======================================== */
 
-.columnLabel {
-  margin-bottom: 20px;
+.sectionTitle {
+  margin-bottom: 26px;
 
   color: var(--color-accent);
 
@@ -69,7 +54,7 @@
   font-weight: 700;
   line-height: 1.2;
 
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -77,73 +62,134 @@
    NAVIGATION
 ======================================== */
 
-.navigation {
+.navigationGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  column-gap: 32px;
-  row-gap: 14px;
+  column-gap: 44px;
 }
 
-.navLink {
-  width: fit-content;
+.navigationLink {
+  min-height: 46px;
 
-  color: var(--color-text);
+  display: flex;
+  align-items: center;
+
+  border-bottom: 1px solid var(--color-border);
 
   font-size: 15px;
   font-weight: 500;
-  line-height: 1.4;
 
   transition:
     color 180ms ease,
-    transform 180ms ease;
+    border-color 180ms ease;
 }
 
-.navLink:hover {
+.navigationLink:hover {
   color: var(--color-accent);
-  transform: translateX(2px);
+  border-color: var(--color-accent);
 }
 
 /* ========================================
    CONTACTS
 ======================================== */
 
-.primaryContacts {
+.contactPrimary {
+  display: grid;
+
+  gap: 16px;
+
+  padding-bottom: 26px;
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.phoneContact {
+  width: fit-content;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 
-  gap: 10px;
-
-  margin-bottom: 22px;
-}
-
-.contactLink {
-  color: var(--color-text);
-
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.4;
-
-  overflow-wrap: anywhere;
+  gap: 3px;
 
   transition: color 180ms ease;
 }
 
-.contactLink:hover {
+.phoneContact strong {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.phoneContact:hover {
+  color: var(--color-accent);
+}
+
+.contactName {
+  color: var(--color-text-muted);
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.emailLink {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 2px;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+
+  transition: color 180ms ease;
+}
+
+.emailLink:hover {
   color: var(--color-accent);
 }
 
 /* ========================================
-   SOCIAL LINKS
+   ICONS
 ======================================== */
 
-.socials {
-  border-top: 1px solid var(--color-border);
+.contactIcon {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 18px;
+
+  color: var(--color-text-muted);
+
+  transition: color 180ms ease;
+}
+
+.emailLink:hover .contactIcon,
+.socialLink:hover .contactIcon {
+  color: var(--color-accent);
+}
+
+/* ========================================
+   SOCIAL
+======================================== */
+
+.socialLinks {
+  display: grid;
+
+  margin-bottom: 6px;
 }
 
 .socialLink {
-  min-height: 44px;
+  min-height: 48px;
 
   display: flex;
   align-items: center;
@@ -153,65 +199,64 @@
 
   border-bottom: 1px solid var(--color-border);
 
-  color: var(--color-text);
-
   font-size: 14px;
   font-weight: 600;
-  line-height: 1.3;
 
   transition:
     color 180ms ease,
-    padding-left 180ms ease;
+    border-color 180ms ease;
 }
 
-.socialArrow {
-  flex: 0 0 auto;
+.socialLinkContent {
+  display: inline-flex;
+  align-items: center;
 
+  gap: 10px;
+}
+
+.externalArrow {
   color: var(--color-accent);
 
-  font-size: 15px;
-  line-height: 1;
+  transition: transform 180ms ease;
 }
 
 .socialLink:hover {
-  padding-left: 4px;
-
   color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.socialLink:hover .externalArrow {
+  transform: translate(2px, -2px);
 }
 
 /* ========================================
    BOTTOM BAR
 ======================================== */
 
-.bottom {
-  min-height: 48px;
+.bottomBar {
+  min-height: 72px;
 
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
 
-  gap: 32px;
-
-  padding-top: 18px;
+  gap: 24px;
 
   border-top: 1px solid var(--color-border);
 
   color: var(--color-text-muted);
 
   font-size: 11px;
-  font-weight: 500;
-  line-height: 1.5;
-
-  letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
 /* ========================================
    FOCUS
 ======================================== */
 
-.logo:focus-visible,
-.navLink:focus-visible,
-.contactLink:focus-visible,
+.navigationLink:focus-visible,
+.phoneContact:focus-visible,
+.emailLink:focus-visible,
 .socialLink:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
@@ -222,16 +267,10 @@
 ======================================== */
 
 @media (max-width: 1000px) {
-  .inner {
-    padding-top: 48px;
-  }
-
-  .main {
+  .mainGrid {
     grid-template-columns: 1fr 1fr;
 
-    gap: 42px 48px;
-
-    padding-bottom: 40px;
+    gap: 54px 48px;
   }
 
   .brand {
@@ -239,7 +278,7 @@
   }
 
   .brandText {
-    font-size: 15px;
+    max-width: 320px;
   }
 }
 
@@ -248,113 +287,100 @@
 ======================================== */
 
 @media (max-width: 650px) {
-  .inner {
-    padding-top: 34px;
-    padding-bottom: 18px;
+  .footerContainer {
+    width: min(calc(100% - 36px), var(--container));
   }
 
-  .main {
+  .mainGrid {
     grid-template-columns: 1fr;
 
     gap: 34px;
 
-    padding-bottom: 34px;
+    padding-top: 38px;
+    padding-bottom: 28px;
   }
 
   .brand {
     grid-column: auto;
   }
 
-  /*
-   * На мобільному логотип Footer приховуємо.
-   * Логотип 4HOME вже постійно присутній
-   * у sticky Header, тому повтор унизу
-   * створював ефект задвоєння.
-   */
-  .logo {
-    display: none;
-  }
-
   .brandText {
-    font-size: 15px;
+    max-width: 260px;
+
+    font-size: 16px;
     line-height: 1.5;
   }
 
-  .columnLabel {
-    margin-bottom: 15px;
+  .sectionTitle {
+    margin-bottom: 16px;
   }
 
-  /* ----------------------------------------
-     MOBILE NAVIGATION
-  ---------------------------------------- */
-
-  .navigation {
+  .navigationGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 
-    column-gap: 24px;
-    row-gap: 0;
-
-    border-top: 1px solid var(--color-border);
+    column-gap: 30px;
   }
 
-  .navLink {
-    width: 100%;
+  .navigationLink {
     min-height: 44px;
-
-    display: flex;
-    align-items: center;
-
-    border-bottom: 1px solid var(--color-border);
 
     font-size: 14px;
   }
 
-  .navLink:last-child {
-    grid-column: 1 / -1;
+  .contactPrimary {
+    gap: 14px;
+
+    padding-bottom: 18px;
   }
 
-  /* ----------------------------------------
-     MOBILE CONTACTS
-  ---------------------------------------- */
-
-  .primaryContacts {
-    gap: 10px;
-
-    margin-bottom: 20px;
+  .phoneContact {
+    gap: 2px;
   }
 
-  .contactLink {
+  .phoneContact strong {
     font-size: 16px;
   }
 
+  .contactName {
+    font-size: 9px;
+  }
+
+  .emailLink {
+    gap: 9px;
+
+    font-size: 13px;
+  }
+
   .socialLink {
-    min-height: 46px;
+    min-height: 44px;
 
     font-size: 14px;
   }
 
-  /* ----------------------------------------
-     MOBILE BOTTOM
-  ---------------------------------------- */
-
-  .bottom {
-    min-height: 0;
-
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 16px;
-
-    padding-top: 16px;
-
-    font-size: 10px;
+  .socialLinkContent {
+    gap: 9px;
   }
 
-  .bottom p:last-child {
-    max-width: 180px;
+  .contactIcon {
+    width: 17px;
+    height: 17px;
 
-    text-align: right;
+    flex-basis: 17px;
+  }
+
+  .bottomBar {
+    min-height: auto;
+
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 7px;
+
+    padding-top: 18px;
+    padding-bottom: 22px;
+
+    font-size: 10.5px;
+    line-height: 1.45;
   }
 }
 
@@ -363,35 +389,35 @@
 ======================================== */
 
 @media (max-width: 390px) {
-  .inner {
-    padding-top: 32px;
+  .footerContainer {
+    width: min(calc(100% - 32px), var(--container));
   }
 
-  .main {
+  .navigationGrid {
+    column-gap: 22px;
+  }
+
+  .mainGrid {
     gap: 30px;
 
-    padding-bottom: 30px;
+    padding-top: 34px;
+    padding-bottom: 24px;
   }
 
-  .navigation {
-    column-gap: 18px;
-  }
-
-  .contactLink {
+  .brandText {
     font-size: 15px;
   }
 
-  .bottom {
-    flex-direction: column;
-    align-items: flex-start;
-
-    gap: 5px;
+  .navigationLink {
+    min-height: 42px;
   }
 
-  .bottom p:last-child {
-    max-width: none;
+  .socialLink {
+    min-height: 42px;
+  }
 
-    text-align: left;
+  .bottomBar {
+    padding-bottom: 24px;
   }
 }
 
@@ -400,9 +426,12 @@
 ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .navLink,
-  .contactLink,
-  .socialLink {
+  .navigationLink,
+  .phoneContact,
+  .emailLink,
+  .socialLink,
+  .contactIcon,
+  .externalArrow {
     transition: none;
   }
 }

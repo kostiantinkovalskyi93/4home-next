@@ -4,6 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import {
+  InstagramIcon,
+  MailIcon,
+  TelegramIcon,
+  ViberIcon,
+} from "@/components/ui/ContactIcons";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./Header.module.css";
@@ -77,7 +83,10 @@ export function Header() {
             />
           </Link>
 
-          <nav className={styles.navigation} aria-label="Основна навігація">
+          <nav
+            className={styles.navigation}
+            aria-label="Основна навігація"
+          >
             {navigation.map((item) => (
               <Link
                 key={item.href}
@@ -94,8 +103,12 @@ export function Header() {
               Розрахувати вартість
             </Link>
 
-            <a href={CONTACTS.phone.href} className={styles.phone}>
-              {CONTACTS.phone.display}
+            <a
+              href={CONTACTS.primaryPhone.href}
+              className={styles.phone}
+              aria-label={`Зателефонувати Сергію: ${CONTACTS.primaryPhone.display}`}
+            >
+              {CONTACTS.primaryPhone.display}
             </a>
           </div>
 
@@ -104,7 +117,9 @@ export function Header() {
               isMenuOpen ? styles.menuButtonOpen : ""
             }`}
             type="button"
-            aria-label={isMenuOpen ? "Закрити меню" : "Відкрити меню"}
+            aria-label={
+              isMenuOpen ? "Закрити меню" : "Відкрити меню"
+            }
             aria-expanded={isMenuOpen}
             aria-controls="mobile-navigation"
             onClick={toggleMenu}
@@ -157,18 +172,75 @@ export function Header() {
               Розрахувати вартість
             </Link>
 
-            <a href={CONTACTS.phone.href} className={styles.mobilePhone}>
-              {CONTACTS.phone.display}
-            </a>
+            <div className={styles.mobileContacts}>
+              <a
+                href={CONTACTS.primaryPhone.href}
+                className={styles.mobilePhoneContact}
+              >
+                <span className={styles.mobileContactName}>
+                  {CONTACTS.primaryPhone.name}
+                </span>
 
-            <a
-              href={CONTACTS.instagram.href}
-              className={styles.mobileInstagram}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {CONTACTS.instagram.label}
-            </a>
+                <strong>
+                  {CONTACTS.primaryPhone.display}
+                </strong>
+              </a>
+
+              <a
+                href={CONTACTS.secondaryPhone.href}
+                className={styles.mobilePhoneContact}
+              >
+                <span className={styles.mobileContactName}>
+                  {CONTACTS.secondaryPhone.name}
+                </span>
+
+                <strong>
+                  {CONTACTS.secondaryPhone.display}
+                </strong>
+              </a>
+            </div>
+
+            <div className={styles.mobileContactChannels}>
+              <a
+                href={CONTACTS.email.href}
+                className={styles.mobileChannel}
+              >
+                <MailIcon className={styles.mobileChannelIcon} />
+                <span>Email</span>
+              </a>
+
+              <a
+                href={CONTACTS.instagram.href}
+                className={styles.mobileChannel}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <InstagramIcon
+                  className={styles.mobileChannelIcon}
+                />
+                <span>Instagram</span>
+              </a>
+
+              <a
+                href={CONTACTS.viber.href}
+                className={styles.mobileChannel}
+              >
+                <ViberIcon className={styles.mobileChannelIcon} />
+                <span>Viber</span>
+              </a>
+
+              <a
+                href={CONTACTS.telegram.href}
+                className={styles.mobileChannel}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <TelegramIcon
+                  className={styles.mobileChannelIcon}
+                />
+                <span>Telegram</span>
+              </a>
+            </div>
           </div>
         </div>
       </aside>

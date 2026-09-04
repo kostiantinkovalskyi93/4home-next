@@ -1,38 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import {
+  InstagramIcon,
+  MailIcon,
+  TelegramIcon,
+  ViberIcon,
+} from "@/components/ui/ContactIcons";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./Footer.module.css";
 
-const navigation = [
-  { label: "Кухні", href: "/kitchens" },
-  { label: "Шафи", href: "/wardrobes" },
-  { label: "Інші меблі", href: "/furniture" },
-  { label: "Наші роботи", href: "/portfolio" },
-  { label: "Контакти", href: "/contacts" },
-];
-
 export function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={`container ${styles.inner}`}>
-        <div className={styles.main}>
+      <div className={`container ${styles.footerContainer}`}>
+        <div className={styles.mainGrid}>
           <div className={styles.brand}>
-            <Link
-              href="/"
-              className={styles.logo}
-              aria-label="4HOME — головна сторінка"
-            >
-              <Image
-                src="/brand/4home-logo.png"
-                alt="4HOME"
-                width={522}
-                height={247}
-                className={styles.logoImage}
-              />
-            </Link>
-
             <p className={styles.brandText}>
               Меблі на замовлення
               <br />
@@ -40,45 +23,91 @@ export function Footer() {
             </p>
           </div>
 
-          <div className={styles.navigationBlock}>
-            <p className={styles.columnLabel}>Навігація</p>
+          <div className={styles.navigation}>
+            <p className={styles.sectionTitle}>НАВІГАЦІЯ</p>
 
-            <nav className={styles.navigation} aria-label="Навігація у підвалі">
-              {navigation.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={styles.navLink}
-                >
-                  {item.label}
-                </Link>
-              ))}
+            <nav
+              className={styles.navigationGrid}
+              aria-label="Навігація footer"
+            >
+              <Link href="/kitchens" className={styles.navigationLink}>
+                Кухні
+              </Link>
+
+              <Link href="/wardrobes" className={styles.navigationLink}>
+                Шафи
+              </Link>
+
+              <Link href="/furniture" className={styles.navigationLink}>
+                Інші меблі
+              </Link>
+
+              <Link href="/portfolio" className={styles.navigationLink}>
+                Наші роботи
+              </Link>
+
+              <Link href="/contacts" className={styles.navigationLink}>
+                Контакти
+              </Link>
             </nav>
           </div>
 
-          <div className={styles.contactsBlock}>
-            <p className={styles.columnLabel}>Контакти</p>
+          <div className={styles.contacts}>
+            <p className={styles.sectionTitle}>КОНТАКТИ</p>
 
-            <div className={styles.primaryContacts}>
-              <a href={CONTACTS.phone.href} className={styles.contactLink}>
-                {CONTACTS.phone.display}
+            <div className={styles.contactPrimary}>
+              <a
+                href={CONTACTS.primaryPhone.href}
+                className={styles.phoneContact}
+              >
+                <span className={styles.contactName}>
+                  {CONTACTS.primaryPhone.name}
+                </span>
+
+                <strong>
+                  {CONTACTS.primaryPhone.display}
+                </strong>
               </a>
 
-              <a href={CONTACTS.email.href} className={styles.contactLink}>
-                {CONTACTS.email.display}
+              <a
+                href={CONTACTS.secondaryPhone.href}
+                className={styles.phoneContact}
+              >
+                <span className={styles.contactName}>
+                  {CONTACTS.secondaryPhone.name}
+                </span>
+
+                <strong>
+                  {CONTACTS.secondaryPhone.display}
+                </strong>
+              </a>
+
+              <a
+                href={CONTACTS.email.href}
+                className={styles.emailLink}
+              >
+                <MailIcon className={styles.contactIcon} />
+
+                <span>{CONTACTS.email.display}</span>
               </a>
             </div>
 
-            <div className={styles.socials}>
+            <div className={styles.socialLinks}>
               <a
                 href={CONTACTS.instagram.href}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className={styles.socialLink}
-                aria-label="Відкрити Instagram 4HOME"
               >
-                <span>Instagram</span>
-                <span className={styles.socialArrow} aria-hidden="true">
+                <span className={styles.socialLinkContent}>
+                  <InstagramIcon className={styles.contactIcon} />
+                  <span>Instagram</span>
+                </span>
+
+                <span
+                  className={styles.externalArrow}
+                  aria-hidden="true"
+                >
                   ↗
                 </span>
               </a>
@@ -86,10 +115,16 @@ export function Footer() {
               <a
                 href={CONTACTS.viber.href}
                 className={styles.socialLink}
-                aria-label="Написати 4HOME у Viber"
               >
-                <span>Viber</span>
-                <span className={styles.socialArrow} aria-hidden="true">
+                <span className={styles.socialLinkContent}>
+                  <ViberIcon className={styles.contactIcon} />
+                  <span>{CONTACTS.viber.label}</span>
+                </span>
+
+                <span
+                  className={styles.externalArrow}
+                  aria-hidden="true"
+                >
                   ↗
                 </span>
               </a>
@@ -97,12 +132,18 @@ export function Footer() {
               <a
                 href={CONTACTS.telegram.href}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className={styles.socialLink}
-                aria-label="Написати 4HOME у Telegram"
               >
-                <span>Telegram</span>
-                <span className={styles.socialArrow} aria-hidden="true">
+                <span className={styles.socialLinkContent}>
+                  <TelegramIcon className={styles.contactIcon} />
+                  <span>{CONTACTS.telegram.label}</span>
+                </span>
+
+                <span
+                  className={styles.externalArrow}
+                  aria-hidden="true"
+                >
                   ↗
                 </span>
               </a>
@@ -110,10 +151,10 @@ export function Footer() {
           </div>
         </div>
 
-        <div className={styles.bottom}>
+        <div className={styles.bottomBar}>
           <p>© 2026 4HOME</p>
 
-          <p>Меблі на замовлення • Київ та передмістя</p>
+          <p>Меблі на замовлення · Київ та передмістя</p>
         </div>
       </div>
     </footer>

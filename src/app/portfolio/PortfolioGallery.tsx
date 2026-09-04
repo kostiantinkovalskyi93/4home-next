@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
+
+import {
+  portfolioProjects,
+  type PortfolioCategory,
+} from "@/data/portfolioProjects";
 
 import styles from "./page.module.css";
 
@@ -15,97 +21,16 @@ const filters = [
 
 type Filter = (typeof filters)[number];
 
-type Project = {
-  id: string;
-  title: string;
-  category: Exclude<Filter, "Усі">;
-  image: string;
-  alt: string;
-  size: "large" | "small";
-};
-
-const projects: Project[] = [
-  {
-    id: "kitchen-01",
-    title: "Світла кухня",
-    category: "Кухні",
-    image: "/images/portfolio/kitchen-01.webp",
-    alt: "Світла кухня на замовлення 4HOME",
-    size: "large",
-  },
-  {
-    id: "kitchen-02",
-    title: "Сучасна кухня",
-    category: "Кухні",
-    image: "/images/portfolio/kitchen-02.webp",
-    alt: "Сучасна кухня на замовлення 4HOME",
-    size: "small",
-  },
-  {
-    id: "kitchen-03",
-    title: "Кухня у світлому інтер’єрі",
-    category: "Кухні",
-    image: "/images/portfolio/kitchen-03.webp",
-    alt: "Кухня у світлому інтер'єрі 4HOME",
-    size: "small",
-  },
-  {
-    id: "hinged-01",
-    title: "Світла розпашна шафа",
-    category: "Розпашні шафи",
-    image: "/images/portfolio/hinged-01.webp",
-    alt: "Світла розпашна шафа на замовлення 4HOME",
-    size: "small",
-  },
-  {
-    id: "hinged-02",
-    title: "Вбудована шафа",
-    category: "Розпашні шафи",
-    image: "/images/portfolio/hinged-02.webp",
-    alt: "Вбудована розпашна шафа на замовлення 4HOME",
-    size: "large",
-  },
-  {
-    id: "sliding-01",
-    title: "Дзеркальна шафа-купе",
-    category: "Шафи-купе",
-    image: "/images/portfolio/sliding-01.webp",
-    alt: "Дзеркальна шафа-купе на замовлення 4HOME",
-    size: "small",
-  },
-  {
-    id: "sliding-02",
-    title: "Шафа-купе для кімнати",
-    category: "Шафи-купе",
-    image: "/images/portfolio/sliding-02.webp",
-    alt: "Шафа-купе для кімнати 4HOME",
-    size: "small",
-  },
-  {
-    id: "furniture-01",
-    title: "Консоль",
-    category: "Інші меблі",
-    image: "/images/portfolio/furniture-01.webp",
-    alt: "Консоль на замовлення 4HOME",
-    size: "small",
-  },
-  {
-    id: "furniture-02",
-    title: "ТВ-тумба",
-    category: "Інші меблі",
-    image: "/images/portfolio/furniture-02.webp",
-    alt: "ТВ-тумба на замовлення 4HOME",
-    size: "large",
-  },
-];
-
 export function PortfolioGallery() {
   const [activeFilter, setActiveFilter] = useState<Filter>("Усі");
 
   const visibleProjects =
     activeFilter === "Усі"
-      ? projects
-      : projects.filter((project) => project.category === activeFilter);
+      ? portfolioProjects
+      : portfolioProjects.filter(
+          (project) =>
+            project.category === (activeFilter as PortfolioCategory),
+        );
 
   return (
     <section className={styles.portfolio}>
@@ -142,18 +67,15 @@ export function PortfolioGallery() {
 
         <div className={styles.grid}>
           {visibleProjects.map((project) => (
-            <article
-              key={project.id}
-              className={`${styles.projectCard} ${
-                project.size === "large"
-                  ? styles.projectLarge
-                  : styles.projectSmall
-              }`}
+            <Link
+              key={project.slug}
+              href={`/portfolio/${project.slug}`}
+              className={styles.projectCard}
             >
               <div className={styles.imageWrapper}>
                 <Image
-                  src={project.image}
-                  alt={project.alt}
+                  src={project.coverImage}
+                  alt={project.images[0].alt}
                   fill
                   sizes="(max-width: 650px) 100vw, (max-width: 1000px) 50vw, 58vw"
                   className={styles.image}
@@ -173,7 +95,7 @@ export function PortfolioGallery() {
                   </span>
                 </div>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </div>
