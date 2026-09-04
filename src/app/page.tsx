@@ -32,6 +32,49 @@ const advantages = [
   },
 ];
 
+const categories = [
+  {
+    number: "01",
+    title: "Кухні",
+    description:
+      "Кухні за індивідуальними розмірами з урахуванням планування, техніки та ваших щоденних сценаріїв.",
+    href: "/kitchens",
+    image: "/images/home/categories/kitchens.webp",
+    alt: "Кухня на замовлення",
+    layout: "primary",
+  },
+  {
+    number: "02",
+    title: "Розпашні шафи",
+    description:
+      "Шафи для спальні, передпокою, дитячої та інших приміщень.",
+    href: "/wardrobes#hinged",
+    image: "/images/home/categories/hinged-wardrobes.webp",
+    alt: "Розпашна шафа на замовлення",
+    layout: "secondary",
+  },
+  {
+    number: "03",
+    title: "Шафи-купе",
+    description:
+      "Вбудовані та окремостоячі рішення для ефективного використання простору.",
+    href: "/wardrobes#sliding",
+    image: "/images/home/categories/sliding-wardrobes.webp",
+    alt: "Шафа-купе на замовлення",
+    layout: "tertiary",
+  },
+  {
+    number: "04",
+    title: "Інші меблі",
+    description:
+      "Тумби, столи, консолі та інші корпусні меблі, створені під ваш простір.",
+    href: "/furniture",
+    image: "/images/home/categories/other-furniture.webp",
+    alt: "Корпусні меблі на замовлення",
+    layout: "minor",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -109,6 +152,86 @@ export default function Home() {
                       {item.description}
                     </p>
                   </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.categories}>
+          <div className="container">
+            <div className={styles.categoriesHeader}>
+              <div>
+                <p className={styles.categoriesEyebrow}>ЩО МИ ВИГОТОВЛЯЄМО</p>
+
+                <h2 className={styles.categoriesTitle}>
+                  Меблі для різних
+                  <br />
+                  просторів і задач
+                </h2>
+              </div>
+
+              <p className={styles.categoriesIntro}>
+                Кожен проєкт починається не з готової моделі, а з вашого
+                приміщення, розмірів, потреб і побажань до майбутніх меблів.
+              </p>
+            </div>
+
+            <div className={styles.categoriesGrid}>
+              {categories.map((category) => (
+                <article
+                  key={category.number}
+                  className={`${styles.categoryCard} ${
+                    styles[
+                      `category${category.layout[0].toUpperCase()}${category.layout.slice(
+                        1,
+                      )}`
+                    ]
+                  }`}
+                >
+                  <Link href={category.href} className={styles.categoryLink}>
+                    <div className={styles.categoryImageWrapper}>
+                      <Image
+                        src={category.image}
+                        alt={category.alt}
+                        fill
+                        sizes={
+                          category.layout === "primary"
+                            ? "(max-width: 760px) 100vw, 60vw"
+                            : "(max-width: 760px) 100vw, 40vw"
+                        }
+                        className={styles.categoryImage}
+                      />
+
+                      <div className={styles.categoryShade} />
+
+                      <span className={styles.categoryNumber}>
+                        {category.number}
+                      </span>
+
+                      <span
+                        className={styles.categoryArrow}
+                        aria-hidden="true"
+                      >
+                        ↗
+                      </span>
+                    </div>
+
+                    <div className={styles.categoryContent}>
+                      <h3 className={styles.categoryTitle}>
+                        {category.title}
+                      </h3>
+
+                      <p className={styles.categoryDescription}>
+                        {category.description}
+                      </p>
+
+                      <span className={styles.categoryMore}>
+                        Переглянути
+                        <span aria-hidden="true">→</span>
+                      </span>
+                    </div>
+                  </Link>
                 </article>
               ))}
             </div>

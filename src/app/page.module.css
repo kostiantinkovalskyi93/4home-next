@@ -25,10 +25,6 @@
   padding-block: 72px;
 }
 
-/* ========================================
-   HERO CONTENT
-======================================== */
-
 .heroContent {
   max-width: 570px;
 }
@@ -66,10 +62,6 @@
   font-size: 18px;
   line-height: 1.65;
 }
-
-/* ========================================
-   HERO BUTTONS
-======================================== */
 
 .actions {
   display: flex;
@@ -125,10 +117,6 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* ========================================
-   HERO VISUAL
-======================================== */
-
 .heroVisual {
   min-width: 0;
 
@@ -157,7 +145,7 @@
 }
 
 /* ========================================
-   ADVANTAGES SECTION
+   ADVANTAGES
 ======================================== */
 
 .advantages {
@@ -235,10 +223,6 @@
   line-height: 1.7;
 }
 
-/* ========================================
-   ADVANTAGES GRID
-======================================== */
-
 .advantagesGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -314,11 +298,286 @@
 }
 
 /* ========================================
-   FOCUS STATES
+   CATEGORIES
+======================================== */
+
+.categories {
+  padding-block: 116px 124px;
+
+  background: var(--color-dark);
+  color: #ffffff;
+}
+
+.categoriesHeader {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(280px, 430px);
+
+  align-items: end;
+
+  gap: 72px;
+}
+
+.categoriesEyebrow {
+  margin-bottom: 18px;
+
+  color: #c89b78;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.16em;
+}
+
+.categoriesTitle {
+  max-width: 760px;
+
+  font-size: clamp(44px, 4.7vw, 68px);
+  font-weight: 700;
+  line-height: 1;
+
+  letter-spacing: -0.045em;
+}
+
+.categoriesIntro {
+  max-width: 430px;
+
+  color: #bdb7b1;
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ========================================
+   CATEGORY GRID
+======================================== */
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+
+  gap: 30px 24px;
+
+  margin-top: 70px;
+}
+
+.categoryCard {
+  min-width: 0;
+}
+
+/* 01 — Кухні */
+.categoryPrimary {
+  grid-column: 1 / 8;
+}
+
+/* 02 — Розпашні шафи */
+.categorySecondary {
+  grid-column: 8 / 13;
+}
+
+/* 03 — Шафи-купе */
+.categoryTertiary {
+  grid-column: 1 / 8;
+}
+
+/* 04 — Інші меблі */
+.categoryMinor {
+  grid-column: 8 / 13;
+}
+
+.categoryLink {
+  display: block;
+}
+
+.categoryImageWrapper {
+  position: relative;
+
+  overflow: hidden;
+
+  background: var(--color-dark-soft);
+}
+
+/* Найважливіша категорія */
+.categoryPrimary .categoryImageWrapper {
+  aspect-ratio: 4 / 3;
+}
+
+/* Друга за важливістю */
+.categorySecondary .categoryImageWrapper {
+  aspect-ratio: 4 / 3.2;
+}
+
+/* Третя */
+.categoryTertiary .categoryImageWrapper {
+  aspect-ratio: 16 / 9.5;
+}
+
+/* Найменша категорія */
+.categoryMinor .categoryImageWrapper {
+  aspect-ratio: 16 / 8.3;
+}
+
+.categoryImage {
+  object-fit: cover;
+
+  transform: scale(1.001);
+
+  transition: transform 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.categoryShade {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.04) 28%,
+      rgba(0, 0, 0, 0.42) 100%
+    );
+
+  pointer-events: none;
+
+  transition: background 300ms ease;
+}
+
+.categoryNumber {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 40px;
+  height: 32px;
+
+  padding-inline: 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+
+  background: rgba(23, 22, 21, 0.28);
+  color: #ffffff;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+}
+
+.categoryArrow {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+
+  z-index: 2;
+
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 50%;
+
+  background: rgba(23, 22, 21, 0.28);
+  color: #ffffff;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  font-size: 22px;
+
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    transform 220ms ease;
+}
+
+.categoryContent {
+  padding-top: 24px;
+}
+
+.categoryTitle {
+  color: #ffffff;
+
+  font-size: clamp(26px, 2.1vw, 34px);
+  font-weight: 600;
+  line-height: 1.1;
+
+  letter-spacing: -0.03em;
+}
+
+.categoryDescription {
+  max-width: 520px;
+
+  margin-top: 12px;
+
+  color: #aaa49e;
+
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.categoryMore {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 20px;
+
+  color: #d8b394;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition: gap 200ms ease;
+}
+
+.categoryLink:hover .categoryImage {
+  transform: scale(1.035);
+}
+
+.categoryLink:hover .categoryShade {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.02) 30%,
+      rgba(0, 0, 0, 0.34) 100%
+    );
+}
+
+.categoryLink:hover .categoryArrow {
+  border-color: var(--color-accent);
+
+  background: var(--color-accent);
+
+  transform: rotate(5deg);
+}
+
+.categoryLink:hover .categoryMore {
+  gap: 15px;
+}
+
+/* ========================================
+   FOCUS
 ======================================== */
 
 .primaryButton:focus-visible,
-.secondaryButton:focus-visible {
+.secondaryButton:focus-visible,
+.categoryLink:focus-visible {
   outline: 2px solid #c89b78;
   outline-offset: 4px;
 }
@@ -360,6 +619,16 @@
   .advantageCard:nth-child(3) {
     border-left: 1px solid var(--color-border);
   }
+
+  .categoriesHeader {
+    grid-template-columns: 1fr;
+
+    gap: 28px;
+  }
+
+  .categoriesIntro {
+    max-width: 620px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -399,11 +668,35 @@
   .advantagesGrid {
     margin-top: 58px;
   }
+
+  .categories {
+    padding-block: 92px 100px;
+  }
+
+  .categoriesGrid {
+    margin-top: 56px;
+  }
 }
 
 /* ========================================
    MOBILE
 ======================================== */
+
+@media (max-width: 760px) {
+  .categoryPrimary,
+  .categorySecondary,
+  .categoryTertiary,
+  .categoryMinor {
+    grid-column: 1 / -1;
+  }
+
+  .categoryPrimary .categoryImageWrapper,
+  .categorySecondary .categoryImageWrapper,
+  .categoryTertiary .categoryImageWrapper,
+  .categoryMinor .categoryImageWrapper {
+    aspect-ratio: 4 / 3;
+  }
+}
 
 @media (max-width: 600px) {
   .heroInner {
@@ -539,6 +832,73 @@
 
     font-size: 14px;
   }
+
+  .categories {
+    padding-block: 76px 84px;
+  }
+
+  .categoriesHeader {
+    gap: 22px;
+  }
+
+  .categoriesEyebrow {
+    margin-bottom: 16px;
+
+    font-size: 11px;
+  }
+
+  .categoriesTitle {
+    font-size: clamp(38px, 10vw, 48px);
+    line-height: 1.02;
+  }
+
+  .categoriesIntro {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .categoriesGrid {
+    gap: 42px;
+
+    margin-top: 46px;
+  }
+
+  .categoryContent {
+    padding-top: 18px;
+  }
+
+  .categoryTitle {
+    font-size: 27px;
+  }
+
+  .categoryDescription {
+    margin-top: 10px;
+
+    font-size: 14px;
+  }
+
+  .categoryMore {
+    margin-top: 16px;
+  }
+
+  .categoryNumber {
+    top: 16px;
+    left: 16px;
+  }
+
+  .categoryArrow {
+    right: 16px;
+    bottom: 16px;
+
+    width: 46px;
+    height: 46px;
+
+    font-size: 20px;
+  }
+
+  .categoryLink:hover .categoryImage {
+    transform: none;
+  }
 }
 
 /* ========================================
@@ -554,7 +914,8 @@
     font-size: 15px;
   }
 
-  .sectionTitle {
+  .sectionTitle,
+  .categoriesTitle {
     font-size: 36px;
   }
 }
@@ -566,7 +927,11 @@
 @media (prefers-reduced-motion: reduce) {
   .primaryButton,
   .secondaryButton,
-  .advantageCard {
+  .advantageCard,
+  .categoryImage,
+  .categoryShade,
+  .categoryArrow,
+  .categoryMore {
     transition: none;
   }
 }
