@@ -168,6 +168,25 @@ const materials = [
   },
 ];
 
+const aboutFacts = [
+  {
+    number: "01",
+    title: "Індивідуальні розміри",
+  },
+  {
+    number: "02",
+    title: "Погодження до виготовлення",
+  },
+  {
+    number: "03",
+    title: "Доставка та встановлення",
+  },
+  {
+    number: "04",
+    title: "Київ та передмістя",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -500,6 +519,61 @@ export default function Home() {
                     </p>
                   </div>
                 </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.about}>
+          <div className="container">
+            <div className={styles.aboutGrid}>
+              <div className={styles.aboutIntro}>
+                <p className={styles.aboutEyebrow}>ПРО 4HOME</p>
+
+                <h2 className={styles.aboutTitle}>
+                  Меблі, які починаються
+                  <br />
+                  з вашого простору
+                </h2>
+              </div>
+
+              <div className={styles.aboutContent}>
+                <p className={styles.aboutLead}>
+                  4HOME — меблі на замовлення для квартир і будинків у Києві та
+                  передмісті.
+                </p>
+
+                <p className={styles.aboutText}>
+                  Кожен проєкт створюється індивідуально: від першого
+                  обговорення та заміру до підбору матеріалів, виготовлення,
+                  доставки й монтажу.
+                </p>
+
+                <p className={styles.aboutText}>
+                  Ми не продаємо готові меблі зі складу. Конструкція, розміри,
+                  наповнення та зовнішній вигляд підбираються під конкретне
+                  приміщення і ваші побажання.
+                </p>
+
+                <div className={styles.aboutActions}>
+                  <Link href="/about" className={styles.aboutLink}>
+                    Детальніше про 4HOME
+                    <span aria-hidden="true">→</span>
+                  </Link>
+
+                  <Link href="/contacts" className={styles.aboutButton}>
+                    Обговорити проєкт
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.aboutFacts}>
+              {aboutFacts.map((fact) => (
+                <div key={fact.number} className={styles.aboutFact}>
+                  <span className={styles.aboutFactNumber}>{fact.number}</span>
+                  <p className={styles.aboutFactText}>{fact.title}</p>
+                </div>
               ))}
             </div>
           </div>
