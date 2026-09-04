@@ -1,3 +1,7 @@
+/* ========================================
+   HERO
+======================================== */
+
 .hero {
   min-height: calc(100vh - 76px);
 
@@ -153,6 +157,163 @@
 }
 
 /* ========================================
+   ADVANTAGES SECTION
+======================================== */
+
+.advantages {
+  position: relative;
+
+  overflow: hidden;
+
+  padding-block: 108px 116px;
+
+  background: var(--color-bg);
+}
+
+.advantages::before {
+  content: "";
+
+  position: absolute;
+  top: -180px;
+  right: -160px;
+
+  width: 420px;
+  height: 420px;
+
+  border: 1px solid rgba(154, 104, 69, 0.1);
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.advantagesHeader {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.85fr)
+    minmax(280px, 0.55fr);
+
+  column-gap: 80px;
+  row-gap: 18px;
+
+  align-items: end;
+
+  max-width: 1120px;
+}
+
+.sectionEyebrow {
+  grid-column: 1 / -1;
+
+  color: var(--color-accent);
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.16em;
+}
+
+.sectionTitle {
+  max-width: 680px;
+
+  color: var(--color-text);
+
+  font-size: clamp(42px, 4.5vw, 66px);
+  font-weight: 700;
+  line-height: 1;
+
+  letter-spacing: -0.045em;
+}
+
+.sectionIntro {
+  max-width: 440px;
+
+  padding-bottom: 5px;
+
+  color: var(--color-text-muted);
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ========================================
+   ADVANTAGES GRID
+======================================== */
+
+.advantagesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  margin-top: 72px;
+
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.advantageCard {
+  min-width: 0;
+  min-height: 290px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 28px 28px 32px;
+
+  border-right: 1px solid var(--color-border);
+
+  transition:
+    background-color 220ms ease,
+    transform 220ms ease;
+}
+
+.advantageCard:first-child {
+  border-left: 1px solid var(--color-border);
+}
+
+.advantageCard:hover {
+  background: rgba(255, 255, 255, 0.55);
+
+  transform: translateY(-4px);
+}
+
+.advantageNumber {
+  color: var(--color-accent);
+
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+
+  letter-spacing: 0.08em;
+}
+
+.advantageContent {
+  padding-top: 52px;
+}
+
+.advantageTitle {
+  max-width: 220px;
+
+  color: var(--color-text);
+
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+
+  letter-spacing: -0.025em;
+}
+
+.advantageDescription {
+  max-width: 250px;
+
+  margin-top: 18px;
+
+  color: var(--color-text-muted);
+
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* ========================================
    FOCUS STATES
 ======================================== */
 
@@ -165,6 +326,41 @@
 /* ========================================
    TABLET
 ======================================== */
+
+@media (max-width: 1000px) {
+  .advantagesHeader {
+    grid-template-columns: 1fr;
+
+    max-width: 760px;
+  }
+
+  .sectionIntro {
+    max-width: 620px;
+
+    padding-bottom: 0;
+  }
+
+  .advantagesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .advantageCard {
+    min-height: 260px;
+  }
+
+  .advantageCard:nth-child(2) {
+    border-right: 1px solid var(--color-border);
+  }
+
+  .advantageCard:nth-child(3),
+  .advantageCard:nth-child(4) {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .advantageCard:nth-child(3) {
+    border-left: 1px solid var(--color-border);
+  }
+}
 
 @media (max-width: 900px) {
   .hero {
@@ -194,6 +390,14 @@
 
   .imageFrame {
     aspect-ratio: 16 / 10;
+  }
+
+  .advantages {
+    padding-block: 88px 96px;
+  }
+
+  .advantagesGrid {
+    margin-top: 58px;
   }
 }
 
@@ -254,6 +458,87 @@
   .heroImage {
     object-position: center;
   }
+
+  .advantages {
+    padding-block: 72px 78px;
+  }
+
+  .advantages::before {
+    top: -130px;
+    right: -190px;
+
+    width: 340px;
+    height: 340px;
+  }
+
+  .advantagesHeader {
+    row-gap: 16px;
+  }
+
+  .sectionEyebrow {
+    font-size: 11px;
+  }
+
+  .sectionTitle {
+    font-size: clamp(38px, 10vw, 48px);
+    line-height: 1.02;
+  }
+
+  .sectionIntro {
+    margin-top: 4px;
+
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .advantagesGrid {
+    grid-template-columns: 1fr;
+
+    margin-top: 48px;
+
+    border-bottom: 0;
+  }
+
+  .advantageCard,
+  .advantageCard:first-child,
+  .advantageCard:nth-child(3) {
+    min-height: auto;
+
+    padding: 24px 0 28px;
+
+    border-right: 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .advantageCard:nth-child(3),
+  .advantageCard:nth-child(4) {
+    border-top: 0;
+  }
+
+  .advantageCard:hover {
+    background: transparent;
+
+    transform: none;
+  }
+
+  .advantageContent {
+    padding-top: 32px;
+  }
+
+  .advantageTitle {
+    max-width: 320px;
+
+    font-size: 21px;
+  }
+
+  .advantageDescription {
+    max-width: 360px;
+
+    margin-top: 13px;
+
+    font-size: 14px;
+  }
 }
 
 /* ========================================
@@ -268,6 +553,10 @@
   .description {
     font-size: 15px;
   }
+
+  .sectionTitle {
+    font-size: 36px;
+  }
 }
 
 /* ========================================
@@ -276,7 +565,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .primaryButton,
-  .secondaryButton {
+  .secondaryButton,
+  .advantageCard {
     transition: none;
   }
 }
