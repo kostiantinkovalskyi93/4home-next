@@ -427,8 +427,6 @@
     );
 
   pointer-events: none;
-
-  transition: background 300ms ease;
 }
 
 .categoryNumber,
@@ -487,11 +485,6 @@
   -webkit-backdrop-filter: blur(10px);
 
   font-size: 22px;
-
-  transition:
-    background-color 220ms ease,
-    border-color 220ms ease,
-    transform 220ms ease;
 }
 
 .categoryContent {
@@ -537,14 +530,6 @@
 
 .categoryLink:hover .categoryImage {
   transform: scale(1.035);
-}
-
-.categoryLink:hover .categoryArrow {
-  border-color: var(--color-accent);
-
-  background: var(--color-accent);
-
-  transform: rotate(5deg);
 }
 
 .categoryLink:hover .categoryMore {
@@ -596,10 +581,6 @@
   letter-spacing: -0.045em;
 }
 
-.portfolioHeaderRight {
-  padding-bottom: 4px;
-}
-
 .portfolioIntro {
   color: var(--color-text-muted);
 
@@ -607,7 +588,8 @@
   line-height: 1.7;
 }
 
-.portfolioAllLink {
+.portfolioAllLink,
+.materialsLink {
   display: inline-flex;
   align-items: center;
 
@@ -623,23 +605,19 @@
   transition: gap 200ms ease;
 }
 
-.portfolioAllLink:hover {
+.portfolioAllLink:hover,
+.materialsLink:hover {
   gap: 16px;
 }
 
 .portfolioGrid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-template-rows: repeat(2, auto);
 
   column-gap: 24px;
   row-gap: 34px;
 
   margin-top: 70px;
-}
-
-.portfolioCard {
-  min-width: 0;
 }
 
 .portfolioFeatured {
@@ -649,14 +627,6 @@
 
 .portfolioSmall {
   grid-column: 8 / 13;
-}
-
-.portfolioSmall:nth-child(2) {
-  grid-row: 1;
-}
-
-.portfolioSmall:nth-child(3) {
-  grid-row: 2;
 }
 
 .portfolioLink {
@@ -682,8 +652,6 @@
 .portfolioImage {
   object-fit: cover;
 
-  transform: scale(1.001);
-
   transition: transform 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
 }
 
@@ -707,15 +675,7 @@
   background: rgba(23, 22, 21, 0.26);
   color: #ffffff;
 
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
   font-size: 21px;
-
-  transition:
-    background-color 220ms ease,
-    border-color 220ms ease,
-    transform 220ms ease;
 }
 
 .portfolioInfo {
@@ -746,14 +706,6 @@
 
 .portfolioLink:hover .portfolioImage {
   transform: scale(1.035);
-}
-
-.portfolioLink:hover .portfolioArrow {
-  border-color: var(--color-accent);
-
-  background: var(--color-accent);
-
-  transform: rotate(5deg);
 }
 
 .portfolioMobileAction {
@@ -814,17 +766,11 @@
   line-height: 1.7;
 }
 
-/* ========================================
-   PROCESS TIMELINE
-======================================== */
-
 .processTimeline {
   position: relative;
 
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-
-  gap: 0;
 
   margin-top: 76px;
 }
@@ -873,8 +819,6 @@
 
   font-size: 11px;
   font-weight: 700;
-
-  letter-spacing: 0.06em;
 }
 
 .processContent {
@@ -882,15 +826,11 @@
 }
 
 .processStepTitle {
-  max-width: 180px;
-
   color: var(--color-text);
 
   font-size: 21px;
   font-weight: 600;
   line-height: 1.15;
-
-  letter-spacing: -0.025em;
 }
 
 .processDescription {
@@ -925,22 +865,140 @@
   border: 1px solid var(--color-text);
   border-radius: var(--radius-sm);
 
-  color: var(--color-text);
-
   font-size: 14px;
   font-weight: 600;
-
-  transition:
-    background-color 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
 }
 
-.processButton:hover {
-  background: var(--color-text);
+/* ========================================
+   MATERIALS
+======================================== */
+
+.materials {
+  padding-block: 118px 126px;
+
+  background: var(--color-dark);
+  color: #ffffff;
+}
+
+.materialsHeader {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(280px, 430px);
+
+  align-items: end;
+
+  gap: 72px;
+}
+
+.materialsEyebrow {
+  margin-bottom: 18px;
+
+  color: #c89b78;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  letter-spacing: 0.16em;
+}
+
+.materialsTitle {
+  max-width: 760px;
+
+  font-size: clamp(44px, 4.7vw, 68px);
+  font-weight: 700;
+  line-height: 1;
+
+  letter-spacing: -0.045em;
+}
+
+.materialsIntro {
+  color: #bdb7b1;
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.materialsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  margin-top: 72px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.materialCard {
+  min-height: 310px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 28px;
+
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+
+  transition:
+    background-color 220ms ease,
+    transform 220ms ease;
+}
+
+.materialCard:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.materialCard:hover {
+  background: rgba(255, 255, 255, 0.04);
+
+  transform: translateY(-4px);
+}
+
+.materialTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.materialNumber {
+  color: #c89b78;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.materialPlus {
+  color: rgba(255, 255, 255, 0.45);
+
+  font-size: 22px;
+  font-weight: 300;
+}
+
+.materialContent {
+  padding-top: 48px;
+}
+
+.materialTitle {
+  max-width: 230px;
+
   color: #ffffff;
 
-  transform: translateY(-1px);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.materialDescription {
+  max-width: 250px;
+
+  margin-top: 16px;
+
+  color: #aaa49e;
+
+  font-size: 14px;
+  line-height: 1.65;
 }
 
 /* ========================================
@@ -953,7 +1011,8 @@
 .portfolioLink:focus-visible,
 .portfolioAllLink:focus-visible,
 .portfolioMobileLink:focus-visible,
-.processButton:focus-visible {
+.processButton:focus-visible,
+.materialsLink:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
 }
@@ -966,44 +1025,31 @@
   .advantagesHeader,
   .categoriesHeader,
   .portfolioHeader,
-  .processHeader {
+  .processHeader,
+  .materialsHeader {
     grid-template-columns: 1fr;
 
     max-width: 760px;
+
+    gap: 28px;
   }
 
   .sectionIntro,
   .categoriesIntro,
   .portfolioIntro,
-  .processIntro {
+  .processIntro,
+  .materialsIntro {
     max-width: 620px;
   }
 
-  .advantagesGrid {
+  .advantagesGrid,
+  .materialsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .advantageCard {
-    min-height: 260px;
-  }
-
-  .advantageCard:nth-child(2) {
-    border-right: 1px solid var(--color-border);
-  }
-
-  .advantageCard:nth-child(3),
-  .advantageCard:nth-child(4) {
-    border-top: 1px solid var(--color-border);
-  }
-
-  .advantageCard:nth-child(3) {
-    border-left: 1px solid var(--color-border);
-  }
-
-  .categoriesHeader,
-  .portfolioHeader,
-  .processHeader {
-    gap: 28px;
+  .materialCard:nth-child(3),
+  .materialCard:nth-child(4) {
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
   }
 
   .processTimeline {
@@ -1014,10 +1060,6 @@
 
   .processTimeline::before {
     display: none;
-  }
-
-  .processStep {
-    padding-right: 32px;
   }
 }
 
@@ -1034,35 +1076,19 @@
     padding-block: 56px 64px;
   }
 
-  .heroContent {
-    max-width: 680px;
-  }
-
-  .heroVisual {
-    width: 100%;
-    max-width: 720px;
-  }
-
-  .advantages {
-    padding-block: 88px 96px;
-  }
-
-  .categories {
-    padding-block: 92px 100px;
-  }
-
-  .portfolio {
-    padding-block: 92px 100px;
-  }
-
-  .process {
+  .advantages,
+  .categories,
+  .portfolio,
+  .process,
+  .materials {
     padding-block: 92px 100px;
   }
 
   .advantagesGrid,
   .categoriesGrid,
   .portfolioGrid,
-  .processTimeline {
+  .processTimeline,
+  .materialsGrid {
     margin-top: 56px;
   }
 }
@@ -1088,15 +1114,12 @@
 
   .portfolioGrid {
     grid-template-columns: 1fr;
-    grid-template-rows: auto;
 
     gap: 42px;
   }
 
   .portfolioFeatured,
-  .portfolioSmall,
-  .portfolioSmall:nth-child(2),
-  .portfolioSmall:nth-child(3) {
+  .portfolioSmall {
     grid-column: 1;
     grid-row: auto;
   }
@@ -1127,11 +1150,6 @@
 
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-
-    background: var(--color-surface);
-
-    font-size: 14px;
-    font-weight: 600;
   }
 }
 
@@ -1150,47 +1168,48 @@
   .sectionEyebrow,
   .categoriesEyebrow,
   .portfolioEyebrow,
-  .processEyebrow {
+  .processEyebrow,
+  .materialsEyebrow {
     font-size: 11px;
   }
 
   .title {
     font-size: clamp(40px, 11vw, 52px);
-    line-height: 1;
   }
 
   .description {
     margin-top: 24px;
 
     font-size: 16px;
-    line-height: 1.55;
   }
 
   .actions {
     display: grid;
     grid-template-columns: 1fr;
-
-    margin-top: 30px;
   }
 
   .primaryButton,
   .secondaryButton {
     width: 100%;
-    min-height: 54px;
   }
 
   .imageFrame {
     aspect-ratio: 4 / 3;
   }
 
-  .advantages {
-    padding-block: 72px 78px;
+  .advantages,
+  .categories,
+  .portfolio,
+  .process,
+  .materials {
+    padding-block: 76px 84px;
   }
 
   .sectionTitle,
   .categoriesTitle,
   .portfolioTitle,
-  .processTitle {
+  .processTitle,
+  .materialsTitle {
     font-size: clamp(38px, 10vw, 48px);
     line-height: 1.02;
   }
@@ -1198,110 +1217,44 @@
   .sectionIntro,
   .categoriesIntro,
   .portfolioIntro,
-  .processIntro {
+  .processIntro,
+  .materialsIntro {
     font-size: 15px;
-    line-height: 1.65;
   }
 
-  .advantagesGrid {
+  .advantagesGrid,
+  .materialsGrid {
     grid-template-columns: 1fr;
 
     margin-top: 48px;
-
-    border-bottom: 0;
   }
 
-  .advantageCard,
-  .advantageCard:first-child,
-  .advantageCard:nth-child(3) {
+  .materialCard,
+  .materialCard:first-child {
     min-height: auto;
 
     padding: 24px 0 28px;
 
     border-right: 0;
     border-left: 0;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   }
 
-  .advantageCard:nth-child(3),
-  .advantageCard:nth-child(4) {
+  .materialCard:nth-child(3),
+  .materialCard:nth-child(4) {
     border-top: 0;
   }
 
-  .advantageContent {
-    padding-top: 32px;
+  .materialContent {
+    padding-top: 30px;
   }
 
-  .categories {
-    padding-block: 76px 84px;
-  }
-
-  .categoriesGrid {
-    gap: 42px;
-
-    margin-top: 46px;
-  }
-
-  .categoryContent {
-    padding-top: 18px;
-  }
-
-  .categoryTitle {
-    font-size: 27px;
-  }
-
-  .categoryNumber,
-  .portfolioNumber {
-    top: 16px;
-    left: 16px;
-  }
-
-  .categoryArrow,
-  .portfolioArrow {
-    right: 16px;
-    bottom: 16px;
-
-    width: 46px;
-    height: 46px;
-
-    font-size: 20px;
-  }
-
-  .portfolio {
-    padding-block: 76px 84px;
-  }
-
-  .portfolioHeader {
-    gap: 22px;
-  }
-
-  .portfolioGrid {
-    margin-top: 46px;
-  }
-
-  .portfolioInfo {
-    padding-top: 16px;
-  }
-
-  .portfolioProjectTitle {
-    font-size: 26px;
-  }
-
-  .process {
-    padding-block: 76px 84px;
-  }
-
-  .processHeader {
-    gap: 22px;
+  .materialTitle {
+    font-size: 21px;
   }
 
   .processTimeline {
-    position: relative;
-
-    display: grid;
     grid-template-columns: 1fr;
-
-    gap: 0;
 
     margin-top: 48px;
   }
@@ -1326,31 +1279,8 @@
     padding: 0 0 38px;
   }
 
-  .processStep:last-child {
-    padding-bottom: 0;
-  }
-
-  .processMarker {
-    width: 46px;
-    height: 46px;
-  }
-
   .processContent {
     padding-top: 2px;
-  }
-
-  .processStepTitle {
-    max-width: none;
-
-    font-size: 21px;
-  }
-
-  .processDescription {
-    max-width: 360px;
-
-    margin-top: 10px;
-
-    font-size: 14px;
   }
 
   .processAction {
@@ -1361,7 +1291,6 @@
 
   .processButton {
     width: 100%;
-    min-height: 54px;
   }
 
   .categoryLink:hover .categoryImage,
@@ -1382,7 +1311,8 @@
   .sectionTitle,
   .categoriesTitle,
   .portfolioTitle,
-  .processTitle {
+  .processTitle,
+  .materialsTitle {
     font-size: 36px;
   }
 }
@@ -1396,12 +1326,11 @@
   .secondaryButton,
   .advantageCard,
   .categoryImage,
-  .categoryArrow,
   .categoryMore,
   .portfolioImage,
-  .portfolioArrow,
   .portfolioAllLink,
-  .processButton {
+  .materialCard,
+  .materialsLink {
     transition: none;
   }
 }

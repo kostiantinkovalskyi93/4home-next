@@ -141,6 +141,33 @@ const processSteps = [
   },
 ];
 
+const materials = [
+  {
+    number: "01",
+    title: "Корпусні матеріали",
+    description:
+      "Підбираємо матеріали для корпусу з урахуванням призначення меблів, навантаження та бюджету.",
+  },
+  {
+    number: "02",
+    title: "Фасади",
+    description:
+      "Підбираємо колір, фактуру та тип фасадів так, щоб меблі гармонійно вписувалися в інтер’єр.",
+  },
+  {
+    number: "03",
+    title: "Стільниці та поверхні",
+    description:
+      "Враховуємо зовнішній вигляд, практичність і умови використання робочих поверхонь.",
+  },
+  {
+    number: "04",
+    title: "Фурнітура та механізми",
+    description:
+      "Підбираємо петлі, напрямні, системи відкривання та інші механізми відповідно до конструкції.",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -423,6 +450,57 @@ export default function Home() {
                 Обговорити проєкт
                 <span aria-hidden="true">→</span>
               </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.materials}>
+          <div className="container">
+            <div className={styles.materialsHeader}>
+              <div>
+                <p className={styles.materialsEyebrow}>
+                  МАТЕРІАЛИ ТА ФУРНІТУРА
+                </p>
+
+                <h2 className={styles.materialsTitle}>
+                  Підбираємо рішення
+                  <br />
+                  під конкретний проєкт
+                </h2>
+              </div>
+
+              <div className={styles.materialsHeaderRight}>
+                <p className={styles.materialsIntro}>
+                  Матеріали, кольори та механізми підбираються під конструкцію,
+                  стиль, умови використання та бюджет майбутніх меблів.
+                </p>
+
+                <Link href="/materials" className={styles.materialsLink}>
+                  Детальніше про матеріали
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className={styles.materialsGrid}>
+              {materials.map((item) => (
+                <article key={item.number} className={styles.materialCard}>
+                  <div className={styles.materialTop}>
+                    <span className={styles.materialNumber}>{item.number}</span>
+                    <span className={styles.materialPlus} aria-hidden="true">
+                      +
+                    </span>
+                  </div>
+
+                  <div className={styles.materialContent}>
+                    <h3 className={styles.materialTitle}>{item.title}</h3>
+
+                    <p className={styles.materialDescription}>
+                      {item.description}
+                    </p>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </section>
