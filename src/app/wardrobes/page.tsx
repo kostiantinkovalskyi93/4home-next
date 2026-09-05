@@ -20,7 +20,7 @@ const types = [
     title: "Розпашні шафи",
     description:
       "Індивідуальні шафи для спальні, передпокою, дитячої, гардеробної та інших приміщень.",
-    image: "/images/wardrobes/hinged-02.webp",
+    image: "/images/portfolio/hinged-02.webp",
     alt: "Розпашна шафа на замовлення",
   },
   {
@@ -29,7 +29,7 @@ const types = [
     title: "Шафи-купе",
     description:
       "Рішення для приміщень, де важливо ефективно використати простір і зберегти зручний доступ до речей.",
-    image: "/images/wardrobes/sliding-01.webp",
+    image: "/images/portfolio/sliding-01.webp",
     alt: "Шафа-купе на замовлення",
   },
 ];
@@ -91,22 +91,22 @@ const planningItems = [
 const projects = [
   {
     number: "01",
-    image: "/images/wardrobes/hinged-01.webp",
+    image: "/images/portfolio/hinged-01.webp",
     alt: "Розпашна шафа у світлому інтер'єрі",
   },
   {
     number: "02",
-    image: "/images/wardrobes/hinged-03.webp",
+    image: "/images/home/portfolio/hall-furniture.webp",
     alt: "Шафа для передпокою на замовлення",
   },
   {
     number: "03",
-    image: "/images/wardrobes/sliding-02.webp",
+    image: "/images/portfolio/sliding-02.webp",
     alt: "Шафа-купе з дзеркальними фасадами",
   },
   {
     number: "04",
-    image: "/images/wardrobes/sliding-03.webp",
+    image: "/images/portfolio/sliding-02.webp",
     alt: "Шафа-купе на замовлення у кімнаті",
   },
 ];
@@ -152,7 +152,7 @@ export default function WardrobesPage() {
       <main>
         <section className={styles.hero}>
           <Image
-            src="/images/wardrobes/wardrobes-hero.webp"
+            src="/images/portfolio/hinged-02.webp"
             alt="Шафа на замовлення у Києві"
             fill
             priority

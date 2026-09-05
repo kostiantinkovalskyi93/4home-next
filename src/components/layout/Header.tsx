@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   InstagramIcon,
@@ -15,53 +15,73 @@ import { CONTACTS } from "@/data/contacts";
 import styles from "./Header.module.css";
 
 const navigation = [
-  { label: "Про нас", href: "/about" },
-  { label: "Кухні", href: "/kitchens" },
-  { label: "Шафи", href: "/wardrobes" },
-  { label: "Інші меблі", href: "/furniture" },
-  { label: "Наші роботи", href: "/portfolio" },
-  { label: "Процес", href: "/process" },
-  { label: "Матеріали", href: "/materials" },
-  { label: "Контакти", href: "/contacts" },
-];
+  {
+    label: "Про нас",
+    href: "/about",
+  },
+  {
+    label: "Кухні",
+    href: "/kitchens",
+  },
+  {
+    label: "Шафи",
+    href: "/wardrobes",
+  },
+  {
+    label: "Інші меблі",
+    href: "/furniture",
+  },
+  {
+    label: "Наші роботи",
+    href: "/portfolio",
+  },
+  {
+    label: "Процес",
+    href: "/process",
+  },
+  {
+    label: "Матеріали",
+    href: "/materials",
+  },
+  {
+    label: "Контакти",
+    href: "/contacts",
+  },
+] as const;
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const toggleMenu = () => {
+    setIsMenuOpen((current) => !current);
+  };
+
   useEffect(() => {
     if (!isMenuOpen) {
-      document.body.style.overflow = "";
       return;
     }
 
+    const previousOverflow = document.body.style.overflow;
+
     document.body.style.overflow = "hidden";
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    function handleEscape(event: KeyboardEvent) {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsMenuOpen(false);
+        closeMenu();
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleEscape);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
-
-  function closeMenu() {
-    setIsMenuOpen(false);
-  }
-
-  function toggleMenu() {
-    setIsMenuOpen((current) => !current);
-  }
+  }, [closeMenu, isMenuOpen]);
 
   return (
     <>
@@ -78,7 +98,6 @@ export function Header() {
               alt="4HOME"
               width={522}
               height={247}
-              priority
               className={styles.logoImage}
             />
           </Link>
@@ -99,26 +118,30 @@ export function Header() {
           </nav>
 
           <div className={styles.actions}>
-            <Link href="/contacts" className={styles.cta}>
+            <Link
+              href="/contacts"
+              className={styles.cta}
+            >
               Розрахувати вартість
             </Link>
 
             <a
               href={CONTACTS.primaryPhone.href}
               className={styles.phone}
-              aria-label={`Зателефонувати Сергію: ${CONTACTS.primaryPhone.display}`}
             >
               {CONTACTS.primaryPhone.display}
             </a>
           </div>
 
           <button
+            type="button"
             className={`${styles.menuButton} ${
               isMenuOpen ? styles.menuButtonOpen : ""
             }`}
-            type="button"
             aria-label={
-              isMenuOpen ? "Закрити меню" : "Відкрити меню"
+              isMenuOpen
+                ? "Закрити меню"
+                : "Відкрити меню"
             }
             aria-expanded={isMenuOpen}
             aria-controls="mobile-navigation"
@@ -131,11 +154,15 @@ export function Header() {
         </div>
       </header>
 
-      <div
+      <button
+        type="button"
         className={`${styles.mobileMenuOverlay} ${
-          isMenuOpen ? styles.mobileMenuOverlayOpen : ""
+          isMenuOpen
+            ? styles.mobileMenuOverlayOpen
+            : ""
         }`}
-        aria-hidden={!isMenuOpen}
+        aria-label="Закрити меню"
+        tabIndex={isMenuOpen ? 0 : -1}
         onClick={closeMenu}
       />
 
@@ -156,6 +183,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={styles.mobileNavLink}
+                tabIndex={isMenuOpen ? 0 : -1}
                 onClick={closeMenu}
               >
                 {item.label}
@@ -167,6 +195,7 @@ export function Header() {
             <Link
               href="/contacts"
               className={styles.mobileCta}
+              tabIndex={isMenuOpen ? 0 : -1}
               onClick={closeMenu}
             >
               Розрахувати вартість
@@ -176,6 +205,7 @@ export function Header() {
               <a
                 href={CONTACTS.primaryPhone.href}
                 className={styles.mobilePhoneContact}
+                tabIndex={isMenuOpen ? 0 : -1}
               >
                 <span className={styles.mobileContactName}>
                   {CONTACTS.primaryPhone.name}
@@ -189,6 +219,7 @@ export function Header() {
               <a
                 href={CONTACTS.secondaryPhone.href}
                 className={styles.mobilePhoneContact}
+                tabIndex={isMenuOpen ? 0 : -1}
               >
                 <span className={styles.mobileContactName}>
                   {CONTACTS.secondaryPhone.name}
@@ -204,40 +235,52 @@ export function Header() {
               <a
                 href={CONTACTS.email.href}
                 className={styles.mobileChannel}
+                tabIndex={isMenuOpen ? 0 : -1}
               >
-                <MailIcon className={styles.mobileChannelIcon} />
+                <MailIcon
+                  className={styles.mobileChannelIcon}
+                />
+
                 <span>Email</span>
               </a>
 
               <a
                 href={CONTACTS.instagram.href}
-                className={styles.mobileChannel}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
+                className={styles.mobileChannel}
+                tabIndex={isMenuOpen ? 0 : -1}
               >
                 <InstagramIcon
                   className={styles.mobileChannelIcon}
                 />
+
                 <span>Instagram</span>
               </a>
 
               <a
                 href={CONTACTS.viber.href}
                 className={styles.mobileChannel}
+                tabIndex={isMenuOpen ? 0 : -1}
               >
-                <ViberIcon className={styles.mobileChannelIcon} />
+                <ViberIcon
+                  className={styles.mobileChannelIcon}
+                />
+
                 <span>Viber</span>
               </a>
 
               <a
                 href={CONTACTS.telegram.href}
-                className={styles.mobileChannel}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
+                className={styles.mobileChannel}
+                tabIndex={isMenuOpen ? 0 : -1}
               >
                 <TelegramIcon
                   className={styles.mobileChannelIcon}
                 />
+
                 <span>Telegram</span>
               </a>
             </div>

@@ -70,7 +70,7 @@ const planningItems = [
 const projects = [
   {
     number: "01",
-    image: "/images/kitchens/kitchen-01.webp",
+    image: "/images/portfolio/kitchen-luxury/luxury_kitchen_1.webp",
     alt: "Кухня на замовлення 4HOME",
   },
   {
@@ -80,7 +80,7 @@ const projects = [
   },
   {
     number: "03",
-    image: "/images/kitchens/kitchen-03.webp",
+    image: "/images/portfolio/kitchen-white/big_white_kitchen_2.webp",
     alt: "Сучасна кухня на замовлення 4HOME",
   },
 ];
@@ -126,7 +126,7 @@ export default function KitchensPage() {
       <main>
         <section className={styles.hero}>
           <Image
-            src="/images/kitchens/kitchen-hero.webp"
+            src="/images/portfolio/kitchen-luxury/luxury_kitchen_7.webp"
             alt="Кухня на замовлення у Києві"
             fill
             priority

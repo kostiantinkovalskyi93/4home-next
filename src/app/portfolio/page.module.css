@@ -137,22 +137,33 @@
   grid-column: span 5;
 }
 
-.projectCard:nth-child(3n + 3) {
-  grid-column: span 5;
+.projectFull {
+  grid-column: 1 / -1;
 }
 
-.projectCard:nth-child(3n + 4) {
-  grid-column: span 7;
-}
-
+/*
+ * Усі картки, які стоять у парі 7/5 або 5/7,
+ * мають однакову висоту.
+ *
+ * Це прибирає порожній вертикальний простір
+ * під меншою карткою перед наступним рядком.
+ */
 .imageWrapper {
   position: relative;
-  min-height: 470px;
+  min-height: 520px;
   overflow: hidden;
   background: var(--color-surface-soft);
 }
 
 .projectLarge .imageWrapper {
+  min-height: 520px;
+}
+
+/*
+ * Остання непарна картка займає весь рядок
+ * і може бути трохи вищою.
+ */
+.projectFull .imageWrapper {
   min-height: 560px;
 }
 
@@ -425,13 +436,15 @@
   .projectCard,
   .projectLarge,
   .projectSmall,
+  .projectFull,
   .projectCard:nth-child(3n + 3),
   .projectCard:nth-child(3n + 4) {
     grid-column: span 6;
   }
 
   .imageWrapper,
-  .projectLarge .imageWrapper {
+  .projectLarge .imageWrapper,
+  .projectFull .imageWrapper {
     min-height: 440px;
   }
 
@@ -530,13 +543,15 @@
   .projectCard,
   .projectLarge,
   .projectSmall,
+  .projectFull,
   .projectCard:nth-child(3n + 3),
   .projectCard:nth-child(3n + 4) {
     grid-column: auto;
   }
 
   .imageWrapper,
-  .projectLarge .imageWrapper {
+  .projectLarge .imageWrapper,
+  .projectFull .imageWrapper {
     min-height: 340px;
   }
 
@@ -629,7 +644,8 @@
   }
 
   .imageWrapper,
-  .projectLarge .imageWrapper {
+  .projectLarge .imageWrapper,
+  .projectFull .imageWrapper {
     min-height: 320px;
   }
 

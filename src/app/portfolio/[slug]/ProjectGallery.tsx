@@ -103,7 +103,8 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
         }
 
         const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
+        const lastElement =
+          focusableElements[focusableElements.length - 1];
 
         if (
           event.shiftKey &&
@@ -285,7 +286,6 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
                 src={images[activeIndex].src}
                 alt={images[activeIndex].alt}
                 fill
-                priority
                 sizes="100vw"
                 className={styles.activeImage}
               />

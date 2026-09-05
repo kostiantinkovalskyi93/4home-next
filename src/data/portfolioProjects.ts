@@ -222,10 +222,6 @@ export const portfolioProjects: PortfolioProject[] = [
         alt: "Дзеркальна шафа-купе 4HOME — дзеркальні фасади",
       },
       {
-        src: "/images/portfolio/sliding-mirror/sliding_mirror_ward_2_9.webp",
-        alt: "Дзеркальна шафа-купе 4HOME — вигляд збоку",
-      },
-      {
         src: "/images/portfolio/sliding-mirror/sliding_mirror_ward_2_10.webp",
         alt: "Дзеркальна шафа-купе 4HOME — завершений вигляд",
       },

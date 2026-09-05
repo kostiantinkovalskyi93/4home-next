@@ -41,7 +41,7 @@ const categories = [
     description:
       "Кухні за індивідуальними розмірами з урахуванням планування, техніки та ваших щоденних сценаріїв.",
     href: "/kitchens",
-    image: "/images/home/categories/kitchens.webp",
+    image: "/images/portfolio/kitchen-luxury/luxury_kitchen_7.webp",
     alt: "Кухня на замовлення",
     layout: "primary",
   },
@@ -71,7 +71,7 @@ const categories = [
     description:
       "Тумби, столи, консолі та інші корпусні меблі, створені під ваш простір.",
     href: "/furniture",
-    image: "/images/home/categories/other-furniture.webp",
+    image: "/images/portfolio/media-console/media_console_2.webp",
     alt: "Корпусні меблі на замовлення",
     layout: "minor",
   },
@@ -82,7 +82,7 @@ const portfolioProjects = [
     number: "01",
     title: "Світла кухня",
     category: "Кухня на замовлення",
-    image: "/images/home/portfolio/kitchen-light.webp",
+    image: "/images/portfolio/kitchen-luxury/luxury_kitchen_1.webp",
     alt: "Світла кухня на замовлення",
     size: "featured",
   },
@@ -90,7 +90,7 @@ const portfolioProjects = [
     number: "02",
     title: "Вбудована шафа",
     category: "Розпашні шафи",
-    image: "/images/home/portfolio/fitted-wardrobe.webp",
+    image: "/images/portfolio/hinged-02.webp",
     alt: "Вбудована розпашна шафа",
     size: "small",
   },
@@ -246,7 +246,7 @@ export default function Home() {
             <div className={styles.heroVisual}>
               <div className={styles.imageFrame}>
                 <Image
-                  src="/images/home/hero-kitchen.webp"
+                  src="/images/portfolio/kitchen-luxury/luxury_kitchen_7.webp"
                   alt="Кухня на замовлення 4HOME"
                   fill
                   priority

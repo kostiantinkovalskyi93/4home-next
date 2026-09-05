@@ -19,7 +19,7 @@ const furnitureTypes = [
     title: "Тумби та консолі",
     description:
       "Компактні меблі для спальні, передпокою, вітальні та інших приміщень.",
-    image: "/images/furniture/furniture-01.webp",
+    image: "/images/portfolio/furniture-01.webp",
     alt: "Тумба або консоль на замовлення 4HOME",
     layout: "large",
   },
@@ -28,7 +28,7 @@ const furnitureTypes = [
     title: "ТВ-зони",
     description:
       "Тумби та меблеві композиції під телевізор, техніку й системи зберігання.",
-    image: "/images/furniture/furniture-02.webp",
+    image: "/images/portfolio/media-console/media_console_4.webp",
     alt: "ТВ-зона на замовлення 4HOME",
     layout: "small",
   },
@@ -37,7 +37,7 @@ const furnitureTypes = [
     title: "Меблі для передпокою",
     description:
       "Рішення для зберігання взуття, верхнього одягу та повсякденних речей.",
-    image: "/images/furniture/furniture-04.webp",
+    image: "/images/home/portfolio/hall-furniture.webp",
     alt: "Меблі для передпокою на замовлення 4HOME",
     layout: "small",
   },
@@ -109,12 +109,12 @@ const planningItems = [
 const projects = [
   {
     number: "01",
-    image: "/images/furniture/furniture-01.webp",
+    image: "/images/portfolio/furniture-01.webp",
     alt: "Консоль на замовлення 4HOME",
   },
   {
     number: "02",
-    image: "/images/furniture/furniture-02.webp",
+    image: "/images/portfolio/media-console/media_console_4.webp",
     alt: "ТВ-тумба на замовлення 4HOME",
   },
   {
@@ -124,7 +124,7 @@ const projects = [
   },
   {
     number: "04",
-    image: "/images/furniture/furniture-04.webp",
+    image: "/images/home/portfolio/hall-furniture.webp",
     alt: "Меблі для передпокою на замовлення 4HOME",
   },
 ];
@@ -170,7 +170,7 @@ export default function FurniturePage() {
       <main>
         <section className={styles.hero}>
           <Image
-            src="/images/furniture/furniture-hero.webp"
+            src="/images/portfolio/media-console/media_console_4.webp"
             alt="Індивідуальні корпусні меблі на замовлення"
             fill
             priority
