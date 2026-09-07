@@ -1372,6 +1372,10 @@
   gap: 88px;
 }
 
+  .finalCtaMain {
+  min-width: 0;
+}
+
 .finalCtaEyebrow {
   margin-bottom: 18px;
 

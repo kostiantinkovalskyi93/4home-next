@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
@@ -15,39 +16,43 @@ export const metadata: Metadata = {
 const furnitureTypes = [
   {
     number: "01",
+    label: "OBJECT / 01",
     title: "Тумби та консолі",
     description:
       "Компактні меблі для спальні, передпокою, вітальні та інших приміщень.",
     image: "/images/portfolio/furniture-01.webp",
     alt: "Тумба або консоль на замовлення 4HOME",
-    layout: "large",
+    layout: "feature",
   },
   {
     number: "02",
+    label: "MEDIA / 02",
     title: "ТВ-зони",
     description:
       "Тумби та меблеві композиції під телевізор, техніку й системи зберігання.",
     image: "/images/portfolio/media-console/media_console_4.webp",
     alt: "ТВ-зона на замовлення 4HOME",
-    layout: "small",
+    layout: "wide",
   },
   {
     number: "03",
+    label: "HALL / 03",
     title: "Меблі для передпокою",
     description:
       "Рішення для зберігання взуття, верхнього одягу та повсякденних речей.",
     image: "/images/home/portfolio/hall-furniture.webp",
     alt: "Меблі для передпокою на замовлення 4HOME",
-    layout: "small",
+    layout: "portrait",
   },
   {
     number: "04",
+    label: "CUSTOM / 04",
     title: "Індивідуальні рішення",
     description:
       "Інші корпусні меблі за вашими розмірами, якщо стандартні варіанти не підходять.",
     image: "/images/furniture/furniture-03.webp",
     alt: "Індивідуальні корпусні меблі на замовлення 4HOME",
-    layout: "large",
+    layout: "detail",
   },
 ];
 
@@ -81,24 +86,28 @@ const advantages = [
 const planningItems = [
   {
     number: "01",
+    label: "DIMENSIONS",
     title: "Розміри",
     description:
       "Ураховуємо доступну ширину, висоту, глибину та особливості місця встановлення.",
   },
   {
     number: "02",
+    label: "FUNCTION",
     title: "Призначення",
     description:
       "Конструкція залежить від того, як саме меблі використовуватимуться щодня.",
   },
   {
     number: "03",
+    label: "STORAGE",
     title: "Зберігання",
     description:
       "Продумуємо полиці, шухляди, дверцята та відкриті секції відповідно до задачі.",
   },
   {
     number: "04",
+    label: "INTERIOR",
     title: "Інтер’єр",
     description:
       "Фасади, кольори та пропорції підбираються так, щоб меблі виглядали частиною простору.",
@@ -110,21 +119,25 @@ const projects = [
     number: "01",
     image: "/images/portfolio/furniture-01.webp",
     alt: "Консоль на замовлення 4HOME",
+    layout: "tall",
   },
   {
     number: "02",
     image: "/images/portfolio/media-console/media_console_4.webp",
     alt: "ТВ-тумба на замовлення 4HOME",
+    layout: "wide",
   },
   {
     number: "03",
     image: "/images/furniture/furniture-03.webp",
     alt: "Тумба на замовлення 4HOME",
+    layout: "compact",
   },
   {
     number: "04",
     image: "/images/home/portfolio/hall-furniture.webp",
     alt: "Меблі для передпокою на замовлення 4HOME",
+    layout: "large",
   },
 ];
 
@@ -163,296 +176,463 @@ const processSteps = [
 
 export default function FurniturePage() {
   return (
-    <>
+    <main>
+      {/* HERO */}
+      <section className={styles.hero}>
+        <div
+          className={`container ${styles.pageContainer} ${styles.heroInner}`}
+        >
+          <div className={`${styles.heroTop} ${styles.heroEntranceOne}`}>
+            <p className={styles.eyebrow}>ІНШІ МЕБЛІ НА ЗАМОВЛЕННЯ</p>
 
-      <main>
-        <section className={styles.hero}>
-          <Image
-            src="/images/portfolio/media-console/media_console_4.webp"
-            alt="Індивідуальні корпусні меблі на замовлення"
-            fill
-            priority
-            sizes="100vw"
-            className={styles.heroImage}
-          />
+            <div className={styles.heroIndex}>
+              <span>03</span>
+              <span>/</span>
+              <span>FURNITURE</span>
+            </div>
+          </div>
 
-          <div className={styles.heroOverlay} />
-
-          <div
-            className={`container ${styles.pageContainer} ${styles.heroInner}`}
-          >
+          <div className={styles.heroGrid}>
             <div className={styles.heroContent}>
-              <p className={styles.eyebrow}>ІНШІ МЕБЛІ НА ЗАМОВЛЕННЯ</p>
-
-              <h1 className={styles.heroTitle}>
-                Меблі для задач,
+              <h1
+                className={`${styles.heroTitle} ${styles.heroEntranceTwo}`}
+              >
+                Меблі,
                 <br />
-                де стандартного мало
+                що завершують
+                <br />
+                <span>простір.</span>
               </h1>
 
-              <p className={styles.heroText}>
-                Тумби, консолі, ТВ-зони, меблі для передпокою та інші корпусні
-                рішення за індивідуальними розмірами.
-              </p>
+              <div
+                className={`${styles.heroLower} ${styles.heroEntranceThree}`}
+              >
+                <p className={styles.heroText}>
+                  Тумби, консолі, ТВ-зони, меблі для передпокою та інші
+                  корпусні рішення за індивідуальними розмірами.
+                </p>
 
-              <div className={styles.heroActions}>
-                <Link href="/contacts#lead-form" className={styles.primaryButton}>
-                  Розрахувати вартість
-                  <span aria-hidden="true">→</span>
-                </Link>
+                <div className={styles.heroActions}>
+                  <Link
+                    href="/contacts#lead-form"
+                    className={styles.primaryButton}
+                  >
+                    <span>Розрахувати вартість</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
 
-                <Link href="/portfolio" className={styles.secondaryButton}>
-                  Переглянути роботи
-                </Link>
+                  <Link href="/portfolio" className={styles.textButton}>
+                    Переглянути роботи
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`${styles.heroVisual} ${styles.heroEntranceFour}`}
+            >
+              <div className={styles.heroImageFrame}>
+                <Image
+                  src="/images/portfolio/media-console/media_console_4.webp"
+                  alt="Індивідуальні корпусні меблі на замовлення"
+                  fill
+                  priority
+                  sizes="(max-width: 1050px) 100vw, 48vw"
+                  className={styles.heroImage}
+                />
+
+                <div className={styles.heroImageOverlay} />
+
+                <div className={styles.heroImageMeta}>
+                  <span>4HOME / 2026</span>
+                  <span>INDIVIDUAL FURNITURE</span>
+                </div>
+              </div>
+
+              <span className={styles.heroObjectNumber}>03</span>
+
+              <div className={styles.heroCaption}>
+                <span>OBJECT</span>
+                <span>SPACE</span>
+                <span>FUNCTION</span>
               </div>
             </div>
           </div>
-        </section>
 
-        <section className={styles.intro}>
-          <div
-            className={`container ${styles.pageContainer} ${styles.introGrid}`}
-          >
-            <div>
-              <p className={styles.sectionEyebrow}>МЕБЛІ 4HOME</p>
-
-              <h2 className={styles.sectionTitle}>
-                Для простору,
-                <br />
-                де потрібне своє рішення
-              </h2>
-            </div>
-
-            <div className={styles.introContent}>
-              <p>
-                Не всі меблі можна зручно підібрати серед стандартних готових
-                моделей. Розміри приміщення, ніші або конкретна функція часто
-                потребують індивідуального проєкту.
-              </p>
-
-              <p>
-                Тому конструкція, пропорції, матеріали та наповнення
-                підбираються під конкретне місце й задачу.
-              </p>
-            </div>
+          <div className={`${styles.heroFooter} ${styles.heroEntranceFive}`}>
+            <span>INDIVIDUAL</span>
+            <span className={styles.heroFooterLine} />
+            <span>FURNITURE</span>
+            <span className={styles.heroFooterLine} />
+            <span>KYIV</span>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.types}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.typesHeader}>
-              <p className={styles.sectionEyebrow}>ЩО МОЖНА ЗРОБИТИ</p>
+      {/* INTRO */}
+      <section className={styles.intro}>
+        <div className={`container ${styles.pageContainer}`}>
+          <Reveal>
+            <p className={styles.sectionEyebrow}>МЕБЛІ 4HOME</p>
+          </Reveal>
 
+          <div className={styles.introGrid}>
+            <Reveal>
               <h2 className={styles.sectionTitle}>
-                Різні меблі —
+                Не просто предмет.
                 <br />
-                один підхід
+                <span>Частина інтер’єру.</span>
               </h2>
-            </div>
+            </Reveal>
 
-            <div className={styles.visualGrid}>
-              {furnitureTypes.map((item) => (
+            <Reveal delay={70}>
+              <div className={styles.introContent}>
+                <p>
+                  Не всі меблі можна зручно підібрати серед стандартних готових
+                  моделей. Розміри приміщення, ніші або конкретна функція часто
+                  потребують індивідуального проєкту.
+                </p>
+
+                <p>
+                  Тому конструкція, пропорції, матеріали та наповнення
+                  підбираються під конкретне місце й задачу.
+                </p>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* COLLECTION */}
+      <section className={styles.collection}>
+        <div className={`container ${styles.pageContainer}`}>
+          <div className={styles.collectionHeader}>
+            <Reveal>
+              <div>
+                <p className={styles.sectionEyebrow}>COLLECTION / 01—04</p>
+
+                <h2 className={styles.sectionTitle}>
+                  Різні меблі.
+                  <br />
+                  <span>Один підхід.</span>
+                </h2>
+              </div>
+            </Reveal>
+
+            <Reveal delay={70}>
+              <p className={styles.collectionLead}>
+                Кожен предмет створюється під своє місце, функцію та
+                пропорції конкретного інтер’єру.
+              </p>
+            </Reveal>
+          </div>
+
+          <div className={styles.collectionGrid}>
+            {furnitureTypes.map((item, index) => (
+              <Reveal key={item.number} delay={index * 45}>
                 <article
-                  key={item.number}
-                  className={`${styles.visualCard} ${
-                    item.layout === "large"
-                      ? styles.visualCardLarge
-                      : styles.visualCardSmall
+                  className={`${styles.collectionItem} ${
+                    item.layout === "feature"
+                      ? styles.collectionFeature
+                      : item.layout === "wide"
+                        ? styles.collectionWide
+                        : item.layout === "portrait"
+                          ? styles.collectionPortrait
+                          : styles.collectionDetail
                   }`}
                 >
-                  <Image
-                    src={item.image}
-                    alt={item.alt}
-                    fill
-                    sizes="(max-width: 700px) 100vw, 50vw"
-                    className={styles.visualImage}
-                  />
+                  <div className={styles.collectionImageWrapper}>
+                    <Image
+                      src={item.image}
+                      alt={item.alt}
+                      fill
+                      sizes="
+                        (max-width: 650px) 100vw,
+                        (max-width: 1050px) 50vw,
+                        55vw
+                      "
+                      className={styles.collectionImage}
+                    />
 
-                  <div className={styles.visualOverlay} />
+                    <div className={styles.collectionOverlay} />
 
-                  <div className={styles.visualContent}>
-                    <span className={styles.visualNumber}>{item.number}</span>
+                    <span className={styles.collectionImageNumber}>
+                      {item.number}
+                    </span>
+                  </div>
 
-                    <div>
-                      <h3>{item.title}</h3>
-                      <p>{item.description}</p>
-                    </div>
+                  <div className={styles.collectionContent}>
+                    <span className={styles.collectionLabel}>
+                      {item.label}
+                    </span>
+
+                    <h3>{item.title}</h3>
+
+                    <p>{item.description}</p>
                   </div>
                 </article>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.advantages}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.sectionHeading}>
-              <p className={styles.sectionEyebrow}>ОСНОВНІ ПРИНЦИПИ</p>
+      {/* PRINCIPLES */}
+      <section className={styles.principles}>
+        <div className={`container ${styles.pageContainer}`}>
+          <Reveal>
+            <p className={styles.sectionEyebrow}>ПІДХІД</p>
+          </Reveal>
 
-              <h2 className={styles.sectionTitle}>
-                Створюємо меблі
+          <div className={styles.principlesIntro}>
+            <Reveal>
+              <h2 className={styles.statementTitle}>
+                Один предмет меблів
                 <br />
-                під конкретний простір
+                може змінити
+                <br />
+                <span>весь простір.</span>
               </h2>
-            </div>
+            </Reveal>
 
-            <div className={styles.advantagesGrid}>
-              {advantages.map((item) => (
-                <article key={item.number} className={styles.advantageCard}>
-                  <span className={styles.cardNumber}>{item.number}</span>
-
-                  <div>
-                    <h3 className={styles.cardTitle}>{item.title}</h3>
-                    <p className={styles.cardText}>{item.description}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <Reveal delay={70}>
+              <p className={styles.statementText}>
+                Важливі не лише фасади. Пропорції, висота, глибина,
+                розташування та функція визначають, наскільки природно меблі
+                працюватимуть в інтер’єрі.
+              </p>
+            </Reveal>
           </div>
-        </section>
 
-        <section className={styles.planning}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.planningHeader}>
+          <div className={styles.principlesList}>
+            {advantages.map((item, index) => (
+              <Reveal key={item.number} delay={index * 40}>
+                <article className={styles.principleItem}>
+                  <div className={styles.principleMeta}>
+                    <span>{item.number}</span>
+                    <span className={styles.principleLine} />
+                  </div>
+
+                  <h3>{item.title}</h3>
+
+                  <p>{item.description}</p>
+
+                  <span className={styles.principleMark} aria-hidden="true">
+                    +
+                  </span>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PLANNING */}
+      <section className={styles.planning}>
+        <div className={`container ${styles.pageContainer}`}>
+          <div className={styles.planningHeader}>
+            <Reveal>
               <div>
                 <p className={styles.darkEyebrow}>ПЛАНУВАННЯ</p>
 
                 <h2 className={styles.darkTitle}>
-                  Спочатку задача,
+                  Спочатку задача.
                   <br />
-                  потім конструкція
+                  <span>Потім форма.</span>
                 </h2>
               </div>
+            </Reveal>
 
+            <Reveal delay={70}>
               <p className={styles.planningLead}>
                 Для невеликих меблів особливо важливі правильні пропорції та
                 функціональність. Кожен сантиметр має працювати на конкретну
                 задачу.
               </p>
-            </div>
+            </Reveal>
+          </div>
 
-            <div className={styles.planningGrid}>
-              {planningItems.map((item) => (
-                <article key={item.number} className={styles.planningItem}>
-                  <span className={styles.planningNumber}>{item.number}</span>
+          <div className={styles.planningList}>
+            {planningItems.map((item, index) => (
+              <Reveal key={item.number} delay={index * 45}>
+                <article className={styles.planningItem}>
+                  <div className={styles.planningMeta}>
+                    <span className={styles.planningNumber}>{item.number}</span>
+
+                    <span className={styles.planningLabel}>{item.label}</span>
+                  </div>
 
                   <h3>{item.title}</h3>
 
                   <p>{item.description}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        <section className={styles.portfolio}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.portfolioHeader}>
+                  <span className={styles.planningDot} aria-hidden="true" />
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PORTFOLIO */}
+      <section className={styles.portfolio}>
+        <div className={`container ${styles.pageContainer}`}>
+          <div className={styles.portfolioHeader}>
+            <Reveal>
               <div>
                 <p className={styles.sectionEyebrow}>ВИКОНАНІ РОБОТИ</p>
 
                 <h2 className={styles.sectionTitle}>
-                  Приклади
+                  Меблі
                   <br />
-                  індивідуальних меблів
+                  <span>у реальних інтер’єрах.</span>
                 </h2>
               </div>
+            </Reveal>
 
+            <Reveal delay={70}>
               <Link href="/portfolio" className={styles.textLink}>
                 Усі роботи
                 <span aria-hidden="true">→</span>
               </Link>
-            </div>
+            </Reveal>
+          </div>
 
-            <div className={styles.projectsGrid}>
-              {projects.map((project) => (
+          <div className={styles.projectsGrid}>
+            {projects.map((project, index) => (
+              <Reveal key={project.number} delay={index * 45}>
                 <Link
-                  key={project.number}
                   href="/portfolio"
-                  className={styles.projectCard}
+                  className={`${styles.projectCard} ${
+                    project.layout === "tall"
+                      ? styles.projectTall
+                      : project.layout === "wide"
+                        ? styles.projectWide
+                        : project.layout === "compact"
+                          ? styles.projectCompact
+                          : styles.projectLarge
+                  }`}
                 >
                   <div className={styles.projectImageWrapper}>
                     <Image
                       src={project.image}
                       alt={project.alt}
                       fill
-                      sizes="(max-width: 700px) 100vw, 25vw"
+                      sizes="
+                        (max-width: 650px) 100vw,
+                        (max-width: 1050px) 50vw,
+                        55vw
+                      "
                       className={styles.projectImage}
                     />
 
-                    <span className={styles.projectNumber}>
-                      {project.number}
+                    <div className={styles.projectOverlay} />
+
+                    <div className={styles.projectMeta}>
+                      <span>{project.number}</span>
+                      <span>4HOME / FURNITURE</span>
+                    </div>
+
+                    <span className={styles.projectArrow} aria-hidden="true">
+                      ↗
                     </span>
                   </div>
                 </Link>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.process}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.processHeader}>
-              <p className={styles.sectionEyebrow}>ЯК ЦЕ ВІДБУВАЄТЬСЯ</p>
+      {/* PROCESS */}
+      <section className={styles.process}>
+        <div className={`container ${styles.pageContainer}`}>
+          <div className={styles.processHeader}>
+            <Reveal>
+              <div>
+                <p className={styles.sectionEyebrow}>ЯК ЦЕ ВІДБУВАЄТЬСЯ</p>
 
-              <h2 className={styles.sectionTitle}>
-                Від ідеї
-                <br />
-                до готових меблів
-              </h2>
-            </div>
+                <h2 className={styles.sectionTitle}>
+                  Від ідеї
+                  <br />
+                  <span>до готових меблів.</span>
+                </h2>
+              </div>
+            </Reveal>
 
-            <div className={styles.processGrid}>
-              {processSteps.map((step) => (
-                <article key={step.number} className={styles.processItem}>
+            <Reveal delay={70}>
+              <Link href="/process" className={styles.textLink}>
+                Детальніше про процес
+                <span aria-hidden="true">→</span>
+              </Link>
+            </Reveal>
+          </div>
+
+          <div className={styles.processList}>
+            {processSteps.map((step, index) => (
+              <Reveal key={step.number} delay={index * 35}>
+                <article className={styles.processItem}>
                   <span className={styles.processNumber}>{step.number}</span>
 
                   <h3>{step.title}</h3>
 
                   <p>{step.description}</p>
+
+                  <span className={styles.processDot} aria-hidden="true" />
                 </article>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.cta}>
-          <div
-            className={`container ${styles.pageContainer} ${styles.ctaGrid}`}
-          >
-            <div>
-              <p className={styles.darkEyebrow}>ПОЧНЕМО З ПРОРАХУНКУ</p>
+      {/* CTA */}
+      <section className={styles.cta}>
+        <div className={`container ${styles.pageContainer}`}>
+          <Reveal>
+            <p className={styles.darkEyebrow}>ПОЧНЕМО З ІДЕЇ</p>
+          </Reveal>
 
+          <div className={styles.ctaGrid}>
+            <Reveal>
               <h2 className={styles.ctaTitle}>
-                Є ідея
+                Потрібні меблі,
                 <br />
-                для меблів?
+                яких немає
+                <br />
+                <span>у каталозі?</span>
               </h2>
-            </div>
+            </Reveal>
 
-            <div className={styles.ctaContent}>
-              <p>
-                Надішліть фото місця, приблизні розміри або коротко опишіть, що
-                саме потрібно зробити.
-              </p>
+            <Reveal delay={70}>
+              <div className={styles.ctaContent}>
+                <p>
+                  Надішліть фото місця, приблизні розміри або коротко опишіть,
+                  що саме потрібно зробити.
+                </p>
 
-              <div className={styles.ctaActions}>
-                <Link href="/contacts#lead-form" className={styles.primaryButton}>
-                  Розрахувати вартість
-                  <span aria-hidden="true">→</span>
-                </Link>
+                <div className={styles.ctaActions}>
+                  <Link
+                    href="/contacts#lead-form"
+                    className={styles.ctaButton}
+                  >
+                    <span>Обговорити проєкт</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
 
-                <a
-                  href={CONTACTS.phone.href}
-                  className={styles.secondaryButton}
-                >
-                  {CONTACTS.phone.display}
-                </a>
+                  <a
+                    href={CONTACTS.phone.href}
+                    className={styles.phoneLink}
+                  >
+                    {CONTACTS.phone.display}
+                  </a>
+                </div>
               </div>
-            </div>
+            </Reveal>
           </div>
-        </section>
-      </main>
-    </>
+        </div>
+      </section>
+    </main>
   );
 }

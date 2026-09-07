@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+
+import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
@@ -14,6 +16,8 @@ export const metadata: Metadata = {
 const types = [
   {
     id: "hinged",
+    number: "01",
+    index: "HINGED",
     label: "РОЗПАШНІ ШАФИ",
     title: "Розпашні шафи",
     description:
@@ -23,6 +27,8 @@ const types = [
   },
   {
     id: "sliding",
+    number: "02",
+    index: "SLIDING",
     label: "ШАФИ-КУПЕ",
     title: "Шафи-купе",
     description:
@@ -63,24 +69,28 @@ const planningItems = [
   {
     number: "01",
     title: "Ніша або стіна",
+    short: "SPACE",
     description:
       "Враховуємо геометрію приміщення, плінтуси, розетки, виступи та інші особливості.",
   },
   {
     number: "02",
     title: "Система відкривання",
+    short: "OPENING",
     description:
       "Підбираємо формат дверей відповідно до ширини проходу, планування та сценарію використання.",
   },
   {
     number: "03",
     title: "Внутрішнє наповнення",
+    short: "INSIDE",
     description:
       "Розподіляємо полиці, шухляди та секції так, щоб шафою було зручно користуватися щодня.",
   },
   {
     number: "04",
     title: "Зовнішній вигляд",
+    short: "FACADE",
     description:
       "Фасади, кольори, дзеркала та деталі підбираються під інтер’єр приміщення.",
   },
@@ -91,21 +101,29 @@ const projects = [
     number: "01",
     image: "/images/portfolio/hinged-01.webp",
     alt: "Розпашна шафа у світлому інтер'єрі",
+    layout: "tall",
+    position: "center",
   },
   {
     number: "02",
     image: "/images/home/portfolio/hall-furniture.webp",
     alt: "Шафа для передпокою на замовлення",
+    layout: "wide",
+    position: "center",
   },
   {
     number: "03",
     image: "/images/portfolio/sliding-02.webp",
     alt: "Шафа-купе з дзеркальними фасадами",
+    layout: "narrow",
+    position: "center",
   },
   {
     number: "04",
     image: "/images/portfolio/sliding-02.webp",
     alt: "Шафа-купе на замовлення у кімнаті",
+    layout: "detail",
+    position: "72% center",
   },
 ];
 
@@ -113,345 +131,657 @@ const processSteps = [
   {
     number: "01",
     title: "Запит",
-    description: "Фото, приблизні розміри та опис того, яка шафа потрібна.",
+    description:
+      "Фото, приблизні розміри та опис того, яка шафа потрібна.",
   },
   {
     number: "02",
     title: "Замір",
-    description: "Уточнюємо розміри ніші, стіни та особливості приміщення.",
+    description:
+      "Уточнюємо розміри ніші, стіни та особливості приміщення.",
   },
   {
     number: "03",
     title: "Прорахунок",
-    description: "Формуємо конструкцію, наповнення та розраховуємо вартість.",
+    description:
+      "Формуємо конструкцію, наповнення та розраховуємо вартість.",
   },
   {
     number: "04",
     title: "Погодження",
-    description: "Узгоджуємо фасади, матеріали, фурнітуру та деталі.",
+    description:
+      "Узгоджуємо фасади, матеріали, фурнітуру та деталі.",
   },
   {
     number: "05",
     title: "Виготовлення",
-    description: "Шафа виготовляється за погодженими параметрами.",
+    description:
+      "Шафа виготовляється за погодженими параметрами.",
   },
   {
     number: "06",
     title: "Монтаж",
-    description: "Доставляємо та встановлюємо готові меблі.",
+    description:
+      "Доставляємо та встановлюємо готові меблі.",
   },
 ];
 
 export default function WardrobesPage() {
   return (
-    <>
+    <main>
+      {/* ========================================
+          HERO
+      ======================================== */}
 
-      <main>
-        <section className={styles.hero}>
-          <Image
-            src="/images/portfolio/hinged-02.webp"
-            alt="Шафа на замовлення у Києві"
-            fill
-            priority
-            sizes="100vw"
-            className={styles.heroImage}
-          />
-
-          <div className={styles.heroOverlay} />
-
-          <div
-            className={`container ${styles.pageContainer} ${styles.heroInner}`}
-          >
-            <div className={styles.heroContent}>
-              <p className={styles.eyebrow}>ШАФИ НА ЗАМОВЛЕННЯ</p>
-
-              <h1 className={styles.heroTitle}>
-                Шафи, створені
-                <br />
-                під ваш простір
-              </h1>
-
-              <p className={styles.heroText}>
-                Розпашні шафи та шафи-купе за індивідуальними розмірами,
-                з продуманим наповненням і дизайном під конкретний інтер’єр.
+      <section className={styles.hero}>
+        <div
+          className={`container ${styles.pageContainer} ${styles.heroInner}`}
+        >
+          <div className={styles.heroTop}>
+            <div
+              className={`${styles.heroEntrance} ${styles.heroEntranceOne}`}
+            >
+              <p className={styles.eyebrow}>
+                ШАФИ НА ЗАМОВЛЕННЯ
               </p>
+            </div>
 
-              <div className={styles.heroActions}>
-                <Link href="/contacts#lead-form" className={styles.primaryButton}>
-                  Розрахувати вартість
-                  <span aria-hidden="true">→</span>
-                </Link>
+            <div
+              className={`${styles.heroIndex} ${styles.heroEntrance} ${styles.heroEntranceTwo}`}
+            >
+              <span>02</span>
+              <span>/</span>
+              <span>WARDROBES</span>
+            </div>
+          </div>
 
-                <Link href="/portfolio" className={styles.secondaryButton}>
-                  Переглянути роботи
-                </Link>
+          <div className={styles.heroGrid}>
+            <div className={styles.heroContent}>
+              <div
+                className={`${styles.heroEntrance} ${styles.heroEntranceThree}`}
+              >
+                <h1 className={styles.heroTitle}>
+                  Шафа
+                  <br />
+                  як частина
+                  <br />
+                  <span>простору.</span>
+                </h1>
+              </div>
+
+              <div
+                className={`${styles.heroLower} ${styles.heroEntrance} ${styles.heroEntranceFour}`}
+              >
+                <p className={styles.heroText}>
+                  Розпашні шафи та шафи-купе за
+                  індивідуальними розмірами, з продуманим
+                  наповненням і дизайном під конкретний
+                  інтер’єр.
+                </p>
+
+                <div className={styles.heroActions}>
+                  <Link
+                    href="/contacts#lead-form"
+                    className={styles.primaryButton}
+                  >
+                    <span>Розрахувати вартість</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+
+                  <Link
+                    href="/portfolio"
+                    className={styles.textButton}
+                  >
+                    Переглянути роботи
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`${styles.heroVisual} ${styles.heroEntrance} ${styles.heroEntranceFive}`}
+            >
+              <div
+                className={styles.heroArchitecture}
+                aria-hidden="true"
+              >
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+
+              <div className={styles.heroImageFrame}>
+                <Image
+                  src="/images/portfolio/hinged-02.webp"
+                  alt="Шафа на замовлення у Києві"
+                  fill
+                  priority
+                  sizes="(max-width: 850px) 100vw, 48vw"
+                  className={styles.heroImage}
+                />
+
+                <div className={styles.heroImageOverlay} />
+
+                <div className={styles.heroImageMeta}>
+                  <span>4HOME</span>
+                  <span>FITTED WARDROBE</span>
+                </div>
+              </div>
+
+              <div className={styles.heroSideIndex}>
+                <span>01</span>
+                <span>02</span>
+                <span>03</span>
+                <span>04</span>
               </div>
             </div>
           </div>
-        </section>
 
-        <section className={styles.intro}>
           <div
-            className={`container ${styles.pageContainer} ${styles.introGrid}`}
+            className={`${styles.heroFooter} ${styles.heroEntrance} ${styles.heroEntranceSix}`}
           >
-            <div>
-              <p className={styles.sectionEyebrow}>ШАФИ 4HOME</p>
-
-              <h2 className={styles.sectionTitle}>
-                Не типове рішення,
-                <br />
-                а меблі під приміщення
-              </h2>
-            </div>
-
-            <div className={styles.introContent}>
-              <p>
-                Шафа проєктується з урахуванням розмірів, розташування дверей,
-                стін, ніш та інших особливостей конкретного приміщення.
-              </p>
-
-              <p>
-                Перед виготовленням погоджуються конструкція, внутрішнє
-                наповнення, фасади, матеріали та фурнітура.
-              </p>
-            </div>
+            <span>ФАСАД</span>
+            <span className={styles.heroFooterLine} />
+            <span>НАПОВНЕННЯ</span>
+            <span className={styles.heroFooterLine} />
+            <span>ПРОСТІР</span>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.types}>
-          {/*
-            Обидва URL-якорі розташовані на початку секції.
-            Тому /wardrobes#hinged і /wardrobes#sliding
-            показують секцію повністю, а sticky Header
-            більше не перекриває великий заголовок.
-          */}
-          <span
-            id="hinged"
-            aria-hidden="true"
-            style={{
-              display: "block",
-              height: 0,
-              scrollMarginTop: "110px",
-            }}
-          />
+      {/* ========================================
+          INTRO
+      ======================================== */}
 
-          <span
-            id="sliding"
-            aria-hidden="true"
-            style={{
-              display: "block",
-              height: 0,
-              scrollMarginTop: "110px",
-            }}
-          />
+      <section className={styles.intro}>
+        <div
+          className={`container ${styles.pageContainer}`}
+        >
+          <Reveal>
+            <p className={styles.sectionEyebrow}>
+              ШАФИ 4HOME
+            </p>
+          </Reveal>
 
-          <div className={`container ${styles.pageContainer}`}>
+          <div className={styles.introGrid}>
+            <Reveal delay={60}>
+              <h2 className={styles.sectionTitle}>
+                Не типове рішення.
+                <br />
+                <span>Меблі під приміщення.</span>
+              </h2>
+            </Reveal>
+
+            <Reveal delay={130}>
+              <div className={styles.introContent}>
+                <p>
+                  Шафа проєктується з урахуванням
+                  розмірів, розташування дверей, стін,
+                  ніш та інших особливостей конкретного
+                  приміщення.
+                </p>
+
+                <p>
+                  Перед виготовленням погоджуються
+                  конструкція, внутрішнє наповнення,
+                  фасади, матеріали та фурнітура.
+                </p>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================
+          TYPES
+      ======================================== */}
+
+      <section className={styles.types}>
+        <div
+          className={`container ${styles.pageContainer}`}
+        >
+          <Reveal>
             <div className={styles.typesHeader}>
-              <p className={styles.sectionEyebrow}>ТИПИ ШАФ</p>
+              <p className={styles.sectionEyebrow}>
+                ТИПИ ШАФ
+              </p>
 
               <h2 className={styles.sectionTitle}>
-                Обираємо формат
+                Два формати.
                 <br />
-                під конкретну задачу
+                <span>Різні сценарії.</span>
               </h2>
             </div>
+          </Reveal>
 
-            <div className={styles.typesGrid}>
-              {types.map((item) => (
-                <article key={item.id} className={styles.typeCard}>
-                  <div className={styles.typeImageWrapper}>
+          <div className={styles.typesList}>
+            {types.map((item, index) => (
+              <article
+                key={item.id}
+                id={item.id}
+                className={`${styles.typePanel} ${
+                  index % 2 === 1
+                    ? styles.typePanelReverse
+                    : ""
+                }`}
+              >
+                <Reveal
+                  className={styles.typeVisualReveal}
+                >
+                  <div className={styles.typeVisual}>
                     <Image
                       src={item.image}
                       alt={item.alt}
                       fill
-                      sizes="(max-width: 700px) 100vw, 50vw"
+                      sizes="(max-width: 750px) 100vw, 55vw"
                       className={styles.typeImage}
+                    />
+
+                    <div
+                      className={styles.typeImageOverlay}
+                      aria-hidden="true"
+                    />
+
+                    <div className={styles.typeImageIndex}>
+                      <span>{item.number}</span>
+                      <span>{item.index}</span>
+                    </div>
+                  </div>
+                </Reveal>
+
+                <Reveal
+                  delay={90}
+                  className={styles.typeContentReveal}
+                >
+                  <div className={styles.typeContent}>
+                    <div className={styles.typeNumber}>
+                      {item.number}
+                    </div>
+
+                    <p className={styles.typeLabel}>
+                      {item.label}
+                    </p>
+
+                    <h3>{item.title}</h3>
+
+                    <p className={styles.typeDescription}>
+                      {item.description}
+                    </p>
+
+                    <div
+                      className={styles.typeLines}
+                      aria-hidden="true"
+                    >
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+                </Reveal>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================
+          PRINCIPLES
+      ======================================== */}
+
+      <section className={styles.advantages}>
+        <div
+          className={`container ${styles.pageContainer}`}
+        >
+          <div className={styles.advantagesHeader}>
+            <Reveal>
+              <div>
+                <p className={styles.sectionEyebrow}>
+                  ОСНОВНІ ПРИНЦИПИ
+                </p>
+
+                <h2 className={styles.sectionTitle}>
+                  Продумуємо
+                  <br />
+                  <span>зовні й усередині.</span>
+                </h2>
+              </div>
+            </Reveal>
+
+            <Reveal delay={90}>
+              <p className={styles.advantagesLead}>
+                Розміри, наповнення та зовнішній вигляд
+                формуються як одна система — відповідно
+                до конкретного приміщення.
+              </p>
+            </Reveal>
+          </div>
+
+          <div className={styles.advantagesList}>
+            {advantages.map((item, index) => (
+              <Reveal
+                key={item.number}
+                delay={index * 50}
+              >
+                <article className={styles.advantageItem}>
+                  <div className={styles.advantageMeta}>
+                    <span>{item.number}</span>
+                    <span
+                      className={styles.advantageLine}
+                      aria-hidden="true"
                     />
                   </div>
 
-                  <div className={styles.typeContent}>
-                    <p className={styles.typeLabel}>{item.label}</p>
+                  <h3>{item.title}</h3>
 
+                  <p>{item.description}</p>
+
+                  <span
+                    className={styles.advantageArrow}
+                    aria-hidden="true"
+                  >
+                    ↘
+                  </span>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================
+          ARCHITECTURE / PLANNING
+      ======================================== */}
+
+      <section className={styles.planning}>
+        <div
+          className={`container ${styles.pageContainer}`}
+        >
+          <div className={styles.planningHeader}>
+            <Reveal>
+              <div>
+                <p className={styles.darkEyebrow}>
+                  ВНУТРІШНЯ АРХІТЕКТУРА
+                </p>
+
+                <h2 className={styles.darkTitle}>
+                  Важливо не тільки,
+                  <br />
+                  <span>як шафа виглядає.</span>
+                </h2>
+              </div>
+            </Reveal>
+
+            <Reveal delay={100}>
+              <p className={styles.planningLead}>
+                Зручність шафи залежить від того,
+                наскільки правильно спроєктовані
+                внутрішні секції, система відкривання та
+                використання доступного простору.
+              </p>
+            </Reveal>
+          </div>
+
+          <div className={styles.cabinet}>
+            {planningItems.map((item, index) => (
+              <Reveal
+                key={item.number}
+                delay={index * 55}
+                className={styles.cabinetReveal}
+              >
+                <article className={styles.cabinetSection}>
+                  <div className={styles.cabinetTop}>
+                    <span className={styles.cabinetNumber}>
+                      {item.number}
+                    </span>
+
+                    <span className={styles.cabinetShort}>
+                      {item.short}
+                    </span>
+                  </div>
+
+                  <div
+                    className={styles.cabinetGraphic}
+                    aria-hidden="true"
+                  >
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+
+                  <div className={styles.cabinetContent}>
                     <h3>{item.title}</h3>
 
                     <p>{item.description}</p>
                   </div>
                 </article>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </section>
 
-        <section className={styles.advantages}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.sectionHeading}>
-              <p className={styles.sectionEyebrow}>ОСНОВНІ ПРИНЦИПИ</p>
-
-              <h2 className={styles.sectionTitle}>
-                Продумуємо шафу
-                <br />
-                до деталей
-              </h2>
+          <Reveal delay={190}>
+            <div className={styles.planningBottom}>
+              <span>01 — SPACE</span>
+              <span>02 — OPENING</span>
+              <span>03 — INSIDE</span>
+              <span>04 — FACADE</span>
             </div>
+          </Reveal>
+        </div>
+      </section>
 
-            <div className={styles.advantagesGrid}>
-              {advantages.map((item) => (
-                <article key={item.number} className={styles.advantageCard}>
-                  <span className={styles.cardNumber}>{item.number}</span>
+      {/* ========================================
+          PORTFOLIO
+      ======================================== */}
 
-                  <div>
-                    <h3 className={styles.cardTitle}>{item.title}</h3>
-
-                    <p className={styles.cardText}>{item.description}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.planning}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.planningHeader}>
+      <section className={styles.portfolio}>
+        <div
+          className={`container ${styles.pageContainer}`}
+        >
+          <div className={styles.portfolioHeader}>
+            <Reveal>
               <div>
-                <p className={styles.darkEyebrow}>ПЛАНУВАННЯ</p>
-
-                <h2 className={styles.darkTitle}>
-                  Важливо не тільки,
-                  <br />
-                  як шафа виглядає
-                </h2>
-              </div>
-
-              <p className={styles.planningLead}>
-                Зручність шафи залежить від того, наскільки правильно
-                спроєктовані внутрішні секції, система відкривання та
-                використання доступного простору.
-              </p>
-            </div>
-
-            <div className={styles.planningGrid}>
-              {planningItems.map((item) => (
-                <article key={item.number} className={styles.planningItem}>
-                  <span className={styles.planningNumber}>{item.number}</span>
-
-                  <h3>{item.title}</h3>
-
-                  <p>{item.description}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.portfolio}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.portfolioHeader}>
-              <div>
-                <p className={styles.sectionEyebrow}>ВИКОНАНІ РОБОТИ</p>
+                <p className={styles.sectionEyebrow}>
+                  ВИКОНАНІ РОБОТИ
+                </p>
 
                 <h2 className={styles.sectionTitle}>
-                  Приклади шаф
+                  Шафи
                   <br />
-                  у реальних інтер’єрах
+                  <span>у реальних інтер’єрах.</span>
                 </h2>
               </div>
+            </Reveal>
 
-              <Link href="/portfolio" className={styles.textLink}>
+            <Reveal delay={90}>
+              <Link
+                href="/portfolio"
+                className={styles.textLink}
+              >
                 Усі роботи
                 <span aria-hidden="true">→</span>
               </Link>
-            </div>
+            </Reveal>
+          </div>
 
-            <div className={styles.projectsGrid}>
-              {projects.map((project) => (
+          <div className={styles.projectsGrid}>
+            {projects.map((project, index) => (
+              <Reveal
+                key={project.number}
+                delay={index * 50}
+                className={
+                  project.layout === "wide"
+                    ? styles.projectWideReveal
+                    : project.layout === "detail"
+                      ? styles.projectDetailReveal
+                      : undefined
+                }
+              >
                 <Link
-                  key={project.number}
                   href="/portfolio"
-                  className={styles.projectCard}
+                  className={`${styles.projectCard} ${
+                    project.layout === "tall"
+                      ? styles.projectTall
+                      : project.layout === "wide"
+                        ? styles.projectWide
+                        : project.layout === "detail"
+                          ? styles.projectDetail
+                          : styles.projectNarrow
+                  }`}
                 >
-                  <div className={styles.projectImageWrapper}>
+                  <div
+                    className={styles.projectImageWrapper}
+                  >
                     <Image
                       src={project.image}
                       alt={project.alt}
                       fill
-                      sizes="(max-width: 700px) 100vw, 25vw"
+                      sizes="(max-width: 700px) 100vw, 50vw"
                       className={styles.projectImage}
+                      style={{
+                        objectPosition: project.position,
+                      }}
                     />
 
-                    <span className={styles.projectNumber}>
-                      {project.number}
+                    <div
+                      className={styles.projectOverlay}
+                      aria-hidden="true"
+                    />
+
+                    <div className={styles.projectMeta}>
+                      <span>{project.number}</span>
+                      <span>WARDROBE / 4HOME</span>
+                    </div>
+
+                    <span
+                      className={styles.projectArrow}
+                      aria-hidden="true"
+                    >
+                      ↗
                     </span>
                   </div>
                 </Link>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.process}>
-          <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.processHeader}>
-              <p className={styles.sectionEyebrow}>ЯК ЦЕ ВІДБУВАЄТЬСЯ</p>
+      {/* ========================================
+          PROCESS
+      ======================================== */}
 
-              <h2 className={styles.sectionTitle}>
-                Від першого запиту
-                <br />
-                до готової шафи
-              </h2>
-            </div>
+      <section className={styles.process}>
+        <div
+          className={`container ${styles.pageContainer}`}
+        >
+          <div className={styles.processHeader}>
+            <Reveal>
+              <div>
+                <p className={styles.sectionEyebrow}>
+                  ЯК ЦЕ ВІДБУВАЄТЬСЯ
+                </p>
 
-            <div className={styles.processGrid}>
-              {processSteps.map((step) => (
-                <article key={step.number} className={styles.processItem}>
-                  <span className={styles.processNumber}>{step.number}</span>
+                <h2 className={styles.sectionTitle}>
+                  Від першого запиту
+                  <br />
+                  <span>до готової шафи.</span>
+                </h2>
+              </div>
+            </Reveal>
+
+            <Reveal delay={90}>
+              <Link
+                href="/process"
+                className={styles.textLink}
+              >
+                Детальніше про процес
+                <span aria-hidden="true">→</span>
+              </Link>
+            </Reveal>
+          </div>
+
+          <div className={styles.processList}>
+            {processSteps.map((step, index) => (
+              <Reveal
+                key={step.number}
+                delay={Math.min(index, 5) * 45}
+              >
+                <article className={styles.processItem}>
+                  <span className={styles.processNumber}>
+                    {step.number}
+                  </span>
 
                   <h3>{step.title}</h3>
 
                   <p>{step.description}</p>
+
+                  <span
+                    className={styles.processDot}
+                    aria-hidden="true"
+                  />
                 </article>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.cta}>
-          <div
-            className={`container ${styles.pageContainer} ${styles.ctaGrid}`}
-          >
-            <div>
-              <p className={styles.darkEyebrow}>ПОЧНЕМО З ПРОРАХУНКУ</p>
+      {/* ========================================
+          CTA
+      ======================================== */}
 
+      <section className={styles.cta}>
+        <div
+          className={`container ${styles.pageContainer}`}
+        >
+          <Reveal>
+            <p className={styles.darkEyebrow}>
+              ПОЧНЕМО З ПРОРАХУНКУ
+            </p>
+          </Reveal>
+
+          <div className={styles.ctaGrid}>
+            <Reveal delay={70}>
               <h2 className={styles.ctaTitle}>
-                Плануєте
+                Є місце
                 <br />
-                нову шафу?
+                для шафи?
+                <br />
+                <span>Спроєктуємо рішення.</span>
               </h2>
-            </div>
+            </Reveal>
 
-            <div className={styles.ctaContent}>
-              <p>
-                Надішліть фото місця встановлення, приблизні розміри або
-                коротко опишіть, яка шафа вам потрібна.
-              </p>
+            <Reveal delay={140}>
+              <div className={styles.ctaContent}>
+                <p>
+                  Надішліть фото місця встановлення,
+                  приблизні розміри або коротко опишіть,
+                  яка шафа вам потрібна.
+                </p>
 
-              <div className={styles.ctaActions}>
-                <Link href="/contacts#lead-form" className={styles.primaryButton}>
-                  Розрахувати вартість
-                  <span aria-hidden="true">→</span>
-                </Link>
+                <div className={styles.ctaActions}>
+                  <Link
+                    href="/contacts#lead-form"
+                    className={styles.ctaButton}
+                  >
+                    <span>Розрахувати вартість</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
 
-                <a
-                  href={CONTACTS.phone.href}
-                  className={styles.secondaryButton}
-                >
-                  {CONTACTS.phone.display}
-                </a>
+                  <a
+                    href={CONTACTS.primaryPhone.href}
+                    className={styles.phoneLink}
+                  >
+                    {CONTACTS.primaryPhone.display}
+                  </a>
+                </div>
               </div>
-            </div>
+            </Reveal>
           </div>
-        </section>
-      </main>
-    </>
+        </div>
+      </section>
+    </main>
   );
 }

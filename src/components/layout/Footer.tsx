@@ -9,6 +9,41 @@ import { CONTACTS } from "@/data/contacts";
 
 import styles from "./Footer.module.css";
 
+const footerNavigation = [
+  {
+    label: "Про нас",
+    href: "/about",
+  },
+  {
+    label: "Кухні",
+    href: "/kitchens",
+  },
+  {
+    label: "Шафи",
+    href: "/wardrobes",
+  },
+  {
+    label: "Інші меблі",
+    href: "/furniture",
+  },
+  {
+    label: "Наші роботи",
+    href: "/portfolio",
+  },
+  {
+    label: "Процес",
+    href: "/process",
+  },
+  {
+    label: "Матеріали",
+    href: "/materials",
+  },
+  {
+    label: "Контакти",
+    href: "/contacts",
+  },
+] as const;
+
 export function Footer() {
   return (
     <footer className={styles.footer}>
@@ -27,27 +62,17 @@ export function Footer() {
 
             <nav
               className={styles.navigationGrid}
-              aria-label="Навігація footer"
+              aria-label="Навігація у футері"
             >
-              <Link href="/kitchens" className={styles.navigationLink}>
-                Кухні
-              </Link>
-
-              <Link href="/wardrobes" className={styles.navigationLink}>
-                Шафи
-              </Link>
-
-              <Link href="/furniture" className={styles.navigationLink}>
-                Інші меблі
-              </Link>
-
-              <Link href="/portfolio" className={styles.navigationLink}>
-                Наші роботи
-              </Link>
-
-              <Link href="/contacts" className={styles.navigationLink}>
-                Контакти
-              </Link>
+              {footerNavigation.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={styles.navigationLink}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
 
@@ -63,9 +88,7 @@ export function Footer() {
                   {CONTACTS.primaryPhone.name}
                 </span>
 
-                <strong>
-                  {CONTACTS.primaryPhone.display}
-                </strong>
+                <strong>{CONTACTS.primaryPhone.display}</strong>
               </a>
 
               <a
@@ -76,9 +99,7 @@ export function Footer() {
                   {CONTACTS.secondaryPhone.name}
                 </span>
 
-                <strong>
-                  {CONTACTS.secondaryPhone.display}
-                </strong>
+                <strong>{CONTACTS.secondaryPhone.display}</strong>
               </a>
 
               <a

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import {
+  type CSSProperties,
   useCallback,
   useEffect,
   useRef,
@@ -19,12 +20,119 @@ type ProjectGalleryProps = {
 const PREVIEW_COUNT = 5;
 const SWIPE_THRESHOLD = 45;
 
-export function ProjectGallery({ images }: ProjectGalleryProps) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+type PreviewImageProps = {
+  image: PortfolioImage;
+  imageIndex: number;
+  imagesLength: number;
+  variant: "wide" | "portrait" | "landscape";
+  delay: number;
+  hiddenCount?: number;
+  onOpen: (index: number) => void;
+};
+
+function PreviewImage({
+  image,
+  imageIndex,
+  imagesLength,
+  variant,
+  delay,
+  hiddenCount = 0,
+  onOpen,
+}: PreviewImageProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const element = buttonRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        setIsVisible(true);
+        observer.unobserve(entry.target);
+      },
+      {
+        threshold: 0.04,
+        rootMargin: "0px 0px 4% 0px",
+      },
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      className={`${styles.editorialPreview} ${
+        styles[
+          variant === "wide"
+            ? "editorialWide"
+            : variant === "portrait"
+              ? "editorialPortrait"
+              : "editorialLandscape"
+        ]
+      } ${isVisible ? styles.editorialVisible : ""}`}
+      style={
+        {
+          "--gallery-delay": `${delay}ms`,
+        } as CSSProperties
+      }
+      onClick={() => onOpen(imageIndex)}
+      aria-label={`Відкрити фото ${imageIndex + 1} з ${imagesLength}`}
+    >
+      <span className={styles.editorialMask}>
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          sizes={
+            variant === "wide"
+              ? "(max-width: 650px) 100vw, 1280px"
+              : "(max-width: 650px) 100vw, 50vw"
+          }
+          className={styles.previewImage}
+        />
+
+        {hiddenCount > 0 && (
+          <span className={styles.moreOverlay}>
+            <strong>+{hiddenCount}</strong>
+            <span>фото</span>
+          </span>
+        )}
+
+        <span
+          className={styles.imageNumber}
+          aria-hidden="true"
+        >
+          {String(imageIndex + 1).padStart(2, "0")}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+export function ProjectGallery({
+  images,
+}: ProjectGalleryProps) {
+  const [activeIndex, setActiveIndex] =
+    useState<number | null>(null);
 
   const touchStartX = useRef<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
+  const previousActiveElement =
+    useRef<HTMLElement | null>(null);
 
   const isOpen = activeIndex !== null;
 
@@ -47,7 +155,9 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
         return null;
       }
 
-      return current === 0 ? images.length - 1 : current - 1;
+      return current === 0
+        ? images.length - 1
+        : current - 1;
     });
   }, [images.length]);
 
@@ -57,7 +167,9 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
         return null;
       }
 
-      return current === images.length - 1 ? 0 : current + 1;
+      return current === images.length - 1
+        ? 0
+        : current + 1;
     });
   }, [images.length]);
 
@@ -66,11 +178,14 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
       return;
     }
 
-    const previousOverflow = document.body.style.overflow;
+    const previousOverflow =
+      document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (
+      event: KeyboardEvent,
+    ) => {
       if (event.key === "Escape") {
         closeGallery();
       }
@@ -84,9 +199,10 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
       }
 
       if (event.key === "Tab") {
-        const dialog = document.querySelector<HTMLElement>(
-          '[data-project-lightbox="true"]',
-        );
+        const dialog =
+          document.querySelector<HTMLElement>(
+            '[data-project-lightbox="true"]',
+          );
 
         if (!dialog) {
           return;
@@ -102,9 +218,13 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
           return;
         }
 
-        const firstElement = focusableElements[0];
+        const firstElement =
+          focusableElements[0];
+
         const lastElement =
-          focusableElements[focusableElements.length - 1];
+          focusableElements[
+            focusableElements.length - 1
+          ];
 
         if (
           event.shiftKey &&
@@ -122,26 +242,40 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener(
+      "keydown",
+      handleKeyDown,
+    );
 
     window.requestAnimationFrame(() => {
       closeButtonRef.current?.focus();
     });
 
     return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow =
+        previousOverflow;
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
 
       window.requestAnimationFrame(() => {
         previousActiveElement.current?.focus();
       });
     };
-  }, [closeGallery, isOpen, showNext, showPrevious]);
+  }, [
+    closeGallery,
+    isOpen,
+    showNext,
+    showPrevious,
+  ]);
 
   const handleTouchStart = (
     event: React.TouchEvent<HTMLDivElement>,
   ) => {
-    touchStartX.current = event.touches[0]?.clientX ?? null;
+    touchStartX.current =
+      event.touches[0]?.clientX ?? null;
   };
 
   const handleTouchEnd = (
@@ -151,16 +285,20 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
       return;
     }
 
-    const touchEndX = event.changedTouches[0]?.clientX;
+    const touchEndX =
+      event.changedTouches[0]?.clientX;
 
     if (touchEndX === undefined) {
       touchStartX.current = null;
       return;
     }
 
-    const distance = touchEndX - touchStartX.current;
+    const distance =
+      touchEndX - touchStartX.current;
 
-    if (Math.abs(distance) >= SWIPE_THRESHOLD) {
+    if (
+      Math.abs(distance) >= SWIPE_THRESHOLD
+    ) {
       if (distance > 0) {
         showPrevious();
       } else {
@@ -175,71 +313,112 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
     return null;
   }
 
-  const previewImages = images.slice(0, PREVIEW_COUNT);
-  const hiddenCount = Math.max(images.length - PREVIEW_COUNT, 0);
+  const previewImages =
+    images.slice(0, PREVIEW_COUNT);
+
+  const hiddenCount = Math.max(
+    images.length - PREVIEW_COUNT,
+    0,
+  );
 
   return (
     <>
-      <div className={styles.preview}>
-        <button
-          type="button"
-          className={`${styles.previewButton} ${styles.coverButton}`}
-          onClick={() => openGallery(0)}
-          aria-label={`Відкрити фото 1 з ${images.length}`}
-        >
-          <Image
-            src={images[0].src}
-            alt={images[0].alt}
-            fill
-            priority
-            sizes="(max-width: 650px) 100vw, 1280px"
-            className={styles.previewImage}
-          />
+      <div className={styles.galleryShell}>
+        {/* MAIN IMAGE */}
 
-          <span className={styles.openHint}>
-            <span aria-hidden="true">↗</span>
-            Відкрити галерею
-          </span>
-        </button>
+        <div className={styles.coverReveal}>
+          <button
+            type="button"
+            className={styles.coverButton}
+            onClick={() => openGallery(0)}
+            aria-label={`Відкрити фото 1 з ${images.length}`}
+          >
+            <Image
+              src={images[0].src}
+              alt={images[0].alt}
+              fill
+              priority
+              sizes="100vw"
+              className={styles.coverImage}
+            />
+
+            <span
+              className={styles.coverOverlay}
+              aria-hidden="true"
+            />
+
+            <span className={styles.coverMeta}>
+              <span>
+                01 /{" "}
+                {String(images.length).padStart(
+                  2,
+                  "0",
+                )}
+              </span>
+
+              <span className={styles.openHint}>
+                <span>Відкрити галерею</span>
+                <span aria-hidden="true">↗</span>
+              </span>
+            </span>
+          </button>
+        </div>
+
+        {/* EDITORIAL PREVIEW */}
 
         {previewImages.length > 1 && (
-          <div className={styles.previewGrid}>
-            {previewImages.slice(1).map((image, previewIndex) => {
-              const imageIndex = previewIndex + 1;
+          <div className={styles.editorialGrid}>
+            {previewImages[1] && (
+              <PreviewImage
+                image={previewImages[1]}
+                imageIndex={1}
+                imagesLength={images.length}
+                variant="portrait"
+                delay={0}
+                onOpen={openGallery}
+              />
+            )}
 
-              const isLastPreview =
-                imageIndex === previewImages.length - 1;
+            {previewImages[2] && (
+              <PreviewImage
+                image={previewImages[2]}
+                imageIndex={2}
+                imagesLength={images.length}
+                variant="landscape"
+                delay={45}
+                onOpen={openGallery}
+              />
+            )}
 
-              return (
-                <button
-                  key={image.src}
-                  type="button"
-                  className={styles.previewButton}
-                  onClick={() => openGallery(imageIndex)}
-                  aria-label={`Відкрити фото ${imageIndex + 1} з ${
-                    images.length
-                  }`}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    sizes="(max-width: 650px) 50vw, 25vw"
-                    className={styles.previewImage}
-                  />
+            {previewImages[3] && (
+              <PreviewImage
+                image={previewImages[3]}
+                imageIndex={3}
+                imagesLength={images.length}
+                variant="landscape"
+                delay={45}
+                onOpen={openGallery}
+              />
+            )}
 
-                  {isLastPreview && hiddenCount > 0 && (
-                    <span className={styles.moreOverlay}>
-                      <strong>+{hiddenCount}</strong>
-                      <span>фото</span>
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            {previewImages[4] && (
+              <PreviewImage
+                image={previewImages[4]}
+                imageIndex={4}
+                imagesLength={images.length}
+                variant="wide"
+                delay={70}
+                hiddenCount={hiddenCount}
+                onOpen={openGallery}
+              />
+            )}
           </div>
         )}
       </div>
+
+      {/* ========================================
+          LIGHTBOX
+      ======================================== */}
 
       {activeIndex !== null && (
         <div
@@ -250,9 +429,21 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
           data-project-lightbox="true"
         >
           <div className={styles.topBar}>
-            <span className={styles.counter}>
-              {activeIndex + 1} / {images.length}
-            </span>
+            <div className={styles.lightboxBrand}>
+              <span>4HOME</span>
+
+              <span className={styles.counter}>
+                {String(activeIndex + 1).padStart(
+                  2,
+                  "0",
+                )}{" "}
+                /{" "}
+                {String(images.length).padStart(
+                  2,
+                  "0",
+                )}
+              </span>
+            </div>
 
             <button
               ref={closeButtonRef}
@@ -281,8 +472,13 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
               </button>
             )}
 
-            <div className={styles.activeImageWrapper}>
+            <div
+              className={
+                styles.activeImageWrapper
+              }
+            >
               <Image
+                key={images[activeIndex].src}
                 src={images[activeIndex].src}
                 alt={images[activeIndex].alt}
                 fill
@@ -304,7 +500,9 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
           </div>
 
           {images.length > 1 && (
-            <div className={styles.thumbnailsWrapper}>
+            <div
+              className={styles.thumbnailsWrapper}
+            >
               <div className={styles.thumbnails}>
                 {images.map((image, index) => (
                   <button
@@ -315,10 +513,16 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
                         ? styles.thumbnailButtonActive
                         : ""
                     }`}
-                    onClick={() => setActiveIndex(index)}
-                    aria-label={`Перейти до фото ${index + 1}`}
+                    onClick={() =>
+                      setActiveIndex(index)
+                    }
+                    aria-label={`Перейти до фото ${
+                      index + 1
+                    }`}
                     aria-current={
-                      activeIndex === index ? "true" : undefined
+                      activeIndex === index
+                        ? "true"
+                        : undefined
                     }
                   >
                     <Image
@@ -326,7 +530,9 @@ export function ProjectGallery({ images }: ProjectGalleryProps) {
                       alt=""
                       fill
                       sizes="90px"
-                      className={styles.thumbnailImage}
+                      className={
+                        styles.thumbnailImage
+                      }
                     />
                   </button>
                 ))}
