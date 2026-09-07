@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 
 import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
 
 import "./globals.css";
+
+const manrope = Manrope({
+  subsets: ["cyrillic", "latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -10,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | 4HOME",
   },
   description:
-    "Індивідуальні корпусні меблі на замовлення у Києві: кухні, шафи, тумби та інші меблі за вашими розмірами.",
+    "Меблі на замовлення у Києві та передмісті. Кухні, шафи та інші корпусні меблі за індивідуальними розмірами.",
 };
 
 export default function RootLayout({
@@ -20,7 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
-      <body>
+      <body className={manrope.variable}>
+        <Header />
         {children}
         <Footer />
       </body>

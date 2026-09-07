@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Header } from "@/components/layout/Header";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
@@ -121,7 +120,6 @@ const processSteps = [
 export default function KitchensPage() {
   return (
     <>
-      <Header />
 
       <main>
         <section className={styles.hero}>
@@ -154,7 +152,7 @@ export default function KitchensPage() {
               </p>
 
               <div className={styles.heroActions}>
-                <Link href="/contacts" className={styles.primaryButton}>
+                <Link href="/contacts#lead-form" className={styles.primaryButton}>
                   Розрахувати вартість
                   <span aria-hidden="true">→</span>
                 </Link>
@@ -349,7 +347,7 @@ export default function KitchensPage() {
               </p>
 
               <div className={styles.ctaActions}>
-                <Link href="/contacts" className={styles.primaryButton}>
+                <Link href="/contacts#lead-form" className={styles.primaryButton}>
                   Розрахувати вартість
                   <span aria-hidden="true">→</span>
                 </Link>

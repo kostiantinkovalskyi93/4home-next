@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import { Header } from "@/components/layout/Header";
 import { CONTACTS } from "@/data/contacts";
 import {
   getPortfolioProject,
@@ -74,8 +72,6 @@ export default async function ProjectPage({
 
   return (
     <>
-      <Header />
-
       <main>
         {/* HERO */}
         <section className={styles.hero}>
@@ -248,7 +244,7 @@ export default async function ProjectPage({
 
               <div className={styles.ctaActions}>
                 <Link
-                  href="/contacts"
+                  href="/contacts#lead-form"
                   className={styles.primaryButton}
                 >
                   Розрахувати подібний проєкт

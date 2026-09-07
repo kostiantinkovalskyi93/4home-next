@@ -8,7 +8,6 @@ import {
   InstagramIcon,
   MailIcon,
   TelegramIcon,
-  ViberIcon,
 } from "@/components/ui/ContactIcons";
 import { CONTACTS } from "@/data/contacts";
 
@@ -119,7 +118,7 @@ export function Header() {
 
           <div className={styles.actions}>
             <Link
-              href="/contacts"
+              href="/contacts#lead-form"
               className={styles.cta}
             >
               Розрахувати вартість
@@ -193,7 +192,7 @@ export function Header() {
 
           <div className={styles.mobileMenuBottom}>
             <Link
-              href="/contacts"
+              href="/contacts#lead-form"
               className={styles.mobileCta}
               tabIndex={isMenuOpen ? 0 : -1}
               onClick={closeMenu}
@@ -256,18 +255,6 @@ export function Header() {
                 />
 
                 <span>Instagram</span>
-              </a>
-
-              <a
-                href={CONTACTS.viber.href}
-                className={styles.mobileChannel}
-                tabIndex={isMenuOpen ? 0 : -1}
-              >
-                <ViberIcon
-                  className={styles.mobileChannelIcon}
-                />
-
-                <span>Viber</span>
               </a>
 
               <a

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-
-import { Header } from "@/components/layout/Header";
 import { CONTACTS } from "@/data/contacts";
 
 import { PortfolioGallery } from "./PortfolioGallery";
@@ -16,7 +14,6 @@ export const metadata: Metadata = {
 export default function PortfolioPage() {
   return (
     <>
-      <Header />
 
       <main>
         <section className={styles.hero}>
@@ -60,7 +57,7 @@ export default function PortfolioPage() {
                   наповнення та зовнішній вигляд.
                 </p>
 
-                <Link href="/contacts" className={styles.textLink}>
+                <Link href="/contacts#lead-form" className={styles.textLink}>
                   Обговорити свій проєкт
                   <span aria-hidden="true">→</span>
                 </Link>
@@ -90,7 +87,7 @@ export default function PortfolioPage() {
               </p>
 
               <div className={styles.ctaActions}>
-                <Link href="/contacts" className={styles.primaryButton}>
+                <Link href="/contacts#lead-form" className={styles.primaryButton}>
                   Розрахувати вартість
                   <span aria-hidden="true">→</span>
                 </Link>

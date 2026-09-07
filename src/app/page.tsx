@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FaqAccordion } from "@/components/home/FaqAccordion";
-import { Header } from "@/components/layout/Header";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
@@ -213,7 +212,6 @@ const faqItems = [
 export default function Home() {
   return (
     <>
-      <Header />
 
       <main>
         <section className={styles.hero}>
@@ -233,7 +231,7 @@ export default function Home() {
               </p>
 
               <div className={styles.actions}>
-                <Link href="/contacts" className={styles.primaryButton}>
+                <Link href="/contacts#lead-form" className={styles.primaryButton}>
                   Розрахувати вартість
                 </Link>
 
@@ -488,7 +486,7 @@ export default function Home() {
             </ol>
 
             <div className={styles.processAction}>
-              <Link href="/contacts" className={styles.processButton}>
+              <Link href="/contacts#lead-form" className={styles.processButton}>
                 Обговорити проєкт
                 <span aria-hidden="true">→</span>
               </Link>
@@ -584,7 +582,7 @@ export default function Home() {
                     <span aria-hidden="true">→</span>
                   </Link>
 
-                  <Link href="/contacts" className={styles.aboutButton}>
+                  <Link href="/contacts#lead-form" className={styles.aboutButton}>
                     Обговорити проєкт
                   </Link>
                 </div>
@@ -647,7 +645,7 @@ export default function Home() {
                 </p>
 
                 <div className={styles.finalCtaActions}>
-                  <Link href="/contacts" className={styles.finalCtaPrimary}>
+                  <Link href="/contacts#lead-form" className={styles.finalCtaPrimary}>
                     Розрахувати вартість
                     <span aria-hidden="true">→</span>
                   </Link>

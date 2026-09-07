@@ -4,7 +4,6 @@ import {
   InstagramIcon,
   MailIcon,
   TelegramIcon,
-  ViberIcon,
 } from "@/components/ui/ContactIcons";
 import { CONTACTS } from "@/data/contacts";
 
@@ -102,23 +101,6 @@ export function Footer() {
                 <span className={styles.socialLinkContent}>
                   <InstagramIcon className={styles.contactIcon} />
                   <span>Instagram</span>
-                </span>
-
-                <span
-                  className={styles.externalArrow}
-                  aria-hidden="true"
-                >
-                  ↗
-                </span>
-              </a>
-
-              <a
-                href={CONTACTS.viber.href}
-                className={styles.socialLink}
-              >
-                <span className={styles.socialLinkContent}>
-                  <ViberIcon className={styles.contactIcon} />
-                  <span>{CONTACTS.viber.label}</span>
                 </span>
 
                 <span
