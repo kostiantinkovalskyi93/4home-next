@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 import styles from "./page.module.css";
 
@@ -11,6 +12,32 @@ export const metadata: Metadata = {
   title: "Інші меблі на замовлення у Києві",
   description:
     "Тумби, консолі, столи, меблі для передпокою, ТВ-зони та інші корпусні меблі на замовлення у Києві та передмісті.",
+  alternates: {
+    canonical: "/furniture",
+  },
+};
+
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${SITE_URL}/furniture#service`,
+  name: "Корпусні меблі на замовлення",
+  url: `${SITE_URL}/furniture`,
+  description:
+    "Проєктування, виготовлення, доставка та встановлення корпусних меблів за індивідуальними розмірами у Києві та передмісті.",
+  provider: {
+    "@type": "LocalBusiness",
+    "@id": `${SITE_URL}/#business`,
+    name: SITE_NAME,
+    url: SITE_URL,
+  },
+  areaServed: "Київ та передмістя",
+  serviceType: [
+    "Корпусні меблі на замовлення",
+    "Тумби та консолі на замовлення",
+    "ТВ-зони на замовлення",
+    "Меблі для передпокою на замовлення",
+  ],
 };
 
 const furnitureTypes = [
@@ -176,7 +203,15 @@ const processSteps = [
 
 export default function FurniturePage() {
   return (
-    <main>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(serviceJsonLd),
+        }}
+      />
+
+      <main>
       {/* HERO */}
       <section className={styles.hero}>
         <div
@@ -633,6 +668,7 @@ export default function FurniturePage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }

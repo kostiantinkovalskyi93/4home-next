@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -5,7 +6,34 @@ import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
+export const metadata: Metadata = {
+  title: {
+    absolute: "4HOME — меблі на замовлення у Києві",
+  },
+
+  description: SITE_DESCRIPTION,
+
+  alternates: {
+    canonical: "/",
+  },
+
+  openGraph: {
+    type: "website",
+    url: "/",
+    locale: "uk_UA",
+    siteName: SITE_NAME,
+    title: "4HOME — меблі на замовлення у Києві",
+    description: SITE_DESCRIPTION,
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "4HOME — меблі на замовлення у Києві",
+    description: SITE_DESCRIPTION,
+  },
+};
 const advantages = [
   {
     number: "01",
@@ -208,10 +236,72 @@ const faqItems = [
       "Ні. 4HOME працює з індивідуальними замовленнями. Меблі створюються під конкретне приміщення, розміри та побажання замовника.",
   },
 ];
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${SITE_URL}/#business`,
+  name: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+
+  telephone: "+380993002245",
+  email: "mebli.4home@gmail.com",
+
+  areaServed: "Київ та передмістя",
+
+  sameAs: [
+    "https://www.instagram.com/mebli.4home/",
+  ],
+
+  knowsAbout: [
+    "Кухні на замовлення",
+    "Шафи на замовлення",
+    "Шафи-купе",
+    "Корпусні меблі",
+    "Меблі за індивідуальними розмірами",
+  ],
+};
+
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${SITE_URL}/#custom-furniture-service`,
+
+  name: "Меблі на замовлення 4HOME",
+
+  description:
+    "Проєктування, виготовлення, доставка та встановлення меблів за індивідуальними розмірами у Києві та передмісті.",
+
+  provider: {
+    "@id": `${SITE_URL}/#business`,
+  },
+
+  areaServed: "Київ та передмістя",
+
+  serviceType: [
+    "Кухні на замовлення",
+    "Шафи на замовлення",
+    "Шафи-купе на замовлення",
+    "Корпусні меблі на замовлення",
+  ],
+};
 
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationJsonLd),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(serviceJsonLd),
+        }}
+      />
 
       <main>
         <section className={styles.hero}>

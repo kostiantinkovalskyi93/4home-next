@@ -9,9 +9,12 @@ import { PortfolioGallery } from "./PortfolioGallery";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "Наші роботи | Меблі на замовлення",
+  title: "Наші роботи — меблі на замовлення у Києві",
   description:
     "Реальні проєкти 4HOME: кухні, шафи та інші корпусні меблі на замовлення у Києві та передмісті.",
+  alternates: {
+    canonical: "/portfolio",
+  },
 };
 
 const projectCount = String(portfolioProjects.length).padStart(2, "0");

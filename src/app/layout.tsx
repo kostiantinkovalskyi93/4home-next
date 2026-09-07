@@ -3,6 +3,11 @@ import { Manrope } from "next/font/google";
 
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 
 import "./globals.css";
 
@@ -13,12 +18,52 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+
   title: {
-    default: "4HOME — меблі на замовлення у Києві",
-    template: "%s | 4HOME",
+    default: `${SITE_NAME} — меблі на замовлення у Києві`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Меблі на замовлення у Києві та передмісті. Кухні, шафи та інші корпусні меблі за індивідуальними розмірами.",
+
+  description: SITE_DESCRIPTION,
+
+  applicationName: SITE_NAME,
+
+  authors: [
+    {
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+  ],
+
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+
+  openGraph: {
+    type: "website",
+    locale: "uk_UA",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — меблі на замовлення у Києві`,
+    description: SITE_DESCRIPTION,
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — меблі на замовлення у Києві`,
+    description: SITE_DESCRIPTION,
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

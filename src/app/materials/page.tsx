@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "Матеріали для меблів на замовлення",
   description:
     "Матеріали та фурнітура для меблів на замовлення 4HOME: корпус, фасади, стільниці, меблеві механізми, кольори та фактури.",
+  alternates: {
+    canonical: "/materials",
+  },
 };
 
 const materialGroups = [

@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "Про 4HOME — меблі на замовлення у Києві",
   description:
     "4HOME — меблі на замовлення у Києві та передмісті. Індивідуальне проєктування, підбір матеріалів, виготовлення, доставка та монтаж.",
+  alternates: {
+    canonical: "/about",
+  },
 };
 
 const principles = [

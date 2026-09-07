@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "Як відбувається замовлення меблів",
   description:
     "Процес замовлення меблів 4HOME: від першого запиту та заміру до прорахунку, погодження, виготовлення, доставки та монтажу.",
+  alternates: {
+    canonical: "/process",
+  },
 };
 
 const processSteps = [

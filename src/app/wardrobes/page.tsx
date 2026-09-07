@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 import styles from "./page.module.css";
 
@@ -11,6 +12,31 @@ export const metadata: Metadata = {
   title: "Шафи на замовлення у Києві",
   description:
     "Розпашні шафи та шафи-купе на замовлення у Києві та передмісті. Індивідуальні розміри, наповнення, матеріали, доставка та монтаж.",
+  alternates: {
+    canonical: "/wardrobes",
+  },
+};
+
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${SITE_URL}/wardrobes#service`,
+  name: "Шафи на замовлення",
+  url: `${SITE_URL}/wardrobes`,
+  description:
+    "Проєктування, виготовлення, доставка та встановлення розпашних шаф і шаф-купе за індивідуальними розмірами у Києві та передмісті.",
+  provider: {
+    "@type": "LocalBusiness",
+    "@id": `${SITE_URL}/#business`,
+    name: SITE_NAME,
+    url: SITE_URL,
+  },
+  areaServed: "Київ та передмістя",
+  serviceType: [
+    "Шафи на замовлення",
+    "Розпашні шафи на замовлення",
+    "Шафи-купе на замовлення",
+  ],
 };
 
 const types = [
@@ -168,7 +194,15 @@ const processSteps = [
 
 export default function WardrobesPage() {
   return (
-    <main>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(serviceJsonLd),
+        }}
+      />
+
+      <main>
       {/* ========================================
           HERO
       ======================================== */}
@@ -782,6 +816,7 @@ export default function WardrobesPage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
