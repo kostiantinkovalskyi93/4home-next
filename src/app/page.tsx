@@ -338,6 +338,7 @@ export default function Home() {
                   alt="Кухня на замовлення 4HOME"
                   fill
                   priority
+                  fetchPriority="high"
                   sizes="(max-width: 900px) 100vw, 55vw"
                   className={styles.heroImage}
                 />
