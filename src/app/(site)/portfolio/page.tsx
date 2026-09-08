@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
-import { portfolioProjects } from "@/data/portfolioProjects";
+import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 
 import { PortfolioGallery } from "./PortfolioGallery";
 import styles from "./page.module.css";
@@ -17,9 +17,15 @@ export const metadata: Metadata = {
   },
 };
 
-const projectCount = String(portfolioProjects.length).padStart(2, "0");
+export const dynamic = "force-dynamic";
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const portfolioProjects =
+    await getPublishedPortfolioProjects();
+
+  const projectCount = String(
+    portfolioProjects.length,
+  ).padStart(2, "0");
   return (
     <main>
       <section className={styles.hero}>
@@ -90,7 +96,7 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      <PortfolioGallery />
+      <PortfolioGallery projects={portfolioProjects} />
 
       <section className={styles.statement}>
         <div className={`container ${styles.pageContainer}`}>

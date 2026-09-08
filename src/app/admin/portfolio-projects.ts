@@ -11,7 +11,7 @@ export type AdminPortfolioProject = {
   id: string;
   title: string;
   category: AdminProjectCategory;
-  year: number;
+  year: number | null;
   status: AdminProjectStatus;
   coverImage: string | null;
   photoCount: number;
@@ -25,7 +25,7 @@ export type PortfolioProjectDatabaseRow = {
     | "kitchen"
     | "wardrobe"
     | "furniture";
-  year: number;
+  year: number | null;
   status:
     | "published"
     | "draft";

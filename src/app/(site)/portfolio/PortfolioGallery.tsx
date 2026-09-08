@@ -9,10 +9,10 @@ import {
   useState,
 } from "react";
 
-import {
-  portfolioProjects,
-  type PortfolioCategory,
-} from "@/data/portfolioProjects";
+import type {
+  PublicPortfolioCategory,
+  PublicPortfolioProject,
+} from "@/lib/portfolio-db";
 
 import styles from "./page.module.css";
 
@@ -26,7 +26,7 @@ const filters = [
 
 type Filter = (typeof filters)[number];
 
-type Project = (typeof portfolioProjects)[number];
+type Project = PublicPortfolioProject;
 
 const LARGE_IMAGE_SIZES =
   "(max-width: 650px) 100vw, (max-width: 1000px) 50vw, 58vw";
@@ -168,17 +168,23 @@ function ProjectCard({
   );
 }
 
-export function PortfolioGallery() {
+type PortfolioGalleryProps = {
+  projects: PublicPortfolioProject[];
+};
+
+export function PortfolioGallery({
+  projects,
+}: PortfolioGalleryProps) {
   const [activeFilter, setActiveFilter] =
     useState<Filter>("Усі");
 
   const visibleProjects =
     activeFilter === "Усі"
-      ? portfolioProjects
-      : portfolioProjects.filter(
+      ? projects
+      : projects.filter(
           (project) =>
             project.category ===
-            (activeFilter as PortfolioCategory),
+            (activeFilter as PublicPortfolioCategory),
         );
 
   return (

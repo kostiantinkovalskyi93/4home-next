@@ -6,13 +6,15 @@ import { notFound } from "next/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
 import {
-  getPortfolioProject,
-  portfolioProjects,
-} from "@/data/portfolioProjects";
+  getPublishedPortfolioProject,
+  getPublishedPortfolioProjects,
+} from "@/lib/portfolio-db";
 import { SITE_URL } from "@/lib/site";
 
 import { ProjectGallery } from "./ProjectGallery";
 import styles from "./page.module.css";
+
+export const dynamic = "force-dynamic";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -20,18 +22,12 @@ type ProjectPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return portfolioProjects.map((project) => ({
-    slug: project.slug,
-  }));
-}
-
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const project = getPortfolioProject(slug);
+  const project = await getPublishedPortfolioProject(slug);
 
   if (!project) {
     return {
@@ -83,11 +79,14 @@ export default async function ProjectPage({
 }: ProjectPageProps) {
   const { slug } = await params;
 
-  const project = getPortfolioProject(slug);
+  const project = await getPublishedPortfolioProject(slug);
 
   if (!project) {
     notFound();
   }
+
+  const portfolioProjects =
+    await getPublishedPortfolioProjects();
 
   const projectIndex = portfolioProjects.findIndex(
     (item) => item.slug === project.slug,

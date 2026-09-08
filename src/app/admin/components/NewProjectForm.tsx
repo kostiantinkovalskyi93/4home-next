@@ -84,7 +84,7 @@ type InitialProject = {
   materials: unknown;
   hardware: unknown;
   features: string | null;
-  year: number;
+  year: number | null;
   status: "draft" | "published";
 };
 
@@ -289,7 +289,9 @@ export function NewProjectForm({
   );
 
   const [year, setYear] = useState(
-    String(initialProject?.year ?? 2026),
+    initialProject?.year == null
+      ? ""
+      : String(initialProject.year),
   );
 
   const [projectId, setProjectId] =
@@ -1384,12 +1386,14 @@ export function NewProjectForm({
       return;
     }
 
-    const parsedYear = Number(year);
+    const parsedYear =
+      year.trim() === "" ? null : Number(year);
 
     if (
-      !Number.isInteger(parsedYear) ||
-      parsedYear < 2020 ||
-      parsedYear > 2100
+      parsedYear !== null &&
+      (!Number.isInteger(parsedYear) ||
+        parsedYear < 2020 ||
+        parsedYear > 2100)
     ) {
       setSaveStatus("error");
       setSaveMessage(
@@ -1507,6 +1511,97 @@ export function NewProjectForm({
     }
   };
 
+  const handlePublish = async () => {
+    if (!projectId || saveStatus === "saving") {
+      setSaveStatus("error");
+      setSaveMessage(
+        "Спочатку збережіть роботу як чернетку.",
+      );
+      return;
+    }
+
+    const cleanTitle = title.trim();
+    const cleanDescription = shortDescription.trim();
+
+    if (!cleanTitle || !cleanDescription) {
+      setSaveStatus("error");
+      setSaveMessage(
+        "Для публікації потрібні назва та короткий опис.",
+      );
+      return;
+    }
+
+    const readyPhotos = media.filter(
+      (item) =>
+        item.type === "photo" &&
+        item.source === "stored" &&
+        item.processingStatus === "ready",
+    );
+
+    const readyCover = readyPhotos.find(
+      (item) => item.isCover,
+    );
+
+    if (!readyPhotos.length || !readyCover) {
+      setSaveStatus("error");
+      setSaveMessage(
+        "Для публікації потрібне хоча б одне готове фото та вибрана обкладинка.",
+      );
+      return;
+    }
+
+    setSaveStatus("saving");
+    setSaveMessage("");
+
+    try {
+      const parsedYear =
+        year.trim() === "" ? null : Number(year);
+
+      if (
+        parsedYear !== null &&
+        (!Number.isInteger(parsedYear) ||
+          parsedYear < 2020 ||
+          parsedYear > 2100)
+      ) {
+        throw new Error("Перевірте рік роботи.");
+      }
+
+      const { error } = await supabase
+        .from("portfolio_projects")
+        .update({
+          title: cleanTitle,
+          category,
+          wardrobe_type:
+            category === "wardrobe"
+              ? wardrobeType
+              : null,
+          short_description: cleanDescription,
+          materials: normalizeSpecifications(materials),
+          hardware: normalizeSpecifications(hardware),
+          features: features.trim() || null,
+          year: parsedYear,
+          status: "published",
+          published_at: new Date().toISOString(),
+        })
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      setSaveStatus("saved");
+      setSaveMessage(
+        "Роботу опубліковано на сайті.",
+      );
+      router.refresh();
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveMessage(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося опублікувати роботу.",
+      );
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.pageTop}>
@@ -1532,16 +1627,29 @@ export function NewProjectForm({
                 : "Зберегти чернетку"}
           </button>
 
-          <button
-            type="button"
-            className={styles.secondary}
-          >
-            Попередній перегляд
-          </button>
+          {projectId ? (
+            <Link
+              href={`/admin/portfolio/${projectId}/preview`}
+              className={styles.secondary}
+              target="_blank"
+            >
+              Попередній перегляд
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className={styles.secondary}
+              disabled
+            >
+              Попередній перегляд
+            </button>
+          )}
 
           <button
             type="button"
             className={styles.primary}
+            onClick={handlePublish}
+            disabled={saveStatus === "saving"}
           >
             Опублікувати
           </button>

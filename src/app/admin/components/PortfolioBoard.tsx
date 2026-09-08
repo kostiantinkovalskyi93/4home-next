@@ -242,7 +242,7 @@ export function PortfolioBoard({
                 <p>
                   {project.category}
                   <span> • </span>
-                  {project.year}
+                  {project.year ?? "Рік не вказано"}
                 </p>
 
                 <div
