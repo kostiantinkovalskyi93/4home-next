@@ -18,6 +18,14 @@ export type PublicPortfolioProject = {
   category: PublicPortfolioCategory;
   coverImage: string;
   images: PublicPortfolioImage[];
+  shortDescription: string | null;
+  materials: Array<{label:string;value:string}>;
+  hardware: Array<{label:string;value:string}>;
+  features: string | null;
+  year: number | null;
+  location: string | null;
+  color: string | null;
+  productionTerm: string | null;
 };
 
 type ProjectRow = {
@@ -26,6 +34,14 @@ type ProjectRow = {
   title: string;
   category: "kitchen" | "wardrobe" | "furniture";
   wardrobe_type: "hinged" | "sliding" | null;
+  short_description: string | null;
+  materials: unknown;
+  hardware: unknown;
+  features: string | null;
+  year: number | null;
+  location: string | null;
+  color: string | null;
+  production_term: string | null;
 };
 
 type MediaRow = {
@@ -54,7 +70,7 @@ export async function getPublishedPortfolioProjects() {
   const { data: projectRows, error: projectError } =
     await supabase
       .from("portfolio_projects")
-      .select("id, slug, title, category, wardrobe_type")
+      .select("id, slug, title, category, wardrobe_type, short_description, materials, hardware, features, year, location, color, production_term")
       .eq("status", "published")
       .order("published_at", { ascending: false });
 
@@ -109,6 +125,14 @@ export async function getPublishedPortfolioProjects() {
       category:mapCategory(project),
       coverImage,
       images,
+      shortDescription: project.short_description,
+      materials: Array.isArray(project.materials) ? project.materials as Array<{label:string;value:string}> : [],
+      hardware: Array.isArray(project.hardware) ? project.hardware as Array<{label:string;value:string}> : [],
+      features: project.features,
+      year: project.year,
+      location: project.location,
+      color: project.color,
+      productionTerm: project.production_term,
     }];
   });
 }

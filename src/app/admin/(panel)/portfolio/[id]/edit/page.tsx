@@ -51,6 +51,9 @@ export default async function EditProjectPage({
         hardware,
         features,
         year,
+        location,
+        color,
+        production_term,
         status
       `)
       .eq("id", id)

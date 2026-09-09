@@ -32,6 +32,13 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
 
+  const isProjectPreview =
+    /^\/admin\/portfolio\/[^/]+\/preview\/?$/.test(pathname);
+
+  if (isProjectPreview) {
+    return <>{children}</>;
+  }
+
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>

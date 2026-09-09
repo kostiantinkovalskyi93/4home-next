@@ -85,6 +85,9 @@ type InitialProject = {
   hardware: unknown;
   features: string | null;
   year: number | null;
+  location: string | null;
+  color: string | null;
+  production_term: string | null;
   status: "draft" | "published";
 };
 
@@ -293,6 +296,9 @@ export function NewProjectForm({
       ? ""
       : String(initialProject.year),
   );
+  const [location, setLocation] = useState(initialProject?.location ?? "");
+  const [color, setColor] = useState(initialProject?.color ?? "");
+  const [productionTerm, setProductionTerm] = useState(initialProject?.production_term ?? "");
 
   const [projectId, setProjectId] =
     useState<string | null>(
@@ -1580,6 +1586,9 @@ export function NewProjectForm({
           hardware: normalizeSpecifications(hardware),
           features: features.trim() || null,
           year: parsedYear,
+          location: location.trim() || null,
+          color: color.trim() || null,
+          production_term: productionTerm.trim() || null,
           status: "published",
           published_at: new Date().toISOString(),
         })
@@ -1896,6 +1905,33 @@ export function NewProjectForm({
                   handleFeaturesChange
                 }
                 placeholder="LED-підсвічування, острів, приховані ручки..."
+              />
+            </Field>
+
+            <Field label="Локація / ЖК (необов’язково)">
+              <input
+                type="text"
+                value={location}
+                onChange={(event) => { setLocation(event.target.value); markAsChanged(); }}
+                placeholder="Наприклад: ЖК Варшавський, Київ"
+              />
+            </Field>
+
+            <Field label="Колір (необов’язково)">
+              <input
+                type="text"
+                value={color}
+                onChange={(event) => { setColor(event.target.value); markAsChanged(); }}
+                placeholder="Наприклад: теплий білий / дуб"
+              />
+            </Field>
+
+            <Field label="Термін виготовлення (необов’язково)">
+              <input
+                type="text"
+                value={productionTerm}
+                onChange={(event) => { setProductionTerm(event.target.value); markAsChanged(); }}
+                placeholder="Наприклад: 5–6 тижнів"
               />
             </Field>
 
