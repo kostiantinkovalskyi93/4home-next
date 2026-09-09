@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
+type DeleteVideoResult = {
+  deleted_project_id: string;
+  deleted_web_path: string | null;
+  deleted_video_poster_path: string | null;
+};
+
 export async function POST(request: Request) {
   const supabase = await createClient();
 
@@ -30,80 +36,77 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data: media, error: mediaError } =
-    await supabase
-      .from("portfolio_media")
-      .select("id, project_id, media_type, web_path, video_poster_path")
-      .eq("id", body.mediaId)
-      .eq("media_type", "video")
-      .maybeSingle();
+  // Delete the database row first, atomically, and return the Storage paths.
+  // If Storage cleanup fails afterwards, the project remains internally
+  // consistent and only an orphan file may remain for later cleanup.
+  const { data, error } = await supabase.rpc(
+    "delete_portfolio_video",
+    {
+      p_media_id: body.mediaId,
+    },
+  );
 
-  if (mediaError || !media) {
+  if (error) {
+    console.error(
+      "Failed to delete portfolio video row:",
+      error,
+    );
+
+    return NextResponse.json(
+      { error: "Не вдалося видалити відео." },
+      { status: 500 },
+    );
+  }
+
+  const row = (
+    Array.isArray(data) ? data[0] : data
+  ) as DeleteVideoResult | null;
+
+  if (!row) {
     return NextResponse.json(
       { error: "Відео не знайдено." },
       { status: 404 },
     );
   }
 
-  if (media.video_poster_path) {
+  const cleanupWarnings: string[] = [];
+
+  if (row.deleted_video_poster_path) {
     const { error: posterStorageError } =
       await supabase.storage
         .from("portfolio-video-posters")
-        .remove([media.video_poster_path]);
+        .remove([row.deleted_video_poster_path]);
 
     if (posterStorageError) {
       console.error(
         "Failed to remove portfolio video poster:",
         posterStorageError,
       );
-
-      return NextResponse.json(
-        {
-          error:
-            "Не вдалося видалити poster-зображення відео зі сховища.",
-        },
-        { status: 500 },
+      cleanupWarnings.push(
+        "Не вдалося видалити poster-зображення зі сховища.",
       );
     }
   }
 
-  if (media.web_path) {
-    const { error: storageError } =
+  if (row.deleted_web_path) {
+    const { error: videoStorageError } =
       await supabase.storage
         .from("portfolio-videos")
-        .remove([media.web_path]);
+        .remove([row.deleted_web_path]);
 
-    if (storageError) {
+    if (videoStorageError) {
       console.error(
-        "Failed to remove portfolio video:",
-        storageError,
+        "Failed to remove portfolio video file:",
+        videoStorageError,
       );
-
-      return NextResponse.json(
-        {
-          error:
-            "Не вдалося видалити відеофайл зі сховища.",
-        },
-        { status: 500 },
+      cleanupWarnings.push(
+        "Не вдалося видалити відеофайл зі сховища.",
       );
     }
   }
 
-  const { error: deleteError } =
-    await supabase
-      .from("portfolio_media")
-      .delete()
-      .eq("id", media.id);
-
-  if (deleteError) {
-    return NextResponse.json(
-      {
-        error:
-          "Файл видалено, але не вдалося видалити запис відео.",
-      },
-      { status: 500 },
-    );
-  }
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    cleanupWarnings,
+  });
 }

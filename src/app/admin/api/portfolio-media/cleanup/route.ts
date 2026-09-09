@@ -2,12 +2,23 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
-type DeleteResult = {
+type DeletePhotoResult = {
   new_cover_id: string | null;
   new_cover_status: string | null;
   deleted_original_path: string | null;
   deleted_web_path: string | null;
   deleted_card_path: string | null;
+};
+
+type DeleteVideoResult = {
+  deleted_project_id: string;
+  deleted_web_path: string | null;
+  deleted_video_poster_path: string | null;
+};
+
+type IncompleteMediaRow = {
+  id: string;
+  media_type: "photo" | "video";
 };
 
 export async function POST(request: Request) {
@@ -38,12 +49,14 @@ export async function POST(request: Request) {
     );
   }
 
+  // Keep cleanup media-aware. The current video pipeline normally inserts
+  // only ready rows, but this also safely handles future pending/failed video
+  // states without leaving the endpoint photo-only.
   const { data: rows, error: rowsError } =
     await supabase
       .from("portfolio_media")
-      .select("id")
+      .select("id, media_type")
       .eq("project_id", body.projectId)
-      .eq("media_type", "photo")
       .in("processing_status", [
         "pending",
         "failed",
@@ -56,15 +69,81 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Не вдалося знайти незавершені фото.",
+          "Не вдалося знайти незавершені медіа.",
       },
       { status: 500 },
     );
   }
 
   const deletedIds: string[] = [];
+  const cleanupWarnings: string[] = [];
 
-  for (const row of rows ?? []) {
+  for (const row of (rows ?? []) as IncompleteMediaRow[]) {
+    if (row.media_type === "video") {
+      const { data, error } = await supabase.rpc(
+        "delete_portfolio_video",
+        {
+          p_media_id: row.id,
+        },
+      );
+
+      if (error) {
+        console.error(
+          `Failed to clean video ${row.id}:`,
+          error,
+        );
+        continue;
+      }
+
+      const result = (
+        Array.isArray(data) ? data[0] : data
+      ) as DeleteVideoResult | null;
+
+      if (!result) {
+        continue;
+      }
+
+      deletedIds.push(row.id);
+
+      if (result.deleted_video_poster_path) {
+        const { error: posterError } =
+          await supabase.storage
+            .from("portfolio-video-posters")
+            .remove([
+              result.deleted_video_poster_path,
+            ]);
+
+        if (posterError) {
+          console.error(
+            `Failed to clean video poster ${row.id}:`,
+            posterError,
+          );
+          cleanupWarnings.push(
+            `Poster для відео ${row.id} потребує фонової очистки.`,
+          );
+        }
+      }
+
+      if (result.deleted_web_path) {
+        const { error: videoError } =
+          await supabase.storage
+            .from("portfolio-videos")
+            .remove([result.deleted_web_path]);
+
+        if (videoError) {
+          console.error(
+            `Failed to clean video file ${row.id}:`,
+            videoError,
+          );
+          cleanupWarnings.push(
+            `Відеофайл ${row.id} потребує фонової очистки.`,
+          );
+        }
+      }
+
+      continue;
+    }
+
     const { data, error } = await supabase.rpc(
       "delete_portfolio_photo",
       {
@@ -74,7 +153,7 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error(
-        `Failed to clean media ${row.id}:`,
+        `Failed to clean photo ${row.id}:`,
         error,
       );
       continue;
@@ -82,7 +161,7 @@ export async function POST(request: Request) {
 
     const result = (
       Array.isArray(data) ? data[0] : data
-    ) as DeleteResult | null;
+    ) as DeletePhotoResult | null;
 
     if (!result) {
       continue;
@@ -91,11 +170,22 @@ export async function POST(request: Request) {
     deletedIds.push(row.id);
 
     if (result.deleted_original_path) {
-      await supabase.storage
-        .from("portfolio-originals")
-        .remove([
-          result.deleted_original_path,
-        ]);
+      const { error: originalError } =
+        await supabase.storage
+          .from("portfolio-originals")
+          .remove([
+            result.deleted_original_path,
+          ]);
+
+      if (originalError) {
+        console.error(
+          `Failed to clean photo original ${row.id}:`,
+          originalError,
+        );
+        cleanupWarnings.push(
+          `Оригінал фото ${row.id} потребує фонової очистки.`,
+        );
+      }
     }
 
     const publicPaths = [
@@ -108,9 +198,20 @@ export async function POST(request: Request) {
     );
 
     if (publicPaths.length) {
-      await supabase.storage
-        .from("portfolio-public")
-        .remove(publicPaths);
+      const { error: publicError } =
+        await supabase.storage
+          .from("portfolio-public")
+          .remove(publicPaths);
+
+      if (publicError) {
+        console.error(
+          `Failed to clean public photo files ${row.id}:`,
+          publicError,
+        );
+        cleanupWarnings.push(
+          `Web-версії фото ${row.id} потребують фонової очистки.`,
+        );
+      }
     }
   }
 
@@ -128,5 +229,6 @@ export async function POST(request: Request) {
     coverId: cover?.id ?? null,
     coverStatus:
       cover?.processing_status ?? null,
+    cleanupWarnings,
   });
 }
