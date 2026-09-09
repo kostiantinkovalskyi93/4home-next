@@ -150,6 +150,8 @@ export default async function EditProjectPage({
       type: "photo",
       url: previewUrl,
       originalPath: media.original_path,
+      webPath: media.web_path,
+      cardPath: media.card_path,
       sortOrder: media.sort_order,
       isCover: media.is_cover,
       processingStatus: media.processing_status,

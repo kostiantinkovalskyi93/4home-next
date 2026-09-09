@@ -1049,3 +1049,109 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* Photo Manager 2.0 — N15.3.9 */
+
+.mediaHeaderActions {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.cleanupAction {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: #8b4e42;
+  background: transparent;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cleanupAction:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.mediaCard {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.mediaCard[draggable="true"] {
+  cursor: grab;
+}
+
+.mediaCard[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.mediaCardDragging {
+  opacity: 0.46;
+  border-color: #9a6845;
+  box-shadow:
+    0 0 0 2px rgba(154, 104, 69, 0.12);
+  transform: scale(0.985);
+}
+
+.orderBadge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  color: #fff;
+  background: rgba(23, 22, 21, 0.74);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(6px);
+}
+
+.orderActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 12px 10px;
+}
+
+.orderActions button {
+  min-height: 30px;
+  border: 1px solid #e0d8d1;
+  border-radius: 7px;
+  cursor: pointer;
+  color: #5f5750;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.orderActions button:hover:not(:disabled) {
+  border-color: #b89981;
+  background: #f8f4f0;
+}
+
+.orderActions button:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
+@media (max-width: 720px) {
+  .mediaHeaderActions {
+    justify-items: start;
+  }
+}

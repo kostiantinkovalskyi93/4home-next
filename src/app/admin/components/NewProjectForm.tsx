@@ -31,6 +31,8 @@ type MediaItem = {
   source: "local" | "stored";
   file?: File;
   originalPath?: string;
+  webPath?: string | null;
+  cardPath?: string | null;
   sortOrder?: number;
   isCover?: boolean;
   processingStatus?: "pending" | "processing" | "ready" | "failed";
@@ -45,6 +47,8 @@ export type StoredPortfolioMedia = {
   type: "photo";
   url: string;
   originalPath: string;
+  webPath: string | null;
+  cardPath: string | null;
   sortOrder: number;
   isCover: boolean;
   processingStatus: "pending" | "processing" | "ready" | "failed";
@@ -296,9 +300,21 @@ export function NewProjectForm({
       ? ""
       : String(initialProject.year),
   );
-  const [location, setLocation] = useState(initialProject?.location ?? "");
-  const [color, setColor] = useState(initialProject?.color ?? "");
-  const [productionTerm, setProductionTerm] = useState(initialProject?.production_term ?? "");
+  const [location, setLocation] = useState(
+    initialProject?.location ?? "",
+  );
+  const [color, setColor] = useState(
+    initialProject?.color ?? "",
+  );
+  const [productionTerm, setProductionTerm] =
+    useState(
+      initialProject?.production_term ?? "",
+    );
+
+  const [projectStatus, setProjectStatus] =
+    useState<"draft" | "published">(
+      initialProject?.status ?? "draft",
+    );
 
   const [projectId, setProjectId] =
     useState<string | null>(
@@ -349,6 +365,9 @@ export function NewProjectForm({
   const [isCropDragging, setIsCropDragging] =
     useState(false);
 
+  const [draggedMediaId, setDraggedMediaId] =
+    useState<string | null>(null);
+
   const [cropDragStart, setCropDragStart] =
     useState<{
       pointerX: number;
@@ -385,6 +404,13 @@ export function NewProjectForm({
 
   const photoCount = media.filter(
     (item) => item.type === "photo",
+  ).length;
+
+  const incompletePhotoCount = media.filter(
+    (item) =>
+      item.type === "photo" &&
+      item.source === "stored" &&
+      item.processingStatus !== "ready",
   ).length;
 
   const canAddVideo = videoCount < 2;
@@ -519,39 +545,91 @@ export function NewProjectForm({
       return;
     }
 
-    if (!target.originalPath) {
+    if (
+      !window.confirm(
+        `Видалити "${target.name}"? Фото буде видалене з проєкту та сховища.`,
+      )
+    ) {
       return;
     }
 
+    setSaveStatus("saving");
+    setSaveMessage("Видаляємо фото…");
+
     try {
-      const { error: deleteRowError } =
-        await supabase
-          .from("portfolio_media")
-          .delete()
-          .eq("id", target.id);
+      const response = await fetch(
+        "/admin/api/portfolio-media/delete",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mediaId: target.id,
+          }),
+        },
+      );
 
-      if (deleteRowError) {
-        throw deleteRowError;
-      }
+      const result = (await response
+        .json()
+        .catch(() => null)) as
+        | {
+            error?: string;
+            newCoverId?: string | null;
+            newCoverStatus?: string | null;
+            cleanupWarnings?: string[];
+          }
+        | null;
 
-      const { error: deleteFileError } =
-        await supabase.storage
-          .from("portfolio-originals")
-          .remove([target.originalPath]);
-
-      if (deleteFileError) {
-        console.error(
-          "Portfolio media row deleted, but original file cleanup failed:",
-          deleteFileError,
+      if (!response.ok) {
+        throw new Error(
+          result?.error ??
+            "Не вдалося видалити фото.",
         );
       }
 
       setMedia((current) =>
-        current.filter((item) => item.id !== id),
+        current
+          .filter((item) => item.id !== id)
+          .map((item, index) => ({
+            ...item,
+            isCover:
+              item.type === "photo" &&
+              item.source === "stored"
+                ? item.id === result?.newCoverId
+                : item.isCover,
+            sortOrder:
+              item.type === "photo" &&
+              item.source === "stored"
+                ? index
+                : item.sortOrder,
+          })),
       );
 
+      if (
+        result?.newCoverId &&
+        result.newCoverStatus !== "ready"
+      ) {
+        try {
+          await processStoredPhoto(
+            result.newCoverId,
+          );
+        } catch (processError) {
+          console.error(
+            "New automatic cover could not be processed:",
+            processError,
+          );
+        }
+      }
+
       setSaveStatus("saved");
-      setSaveMessage("Фото видалено.");
+      setSaveMessage(
+        result?.cleanupWarnings?.length
+          ? "Фото видалено. Частина старих файлів потребує фонової очистки."
+          : "Фото видалено. Порядок та обкладинку оновлено.",
+      );
+
+      router.refresh();
     } catch (error) {
       console.error(
         "Failed to delete portfolio photo:",
@@ -560,7 +638,291 @@ export function NewProjectForm({
 
       setSaveStatus("error");
       setSaveMessage(
-        "Не вдалося видалити фото.",
+        error instanceof Error
+          ? error.message
+          : "Не вдалося видалити фото.",
+      );
+    }
+  };
+
+  const persistStoredPhotoOrder = async (
+    nextMedia: MediaItem[],
+  ) => {
+    if (!projectId) {
+      return;
+    }
+
+    const mediaIds = nextMedia
+      .filter(
+        (item) =>
+          item.type === "photo" &&
+          item.source === "stored",
+      )
+      .map((item) => item.id);
+
+    const response = await fetch(
+      "/admin/api/portfolio-media/reorder",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectId,
+          mediaIds,
+        }),
+      },
+    );
+
+    const result = (await response
+      .json()
+      .catch(() => null)) as
+      | { error?: string }
+      | null;
+
+    if (!response.ok) {
+      throw new Error(
+        result?.error ??
+          "Не вдалося зберегти порядок фото.",
+      );
+    }
+  };
+
+  const moveStoredPhoto = async (
+    sourceId: string,
+    targetId: string,
+  ) => {
+    if (
+      sourceId === targetId ||
+      saveStatus === "saving"
+    ) {
+      return;
+    }
+
+    const source = media.find(
+      (item) => item.id === sourceId,
+    );
+    const target = media.find(
+      (item) => item.id === targetId,
+    );
+
+    if (
+      !source ||
+      !target ||
+      source.type !== "photo" ||
+      target.type !== "photo" ||
+      source.source !== "stored" ||
+      target.source !== "stored"
+    ) {
+      return;
+    }
+
+    const previousMedia = media;
+    const nextMedia = [...media];
+
+    const sourceIndex = nextMedia.findIndex(
+      (item) => item.id === sourceId,
+    );
+    const targetIndex = nextMedia.findIndex(
+      (item) => item.id === targetId,
+    );
+
+    const [moved] = nextMedia.splice(
+      sourceIndex,
+      1,
+    );
+
+    nextMedia.splice(
+      targetIndex,
+      0,
+      moved,
+    );
+
+    const storedPhotoIds = nextMedia
+      .filter(
+        (item) =>
+          item.type === "photo" &&
+          item.source === "stored",
+      )
+      .map((item) => item.id);
+
+    const normalized = nextMedia.map((item) => {
+      const nextSortOrder =
+        item.type === "photo" &&
+        item.source === "stored"
+          ? storedPhotoIds.indexOf(item.id)
+          : item.sortOrder;
+
+      return {
+        ...item,
+        sortOrder: nextSortOrder,
+      };
+    });
+
+    setMedia(normalized);
+    setSaveStatus("saving");
+    setSaveMessage("Зберігаємо порядок фото…");
+
+    try {
+      await persistStoredPhotoOrder(normalized);
+
+      setSaveStatus("saved");
+      setSaveMessage("Порядок фото збережено.");
+      router.refresh();
+    } catch (error) {
+      console.error(
+        "Failed to reorder portfolio photos:",
+        error,
+      );
+
+      setMedia(previousMedia);
+      setSaveStatus("error");
+      setSaveMessage(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося змінити порядок фото.",
+      );
+    } finally {
+      setDraggedMediaId(null);
+    }
+  };
+
+  const moveStoredPhotoByStep = (
+    id: string,
+    direction: -1 | 1,
+  ) => {
+    const storedPhotos = media.filter(
+      (item) =>
+        item.type === "photo" &&
+        item.source === "stored",
+    );
+
+    const index = storedPhotos.findIndex(
+      (item) => item.id === id,
+    );
+
+    const nextIndex = index + direction;
+
+    if (
+      index < 0 ||
+      nextIndex < 0 ||
+      nextIndex >= storedPhotos.length
+    ) {
+      return;
+    }
+
+    void moveStoredPhoto(
+      id,
+      storedPhotos[nextIndex].id,
+    );
+  };
+
+  const cleanupIncompletePhotos = async () => {
+    if (
+      !projectId ||
+      incompletePhotoCount === 0 ||
+      saveStatus === "saving"
+    ) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Видалити ${incompletePhotoCount} незавершених фото (pending / failed)?`,
+      )
+    ) {
+      return;
+    }
+
+    setSaveStatus("saving");
+    setSaveMessage(
+      "Очищаємо незавершені фото…",
+    );
+
+    try {
+      const response = await fetch(
+        "/admin/api/portfolio-media/cleanup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectId,
+          }),
+        },
+      );
+
+      const result = (await response
+        .json()
+        .catch(() => null)) as
+        | {
+            error?: string;
+            deletedIds?: string[];
+            coverId?: string | null;
+            coverStatus?: string | null;
+          }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(
+          result?.error ??
+            "Не вдалося очистити незавершені фото.",
+        );
+      }
+
+      const deleted = new Set(
+        result?.deletedIds ?? [],
+      );
+
+      setMedia((current) =>
+        current
+          .filter((item) => !deleted.has(item.id))
+          .map((item) => ({
+            ...item,
+            isCover:
+              item.type === "photo" &&
+              item.source === "stored"
+                ? item.id === result?.coverId
+                : item.isCover,
+          })),
+      );
+
+      if (
+        result?.coverId &&
+        result.coverStatus !== "ready"
+      ) {
+        try {
+          await processStoredPhoto(
+            result.coverId,
+          );
+        } catch (processError) {
+          console.error(
+            "Automatic cover processing after cleanup failed:",
+            processError,
+          );
+        }
+      }
+
+      setSaveStatus("saved");
+      setSaveMessage(
+        deleted.size > 0
+          ? `Очищено незавершених фото: ${deleted.size}.`
+          : "Незавершених фото немає.",
+      );
+
+      router.refresh();
+    } catch (error) {
+      console.error(
+        "Failed to clean incomplete portfolio photos:",
+        error,
+      );
+
+      setSaveStatus("error");
+      setSaveMessage(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося очистити незавершені фото.",
       );
     }
   };
@@ -1443,8 +1805,10 @@ export function NewProjectForm({
         features:
           features.trim() || null,
         year: parsedYear,
-        status: "draft" as const,
-        published_at: null,
+        location: location.trim() || null,
+        color: color.trim() || null,
+        production_term:
+          productionTerm.trim() || null,
       };
 
       if (!projectId) {
@@ -1461,6 +1825,8 @@ export function NewProjectForm({
             ...commonData,
             slug,
             created_by: user.id,
+            status: "draft",
+            published_at: null,
           })
           .select("id, slug")
           .single();
@@ -1588,7 +1954,8 @@ export function NewProjectForm({
           year: parsedYear,
           location: location.trim() || null,
           color: color.trim() || null,
-          production_term: productionTerm.trim() || null,
+          production_term:
+            productionTerm.trim() || null,
           status: "published",
           published_at: new Date().toISOString(),
         })
@@ -1596,6 +1963,7 @@ export function NewProjectForm({
 
       if (error) throw error;
 
+      setProjectStatus("published");
       setSaveStatus("saved");
       setSaveMessage(
         "Роботу опубліковано на сайті.",
@@ -1607,6 +1975,51 @@ export function NewProjectForm({
         error instanceof Error
           ? error.message
           : "Не вдалося опублікувати роботу.",
+      );
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!projectId || saveStatus === "saving") {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        "Зняти цю роботу з публікації? Вона залишиться в CMS як чернетка.",
+      )
+    ) {
+      return;
+    }
+
+    setSaveStatus("saving");
+    setSaveMessage("");
+
+    try {
+      const { error } = await supabase
+        .from("portfolio_projects")
+        .update({
+          status: "draft",
+          published_at: null,
+        })
+        .eq("id", projectId);
+
+      if (error) {
+        throw error;
+      }
+
+      setProjectStatus("draft");
+      setSaveStatus("saved");
+      setSaveMessage(
+        "Роботу знято з публікації.",
+      );
+      router.refresh();
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveMessage(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося зняти роботу з публікації.",
       );
     }
   };
@@ -1633,7 +2046,9 @@ export function NewProjectForm({
               ? "Зберігаємо..."
               : saveStatus === "saved"
                 ? "Збережено"
-                : "Зберегти чернетку"}
+                : projectStatus === "published"
+                  ? "Зберегти зміни"
+                  : "Зберегти чернетку"}
           </button>
 
           {projectId ? (
@@ -1656,11 +2071,21 @@ export function NewProjectForm({
 
           <button
             type="button"
-            className={styles.primary}
-            onClick={handlePublish}
+            className={
+              projectStatus === "published"
+                ? styles.secondary
+                : styles.primary
+            }
+            onClick={
+              projectStatus === "published"
+                ? handleUnpublish
+                : handlePublish
+            }
             disabled={saveStatus === "saving"}
           >
-            Опублікувати
+            {projectStatus === "published"
+              ? "Зняти з публікації"
+              : "Опублікувати"}
           </button>
         </div>
       </div>
@@ -1912,7 +2337,10 @@ export function NewProjectForm({
               <input
                 type="text"
                 value={location}
-                onChange={(event) => { setLocation(event.target.value); markAsChanged(); }}
+                onChange={(event) => {
+                  setLocation(event.target.value);
+                  markAsChanged();
+                }}
                 placeholder="Наприклад: ЖК Варшавський, Київ"
               />
             </Field>
@@ -1921,7 +2349,10 @@ export function NewProjectForm({
               <input
                 type="text"
                 value={color}
-                onChange={(event) => { setColor(event.target.value); markAsChanged(); }}
+                onChange={(event) => {
+                  setColor(event.target.value);
+                  markAsChanged();
+                }}
                 placeholder="Наприклад: теплий білий / дуб"
               />
             </Field>
@@ -1930,7 +2361,12 @@ export function NewProjectForm({
               <input
                 type="text"
                 value={productionTerm}
-                onChange={(event) => { setProductionTerm(event.target.value); markAsChanged(); }}
+                onChange={(event) => {
+                  setProductionTerm(
+                    event.target.value,
+                  );
+                  markAsChanged();
+                }}
                 placeholder="Наприклад: 5–6 тижнів"
               />
             </Field>
@@ -1977,7 +2413,25 @@ export function NewProjectForm({
                 </p>
               </div>
 
-              <div className={styles.counters}>
+              <div className={styles.mediaHeaderActions}>
+                {projectId &&
+                  incompletePhotoCount > 0 && (
+                    <button
+                      type="button"
+                      className={styles.cleanupAction}
+                      onClick={() =>
+                        void cleanupIncompletePhotos()
+                      }
+                      disabled={
+                        saveStatus === "saving"
+                      }
+                    >
+                      Очистити незавершені (
+                      {incompletePhotoCount})
+                    </button>
+                  )}
+
+                <div className={styles.counters}>
                 <span>
                   <ImageIcon />
                   {photoCount}
@@ -1987,6 +2441,7 @@ export function NewProjectForm({
                   <VideoIcon />
                   {videoCount}/2
                 </span>
+                </div>
               </div>
             </div>
 
@@ -2025,10 +2480,47 @@ export function NewProjectForm({
                 {media.map(
                   (item) => (
                     <article
-                      className={
-                        styles.mediaCard
-                      }
+                      className={`${styles.mediaCard} ${
+                        draggedMediaId === item.id
+                          ? styles.mediaCardDragging
+                          : ""
+                      }`}
                       key={item.id}
+                      draggable={
+                        item.type === "photo" &&
+                        item.source === "stored" &&
+                        saveStatus !== "saving"
+                      }
+                      onDragStart={() => {
+                        if (
+                          item.type === "photo" &&
+                          item.source === "stored"
+                        ) {
+                          setDraggedMediaId(item.id);
+                        }
+                      }}
+                      onDragEnd={() =>
+                        setDraggedMediaId(null)
+                      }
+                      onDragOver={(event) => {
+                        if (
+                          draggedMediaId &&
+                          item.type === "photo" &&
+                          item.source === "stored"
+                        ) {
+                          event.preventDefault();
+                        }
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+
+                        if (draggedMediaId) {
+                          void moveStoredPhoto(
+                            draggedMediaId,
+                            item.id,
+                          );
+                        }
+                      }}
                     >
                       <div
                         className={
@@ -2063,6 +2555,16 @@ export function NewProjectForm({
                             preload="metadata"
                           />
                         )}
+
+                        {item.type === "photo" &&
+                          item.source === "stored" && (
+                            <span
+                              className={styles.orderBadge}
+                              title="Перетягніть картку, щоб змінити порядок"
+                            >
+                              ≡ {Number(item.sortOrder ?? 0) + 1}
+                            </span>
+                          )}
 
                         {item.type === "photo" &&
                           item.isCover && (
@@ -2148,6 +2650,43 @@ export function NewProjectForm({
                           >
                             Налаштувати кадр 4:3
                           </button>
+                        )}
+
+                      {item.type === "photo" &&
+                        item.source === "stored" && (
+                          <div className={styles.orderActions}>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                moveStoredPhotoByStep(
+                                  item.id,
+                                  -1,
+                                )
+                              }
+                              disabled={
+                                saveStatus === "saving"
+                              }
+                              aria-label={`Перемістити ${item.name} ліворуч`}
+                            >
+                              ←
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                moveStoredPhotoByStep(
+                                  item.id,
+                                  1,
+                                )
+                              }
+                              disabled={
+                                saveStatus === "saving"
+                              }
+                              aria-label={`Перемістити ${item.name} праворуч`}
+                            >
+                              →
+                            </button>
+                          </div>
                         )}
 
                       <button
