@@ -89,7 +89,6 @@ export default async function EditProjectPage({
         processing_status
       `)
       .eq("project_id", id)
-      .eq("media_type", "photo")
       .order("sort_order", {
         ascending: true,
       });
@@ -104,13 +103,21 @@ export default async function EditProjectPage({
   const initialMedia: StoredPortfolioMedia[] = [];
 
   for (const media of (mediaRows ?? []) as MediaRow[]) {
-    if (!media.original_path) {
-      continue;
-    }
-
     let previewUrl: string | null = null;
 
-    if (
+    if (media.media_type === "video") {
+      if (
+        media.processing_status !== "ready" ||
+        !media.web_path
+      ) {
+        continue;
+      }
+
+      previewUrl = supabase.storage
+        .from("portfolio-videos")
+        .getPublicUrl(media.web_path)
+        .data.publicUrl;
+    } else if (
       media.processing_status === "ready" &&
       media.web_path
     ) {
@@ -118,7 +125,7 @@ export default async function EditProjectPage({
         .from("portfolio-public")
         .getPublicUrl(media.web_path)
         .data.publicUrl;
-    } else {
+    } else if (media.original_path) {
       const {
         data: signedData,
         error: signedError,
@@ -140,21 +147,36 @@ export default async function EditProjectPage({
       previewUrl = signedData.signedUrl;
     }
 
+    if (!previewUrl) {
+      continue;
+    }
+
+    const sourcePath =
+      media.media_type === "video"
+        ? media.web_path
+        : media.original_path;
+
     const fileName =
-      media.original_path.split("/").pop() ??
-      "Фото";
+      sourcePath?.split("/").pop() ??
+      (media.media_type === "video"
+        ? "Відео"
+        : "Фото");
 
     initialMedia.push({
       id: media.id,
       name: fileName,
-      type: "photo",
+      type: media.media_type,
       url: previewUrl,
-      originalPath: media.original_path,
+      originalPath:
+        media.original_path ?? undefined,
       webPath: media.web_path,
       cardPath: media.card_path,
       sortOrder: media.sort_order,
-      isCover: media.is_cover,
-      processingStatus: media.processing_status,
+      isCover:
+        media.media_type === "photo" &&
+        media.is_cover,
+      processingStatus:
+        media.processing_status,
       focalX: media.focal_x,
       focalY: media.focal_y,
       cropZoom: media.crop_zoom,

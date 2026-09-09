@@ -11,6 +11,12 @@ export type PublicPortfolioImage = {
   alt: string;
 };
 
+export type PublicPortfolioMedia = {
+  type: "photo" | "video";
+  src: string;
+  alt: string;
+};
+
 export type PublicPortfolioProject = {
   id: string;
   slug: string;
@@ -18,9 +24,10 @@ export type PublicPortfolioProject = {
   category: PublicPortfolioCategory;
   coverImage: string;
   images: PublicPortfolioImage[];
+  media: PublicPortfolioMedia[];
   shortDescription: string | null;
-  materials: Array<{label:string;value:string}>;
-  hardware: Array<{label:string;value:string}>;
+  materials: Array<{ label: string; value: string }>;
+  hardware: Array<{ label: string; value: string }>;
   features: string | null;
   year: number | null;
   location: string | null;
@@ -47,6 +54,7 @@ type ProjectRow = {
 type MediaRow = {
   id: string;
   project_id: string;
+  media_type: "photo" | "video";
   web_path: string | null;
   card_path: string | null;
   sort_order: number;
@@ -54,11 +62,10 @@ type MediaRow = {
   processing_status: "pending" | "processing" | "ready" | "failed";
 };
 
-function mapCategory(
-  project: ProjectRow,
-): PublicPortfolioCategory {
+function mapCategory(project: ProjectRow): PublicPortfolioCategory {
   if (project.category === "kitchen") return "Кухні";
   if (project.category === "furniture") return "Інші меблі";
+
   return project.wardrobe_type === "sliding"
     ? "Шафи-купе"
     : "Розпашні шафи";
@@ -67,77 +74,114 @@ function mapCategory(
 export async function getPublishedPortfolioProjects() {
   const supabase = await createClient();
 
-  const { data: projectRows, error: projectError } =
-    await supabase
-      .from("portfolio_projects")
-      .select("id, slug, title, category, wardrobe_type, short_description, materials, hardware, features, year, location, color, production_term")
-      .eq("status", "published")
-      .order("published_at", { ascending: false });
+  const { data: projectRows, error: projectError } = await supabase
+    .from("portfolio_projects")
+    .select(
+      "id, slug, title, category, wardrobe_type, short_description, materials, hardware, features, year, location, color, production_term",
+    )
+    .eq("status", "published")
+    .order("published_at", { ascending: false });
 
   if (projectError) {
     console.error("Failed to load published portfolio:", projectError);
     return [] as PublicPortfolioProject[];
   }
 
-  const projects=(projectRows ?? []) as ProjectRow[];
+  const projects = (projectRows ?? []) as ProjectRow[];
   if (!projects.length) return [];
 
-  const { data: mediaRows, error: mediaError } =
-    await supabase
-      .from("portfolio_media")
-      .select("id, project_id, web_path, card_path, sort_order, is_cover, processing_status")
-      .in("project_id", projects.map((project)=>project.id))
-      .eq("media_type","photo")
-      .eq("processing_status","ready")
-      .order("sort_order",{ascending:true});
+  const { data: mediaRows, error: mediaError } = await supabase
+    .from("portfolio_media")
+    .select(
+      "id, project_id, media_type, web_path, card_path, sort_order, is_cover, processing_status",
+    )
+    .in(
+      "project_id",
+      projects.map((project) => project.id),
+    )
+    .eq("processing_status", "ready")
+    .order("sort_order", { ascending: true });
 
   if (mediaError) {
     console.error("Failed to load published portfolio media:", mediaError);
     return [];
   }
 
-  const media=(mediaRows ?? []) as MediaRow[];
+  const media = (mediaRows ?? []) as MediaRow[];
 
   return projects.flatMap((project) => {
-    const photos=media.filter((item)=>item.project_id===project.id && item.web_path);
-    const cover=photos.find((item)=>item.is_cover && item.card_path)
-      ?? photos.find((item)=>item.card_path);
+    const projectMedia = media.filter(
+      (item) => item.project_id === project.id && item.web_path,
+    );
+
+    const photos = projectMedia.filter(
+      (item) => item.media_type === "photo",
+    );
+
+    const cover =
+      photos.find((item) => item.is_cover && item.card_path) ??
+      photos.find((item) => item.card_path);
 
     if (!cover?.card_path || !photos.length) return [];
 
-    const coverImage=supabase.storage
+    const coverImage = supabase.storage
       .from("portfolio-public")
       .getPublicUrl(cover.card_path).data.publicUrl;
 
-    const images=photos.map((item,index)=>({
-      src:supabase.storage
+    const images = photos.map((item, index) => ({
+      src: supabase.storage
         .from("portfolio-public")
         .getPublicUrl(item.web_path!).data.publicUrl,
-      alt:index===0
-        ? `${project.title} — 4HOME`
-        : `${project.title} — фото ${index+1}`,
+      alt:
+        index === 0
+          ? `${project.title} — 4HOME`
+          : `${project.title} — фото ${index + 1}`,
     }));
 
-    return [{
-      id:project.id,
-      slug:project.slug,
-      title:project.title,
-      category:mapCategory(project),
-      coverImage,
-      images,
-      shortDescription: project.short_description,
-      materials: Array.isArray(project.materials) ? project.materials as Array<{label:string;value:string}> : [],
-      hardware: Array.isArray(project.hardware) ? project.hardware as Array<{label:string;value:string}> : [],
-      features: project.features,
-      year: project.year,
-      location: project.location,
-      color: project.color,
-      productionTerm: project.production_term,
-    }];
+    const mixedMedia: PublicPortfolioMedia[] = projectMedia.map(
+      (item, index) => ({
+        type: item.media_type,
+        src: supabase.storage
+          .from(
+            item.media_type === "video"
+              ? "portfolio-videos"
+              : "portfolio-public",
+          )
+          .getPublicUrl(item.web_path!).data.publicUrl,
+        alt:
+          item.media_type === "video"
+            ? `${project.title} — відео ${index + 1}`
+            : `${project.title} — фото ${index + 1}`,
+      }),
+    );
+
+    return [
+      {
+        id: project.id,
+        slug: project.slug,
+        title: project.title,
+        category: mapCategory(project),
+        coverImage,
+        images,
+        media: mixedMedia,
+        shortDescription: project.short_description,
+        materials: Array.isArray(project.materials)
+          ? (project.materials as Array<{ label: string; value: string }>)
+          : [],
+        hardware: Array.isArray(project.hardware)
+          ? (project.hardware as Array<{ label: string; value: string }>)
+          : [],
+        features: project.features,
+        year: project.year,
+        location: project.location,
+        color: project.color,
+        productionTerm: project.production_term,
+      },
+    ];
   });
 }
 
-export async function getPublishedPortfolioProject(slug:string) {
-  const projects=await getPublishedPortfolioProjects();
-  return projects.find((project)=>project.slug===slug) ?? null;
+export async function getPublishedPortfolioProject(slug: string) {
+  const projects = await getPublishedPortfolioProjects();
+  return projects.find((project) => project.slug === slug) ?? null;
 }

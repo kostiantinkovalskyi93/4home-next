@@ -1,16 +1,109 @@
-import {notFound} from "next/navigation";
-import {ProjectDetail} from "@/components/portfolio/ProjectDetail";
-import {createClient} from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
 
-type Props={params:Promise<{id:string}>};
-export const dynamic="force-dynamic";
-const specs=(v:unknown)=>Array.isArray(v)?v.filter((x):x is {label:string;value:string}=>!!x&&typeof x==="object"&&"label" in x&&"value" in x).map(x=>({label:String(x.label),value:String(x.value)})):[];
-export default async function Preview({params}:Props){
- const {id}=await params; const s=await createClient();
- const {data:p}=await s.from("portfolio_projects").select("id,title,category,wardrobe_type,short_description,materials,hardware,features,year,location,color,production_term").eq("id",id).maybeSingle();
- if(!p)notFound();
- const {data:m}=await s.from("portfolio_media").select("id,web_path,sort_order").eq("project_id",id).eq("media_type","photo").eq("processing_status","ready").order("sort_order");
- const images=(m??[]).filter(x=>x.web_path).map((x,i)=>({src:s.storage.from("portfolio-public").getPublicUrl(x.web_path!).data.publicUrl,alt:`${p.title} — фото ${i+1}`}));
- const category=p.category==="kitchen"?"Кухні":p.category==="furniture"?"Інші меблі":p.wardrobe_type==="sliding"?"Шафа-купе":"Розпашна шафа";
- return <ProjectDetail preview editHref={`/admin/portfolio/${id}/edit`} project={{title:p.title,category,shortDescription:p.short_description,materials:specs(p.materials),hardware:specs(p.hardware),features:p.features,year:p.year,location:p.location,color:p.color,productionTerm:p.production_term,images}}/>;
+import {
+  ProjectDetail,
+  type ProjectDetailMedia,
+} from "@/components/portfolio/ProjectDetail";
+import { createClient } from "@/lib/supabase/server";
+
+type Props = { params: Promise<{ id: string }> };
+
+export const dynamic = "force-dynamic";
+
+const specs = (value: unknown) =>
+  Array.isArray(value)
+    ? value
+        .filter(
+          (item): item is { label: string; value: string } =>
+            !!item &&
+            typeof item === "object" &&
+            "label" in item &&
+            "value" in item,
+        )
+        .map((item) => ({
+          label: String(item.label),
+          value: String(item.value),
+        }))
+    : [];
+
+export default async function Preview({ params }: Props) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const { data: project } = await supabase
+    .from("portfolio_projects")
+    .select(
+      "id,title,category,wardrobe_type,short_description,materials,hardware,features,year,location,color,production_term",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!project) notFound();
+
+  const { data: mediaRows } = await supabase
+    .from("portfolio_media")
+    .select("id,media_type,web_path,sort_order")
+    .eq("project_id", id)
+    .eq("processing_status", "ready")
+    .order("sort_order", { ascending: true });
+
+  const media: ProjectDetailMedia[] = (mediaRows ?? [])
+    .filter(
+      (
+        item,
+      ): item is typeof item & {
+        media_type: "photo" | "video";
+        web_path: string;
+      } =>
+        (item.media_type === "photo" || item.media_type === "video") &&
+        Boolean(item.web_path),
+    )
+    .map((item, index) => ({
+      type: item.media_type,
+      src: supabase.storage
+        .from(
+          item.media_type === "video"
+            ? "portfolio-videos"
+            : "portfolio-public",
+        )
+        .getPublicUrl(item.web_path).data.publicUrl,
+      alt:
+        item.media_type === "video"
+          ? `${project.title} — відео ${index + 1}`
+          : `${project.title} — фото ${index + 1}`,
+    }));
+
+  const images = media
+    .filter((item) => item.type === "photo")
+    .map(({ src, alt }) => ({ src, alt }));
+
+  const category =
+    project.category === "kitchen"
+      ? "Кухні"
+      : project.category === "furniture"
+        ? "Інші меблі"
+        : project.wardrobe_type === "sliding"
+          ? "Шафа-купе"
+          : "Розпашна шафа";
+
+  return (
+    <ProjectDetail
+      preview
+      editHref={`/admin/portfolio/${id}/edit`}
+      project={{
+        title: project.title,
+        category,
+        shortDescription: project.short_description,
+        materials: specs(project.materials),
+        hardware: specs(project.hardware),
+        features: project.features,
+        year: project.year,
+        location: project.location,
+        color: project.color,
+        productionTerm: project.production_term,
+        images,
+        media,
+      }}
+    />
+  );
 }

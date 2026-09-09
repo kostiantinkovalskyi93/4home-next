@@ -203,3 +203,104 @@
 .lead{font-size:14px;line-height:1.62}
 .galleryControls{margin-top:10px}
 .shell{width:calc(100% - 24px)}.hero{padding-bottom:30px}.breadcrumbs{margin-bottom:24px}.mainImage{aspect-ratio:1.05/1}.thumb{flex-basis:62px;width:62px}.arrows{display:none}.specs div{grid-template-columns:110px 1fr}.detailRow{grid-template-columns:110px 1fr}.actions{align-items:flex-start;flex-direction:column}.primary{width:100%;justify-content:space-between}.cta h2{font-size:44px}.lightImage{width:100vw;height:80vh}}
+
+/* N15.4.3.2 — mixed photo/video playback without changing the approved gallery layout */
+.mainVideoWrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.48/1;
+  overflow:hidden;
+  background:#111;
+}
+
+.mainVideo{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+  background:#111;
+}
+
+.videoExpand{
+  position:absolute;
+  top:18px;
+  right:18px;
+  z-index:2;
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(246,243,239,.92);
+  color:#1d1b19;
+  font:inherit;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.videoBadge{
+  position:absolute;
+  top:18px;
+  left:18px;
+  z-index:2;
+  padding:7px 9px;
+  background:rgba(23,22,21,.76);
+  color:#fff;
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.12em;
+  pointer-events:none;
+}
+
+.thumbVideo{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  background:#1b1a19;
+  pointer-events:none;
+}
+
+.thumbPlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-size:15px;
+  text-shadow:0 2px 10px rgba(0,0,0,.5);
+  pointer-events:none;
+}
+
+.lightVideoWrap{
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#0d0d0d;
+}
+
+.lightVideo{
+  width:auto;
+  height:auto;
+  max-width:100%;
+  max-height:100%;
+  display:block;
+  object-fit:contain;
+  object-position:center;
+  background:#0d0d0d;
+}
+
+@media(max-width:560px){
+  .mainVideoWrap{aspect-ratio:1.05/1}
+  .videoExpand{top:14px;right:14px}
+  .videoBadge{top:14px;left:14px}
+}

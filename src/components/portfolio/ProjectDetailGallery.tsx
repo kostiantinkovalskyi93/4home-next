@@ -8,71 +8,74 @@ import {
   useState,
 } from "react";
 
-import type { ProjectDetailImage } from "./ProjectDetail";
+import type { ProjectDetailMedia } from "./ProjectDetail";
 
 import styles from "./ProjectDetail.module.css";
 
 type ProjectDetailGalleryProps = {
-  images: ProjectDetailImage[];
+  media: ProjectDetailMedia[];
   title: string;
   description?: string | null;
 };
 
 export function ProjectDetailGallery({
-  images,
+  media,
   title,
   description,
 }: ProjectDetailGalleryProps) {
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const count = images.length;
+  const mainVideoRef = useRef<HTMLVideoElement>(null);
+  const lightVideoRef = useRef<HTMLVideoElement>(null);
+  const count = media.length;
+
+  const pauseVideos = useCallback(() => {
+    mainVideoRef.current?.pause();
+    lightVideoRef.current?.pause();
+  }, []);
+
+  const selectMedia = useCallback(
+    (index: number) => {
+      pauseVideos();
+      setActive(index);
+    },
+    [pauseVideos],
+  );
 
   const showPrevious = useCallback(() => {
-    if (count < 2) {
-      return;
-    }
+    if (count < 2) return;
 
+    pauseVideos();
     setActive((current) =>
       current === 0 ? count - 1 : current - 1,
     );
-  }, [count]);
+  }, [count, pauseVideos]);
 
   const showNext = useCallback(() => {
-    if (count < 2) {
-      return;
-    }
+    if (count < 2) return;
 
+    pauseVideos();
     setActive((current) =>
       current === count - 1 ? 0 : current + 1,
     );
-  }, [count]);
+  }, [count, pauseVideos]);
 
   const closeLightbox = useCallback(() => {
+    pauseVideos();
     setLightbox(false);
-  }, []);
+  }, [pauseVideos]);
 
   useEffect(() => {
-    if (!lightbox) {
-      return;
-    }
+    if (!lightbox) return;
 
     const previousOverflow = document.body.style.overflow;
-
     document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeLightbox();
-      }
-
-      if (event.key === "ArrowLeft") {
-        showPrevious();
-      }
-
-      if (event.key === "ArrowRight") {
-        showNext();
-      }
+      if (event.key === "Escape") closeLightbox();
+      if (event.key === "ArrowLeft") showPrevious();
+      if (event.key === "ArrowRight") showNext();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -85,71 +88,115 @@ export function ProjectDetailGallery({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    closeLightbox,
-    lightbox,
-    showNext,
-    showPrevious,
-  ]);
+  }, [closeLightbox, lightbox, showNext, showPrevious]);
 
   if (!count) {
     return (
       <div className={styles.empty}>
-        Фото проєкту готуються.
+        Медіа проєкту готуються.
       </div>
     );
   }
 
-  const image = images[active];
+  const item = media[active];
+  const isVideo = item.type === "video";
 
   return (
     <div className={styles.gallery}>
-      <button
-        className={styles.mainImage}
-        type="button"
-        onClick={() => setLightbox(true)}
-        aria-label="Відкрити фото на весь екран"
-      >
-        <Image
-          src={image.src}
-          alt={image.alt}
-          fill
-          priority
-          sizes="(max-width: 900px) 100vw, 62vw"
-        />
+      {isVideo ? (
+        <div className={styles.mainVideoWrap}>
+          <video
+            ref={mainVideoRef}
+            className={styles.mainVideo}
+            src={item.src}
+            controls
+            playsInline
+            preload="metadata"
+            aria-label={item.alt}
+          />
 
-        <span className={styles.zoom} aria-hidden="true">
-          ↗
-        </span>
+          <button
+            className={styles.videoExpand}
+            type="button"
+            onClick={() => {
+              pauseVideos();
+              setLightbox(true);
+            }}
+            aria-label="Відкрити відео на весь екран"
+          >
+            ↗
+          </button>
 
-        <span className={styles.counter}>
-          {active + 1} / {count}
-        </span>
-      </button>
+          <span className={styles.videoBadge}>ВІДЕО</span>
+          <span className={styles.counter}>
+            {active + 1} / {count}
+          </span>
+        </div>
+      ) : (
+        <button
+          className={styles.mainImage}
+          type="button"
+          onClick={() => setLightbox(true)}
+          aria-label="Відкрити фото на весь екран"
+        >
+          <Image
+            src={item.src}
+            alt={item.alt}
+            fill
+            priority
+            sizes="(max-width: 900px) 100vw, 62vw"
+          />
+
+          <span className={styles.zoom} aria-hidden="true">
+            ↗
+          </span>
+
+          <span className={styles.counter}>
+            {active + 1} / {count}
+          </span>
+        </button>
+      )}
 
       <div className={styles.galleryControls}>
         <div className={styles.thumbs}>
-          {images.map((item, index) => (
+          {media.map((mediaItem, index) => (
             <button
-              key={`${item.src}-${index}`}
+              key={`${mediaItem.type}-${mediaItem.src}-${index}`}
               type="button"
-              onClick={() => setActive(index)}
+              onClick={() => selectMedia(index)}
               className={`${styles.thumb} ${
-                index === active
-                  ? styles.thumbActive
-                  : ""
+                index === active ? styles.thumbActive : ""
               }`}
-              aria-label={`Фото ${index + 1}`}
-              aria-current={
-                index === active ? "true" : undefined
+              aria-label={
+                mediaItem.type === "video"
+                  ? `Відео ${index + 1}`
+                  : `Фото ${index + 1}`
               }
+              aria-current={index === active ? "true" : undefined}
             >
-              <Image
-                src={item.src}
-                alt=""
-                fill
-                sizes="90px"
-              />
+              {mediaItem.type === "video" ? (
+                <>
+                  <video
+                    className={styles.thumbVideo}
+                    src={mediaItem.src}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                  <span className={styles.thumbPlay} aria-hidden="true">
+                    ▶
+                  </span>
+                </>
+              ) : (
+                <Image
+                  src={mediaItem.src}
+                  alt=""
+                  fill
+                  sizes="90px"
+                />
+              )}
             </button>
           ))}
         </div>
@@ -159,7 +206,7 @@ export function ProjectDetailGallery({
             <button
               type="button"
               onClick={showPrevious}
-              aria-label="Попереднє фото"
+              aria-label="Попереднє медіа"
             >
               ←
             </button>
@@ -167,7 +214,7 @@ export function ProjectDetailGallery({
             <button
               type="button"
               onClick={showNext}
-              aria-label="Наступне фото"
+              aria-label="Наступне медіа"
             >
               →
             </button>
@@ -187,7 +234,6 @@ export function ProjectDetailGallery({
               <span className={styles.lightboxEyebrow}>
                 4HOME / ПРОЄКТ
               </span>
-
               <strong>{title}</strong>
             </div>
 
@@ -215,28 +261,43 @@ export function ProjectDetailGallery({
                 type="button"
                 className={`${styles.lightArrow} ${styles.lightPrev}`}
                 onClick={showPrevious}
-                aria-label="Попереднє фото"
+                aria-label="Попереднє медіа"
               >
                 ←
               </button>
             )}
 
-            <div className={styles.lightImage}>
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                priority
-                sizes="100vw"
-              />
-            </div>
+            {isVideo ? (
+              <div className={styles.lightVideoWrap}>
+                <video
+                  ref={lightVideoRef}
+                  className={styles.lightVideo}
+                  src={item.src}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  autoPlay
+                  aria-label={item.alt}
+                />
+              </div>
+            ) : (
+              <div className={styles.lightImage}>
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  fill
+                  priority
+                  sizes="100vw"
+                />
+              </div>
+            )}
 
             {count > 1 && (
               <button
                 type="button"
                 className={`${styles.lightArrow} ${styles.lightNext}`}
                 onClick={showNext}
-                aria-label="Наступне фото"
+                aria-label="Наступне медіа"
               >
                 →
               </button>
@@ -245,24 +306,46 @@ export function ProjectDetailGallery({
 
           <div className={styles.lightboxBottom}>
             <div className={styles.lightThumbs}>
-              {images.map((item, index) => (
+              {media.map((mediaItem, index) => (
                 <button
-                  key={`light-${item.src}-${index}`}
+                  key={`light-${mediaItem.type}-${mediaItem.src}-${index}`}
                   type="button"
-                  onClick={() => setActive(index)}
+                  onClick={() => selectMedia(index)}
                   className={`${styles.lightThumb} ${
-                    index === active
-                      ? styles.lightThumbActive
-                      : ""
+                    index === active ? styles.lightThumbActive : ""
                   }`}
-                  aria-label={`Показати фото ${index + 1}`}
+                  aria-label={
+                    mediaItem.type === "video"
+                      ? `Показати відео ${index + 1}`
+                      : `Показати фото ${index + 1}`
+                  }
                 >
-                  <Image
-                    src={item.src}
-                    alt=""
-                    fill
-                    sizes="76px"
-                  />
+                  {mediaItem.type === "video" ? (
+                    <>
+                      <video
+                        className={styles.thumbVideo}
+                        src={mediaItem.src}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        tabIndex={-1}
+                        aria-hidden="true"
+                      />
+                      <span
+                        className={styles.thumbPlay}
+                        aria-hidden="true"
+                      >
+                        ▶
+                      </span>
+                    </>
+                  ) : (
+                    <Image
+                      src={mediaItem.src}
+                      alt=""
+                      fill
+                      sizes="76px"
+                    />
+                  )}
                 </button>
               ))}
             </div>

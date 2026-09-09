@@ -1155,3 +1155,33 @@
     justify-items: start;
   }
 }
+
+
+/* N15.4.2 — video upload */
+.videoProgress{
+  width:100%;
+  height:4px;
+  margin-top:7px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#e8e1db;
+}
+
+.videoProgress span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:#9a6845;
+  transition:width 180ms ease;
+}
+
+.readyState{
+  display:inline-flex;
+  margin-top:6px;
+  color:#62765f;
+  font-size:10px;
+  font-weight:700;
+}
+
+/* N15.4.3 — automatic MOV/WebM processing */
+.videoProgress span{will-change:width;}

@@ -8,10 +8,17 @@ import { useRouter } from "next/navigation";
 import {
   ChangeEvent,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
+import { Upload } from "tus-js-client";
+
 import { createClient } from "@/lib/supabase/client";
+import {
+  shouldTranscodeVideo,
+  transcodeVideoForWeb,
+} from "@/lib/video-transcode";
 
 import {
   ArrowLeftIcon,
@@ -39,14 +46,17 @@ type MediaItem = {
   focalX?: number;
   focalY?: number;
   cropZoom?: number;
+  uploadProgress?: number;
+  processingLabel?: string;
+  preparedFile?: File;
 };
 
 export type StoredPortfolioMedia = {
   id: string;
   name: string;
-  type: "photo";
+  type: "photo" | "video";
   url: string;
-  originalPath: string;
+  originalPath?: string;
   webPath: string | null;
   cardPath: string | null;
   sortOrder: number;
@@ -55,6 +65,7 @@ export type StoredPortfolioMedia = {
   focalX: number;
   focalY: number;
   cropZoom: number;
+  size?: number | null;
 };
 
 type SpecificationItem = {
@@ -134,6 +145,29 @@ const initialHardware: SpecificationItem[] = [
 function formatMb(size: number) {
   return `${(size / 1024 / 1024).toFixed(1)} МБ`;
 }
+
+function getFileExtension(fileName: string) {
+  const match = fileName
+    .trim()
+    .toLowerCase()
+    .match(/\.([a-z0-9]+)$/);
+
+  return match?.[1] ?? "";
+}
+
+function isSupportedVideoFile(file: File) {
+  const extension = getFileExtension(file.name);
+
+  return (
+    file.type === "video/mp4" ||
+    file.type === "video/webm" ||
+    file.type === "video/quicktime" ||
+    extension === "mp4" ||
+    extension === "webm" ||
+    extension === "mov"
+  );
+}
+
 
 function createEmptySpecification(
   prefix: "material" | "hardware",
@@ -329,6 +363,8 @@ export function NewProjectForm({
   const [saveStatus, setSaveStatus] =
     useState<SaveStatus>("idle");
 
+  const saveInFlightRef = useRef(false);
+
   const [saveMessage, setSaveMessage] =
     useState("");
 
@@ -415,8 +451,21 @@ export function NewProjectForm({
 
   const canAddVideo = videoCount < 2;
 
+  const isMediaProcessing = media.some(
+    (item) =>
+      item.source === "local" &&
+      item.processingStatus === "processing",
+  );
+
+  const hasFailedLocalMedia = media.some(
+    (item) =>
+      item.source === "local" &&
+      item.processingStatus === "failed",
+  );
+
   const accepted = useMemo(
-    () => "image/jpeg,image/png,video/mp4",
+    () =>
+      "image/jpeg,image/png,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov",
     [],
   );
 
@@ -465,6 +514,104 @@ export function NewProjectForm({
     markAsChanged();
   };
 
+  const prepareLocalMedia = async (item: MediaItem) => {
+    const file = item.file;
+
+    if (!file) return;
+
+    setMedia((current) =>
+      current.map((currentItem) =>
+        currentItem.id === item.id
+          ? {
+              ...currentItem,
+              processingStatus: "processing",
+              uploadProgress: 0,
+              processingLabel:
+                item.type === "video" && shouldTranscodeVideo(file)
+                  ? "Оптимізація 0%"
+                  : "Підготовка…",
+            }
+          : currentItem,
+      ),
+    );
+
+    try {
+      let preparedFile = file;
+
+      if (item.type === "video" && shouldTranscodeVideo(file)) {
+        preparedFile = await transcodeVideoForWeb(
+          file,
+          (progress) => {
+            setMedia((current) =>
+              current.map((currentItem) =>
+                currentItem.id === item.id
+                  ? {
+                      ...currentItem,
+                      uploadProgress: progress,
+                      processingLabel: `Оптимізація ${progress}%`,
+                    }
+                  : currentItem,
+              ),
+            );
+          },
+        );
+      } else if (item.type === "photo") {
+        const bitmap = await createImageBitmap(file);
+        bitmap.close();
+      }
+
+      setMedia((current) =>
+        current.map((currentItem) =>
+          currentItem.id === item.id
+            ? {
+                ...currentItem,
+                preparedFile,
+                processingStatus: "ready",
+                uploadProgress: 100,
+                processingLabel: "Готово до збереження",
+              }
+            : currentItem,
+        ),
+      );
+    } catch (error) {
+      console.error("Local media preparation failed:", error);
+
+      setMedia((current) =>
+        current.map((currentItem) =>
+          currentItem.id === item.id
+            ? {
+                ...currentItem,
+                preparedFile: undefined,
+                processingStatus: "failed",
+                uploadProgress: undefined,
+                processingLabel: "Не вдалося підготувати файл",
+              }
+            : currentItem,
+        ),
+      );
+
+      setSaveStatus("error");
+      setSaveMessage(
+        `Не вдалося підготувати "${file.name}". Видаліть файл і спробуйте додати його ще раз.`,
+      );
+    }
+  };
+
+  const retryLocalMediaPreparation = (id: string) => {
+    const target = media.find(
+      (item) =>
+        item.id === id &&
+        item.source === "local" &&
+        item.processingStatus === "failed",
+    );
+
+    if (!target) return;
+
+    setSaveStatus("idle");
+    setSaveMessage("");
+    void prepareLocalMedia(target);
+  };
+
   const handleFiles = (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
@@ -472,55 +619,69 @@ export function NewProjectForm({
       event.target.files ?? [],
     );
 
-    if (!files.length) {
-      return;
-    }
+    if (!files.length) return;
 
     const next: MediaItem[] = [];
     let remainingVideos = 2 - videoCount;
 
     for (const file of files) {
-      const isVideo =
-        file.type === "video/mp4";
-
+      const isVideo = isSupportedVideoFile(file);
       const isPhoto =
         file.type === "image/jpeg" ||
-        file.type === "image/png";
+        file.type === "image/png" ||
+        /\.(jpe?g|png)$/i.test(file.name);
 
       if (!isVideo && !isPhoto) {
+        setSaveStatus("error");
+        setSaveMessage(
+          `"${file.name}" не підтримується. Дозволено JPG, PNG, MP4, WebM та MOV.`,
+        );
         continue;
       }
 
-      if (
-        isVideo &&
-        remainingVideos <= 0
-      ) {
+      if (isVideo && remainingVideos <= 0) {
+        setSaveStatus("error");
+        setSaveMessage(
+          "До одного проєкту можна додати максимум 2 відео.",
+        );
         continue;
       }
 
-      if (isVideo) {
-        remainingVideos -= 1;
+      if (isVideo && file.size > 100 * 1024 * 1024) {
+        setSaveStatus("error");
+        setSaveMessage(
+          `"${file.name}" перевищує ліміт 100 MB.`,
+        );
+        continue;
       }
+
+      if (isVideo) remainingVideos -= 1;
 
       next.push({
         id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
         name: file.name,
-        type: isVideo
-          ? "video"
-          : "photo",
+        type: isVideo ? "video" : "photo",
         url: URL.createObjectURL(file),
         size: file.size,
         source: "local",
         file,
+        processingStatus: "processing",
+        uploadProgress: 0,
+        processingLabel: "Підготовка…",
       });
     }
 
-    setMedia((current) => [
-      ...current,
-      ...next,
-    ]);
+    if (next.length) {
+      setMedia((current) => [...current, ...next]);
+      setSaveStatus("idle");
+      setSaveMessage("");
 
-    markAsChanged();
+      void (async () => {
+        for (const item of next) {
+          await prepareLocalMedia(item);
+        }
+      })();
+    }
 
     event.target.value = "";
   };
@@ -531,6 +692,12 @@ export function NewProjectForm({
     );
 
     if (!target) {
+      return;
+    }
+
+    if (saveStatus === "saving") {
+      setSaveStatus("error");
+      setSaveMessage("Дочекайтеся завершення поточної операції з медіа.");
       return;
     }
 
@@ -545,20 +712,32 @@ export function NewProjectForm({
       return;
     }
 
+    const isStoredVideo =
+      target.type === "video" &&
+      target.source === "stored";
+
     if (
       !window.confirm(
-        `Видалити "${target.name}"? Фото буде видалене з проєкту та сховища.`,
+        isStoredVideo
+          ? `Видалити "${target.name}"? Відео буде видалене з проєкту та сховища.`
+          : `Видалити "${target.name}"? Фото буде видалене з проєкту та сховища.`,
       )
     ) {
       return;
     }
 
     setSaveStatus("saving");
-    setSaveMessage("Видаляємо фото…");
+    setSaveMessage(
+      isStoredVideo
+        ? "Видаляємо відео…"
+        : "Видаляємо фото…",
+    );
 
     try {
       const response = await fetch(
-        "/admin/api/portfolio-media/delete",
+        isStoredVideo
+          ? "/admin/api/portfolio-media/delete-video"
+          : "/admin/api/portfolio-media/delete",
         {
           method: "POST",
           headers: {
@@ -1560,6 +1739,7 @@ export function NewProjectForm({
       (item) =>
         item.type === "photo" &&
         item.source === "local" &&
+        item.processingStatus === "ready" &&
         item.file,
     );
 
@@ -1729,8 +1909,271 @@ export function NewProjectForm({
     }
   };
 
+  const uploadPendingVideos = async (
+    targetProjectId: string,
+  ) => {
+    const pendingVideos = media.filter(
+      (item) =>
+        item.type === "video" &&
+        item.source === "local" &&
+        item.processingStatus === "ready" &&
+        item.file,
+    );
+
+    if (!pendingVideos.length) {
+      return;
+    }
+
+    const { count: storedVideoCount, error: videoCountError } =
+      await supabase
+        .from("portfolio_media")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", targetProjectId)
+        .eq("media_type", "video");
+
+    if (videoCountError) {
+      throw videoCountError;
+    }
+
+    if ((storedVideoCount ?? 0) + pendingVideos.length > 2) {
+      throw new Error(
+        "Ліміт 2 відео вже досягнуто. Оновіть сторінку перед повторною спробою.",
+      );
+    }
+
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session?.access_token) {
+      throw new Error(
+        "Сесію адміністратора не знайдено. Увійдіть повторно.",
+      );
+    }
+
+    const { data: existingMedia, error: mediaError } =
+      await supabase
+        .from("portfolio_media")
+        .select("sort_order")
+        .eq("project_id", targetProjectId)
+        .order("sort_order", { ascending: false })
+        .limit(1);
+
+    if (mediaError) {
+      throw mediaError;
+    }
+
+    let nextSortOrder =
+      existingMedia?.[0]?.sort_order != null
+        ? existingMedia[0].sort_order + 1
+        : 0;
+
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!supabaseUrl) {
+      throw new Error(
+        "NEXT_PUBLIC_SUPABASE_URL не налаштовано.",
+      );
+    }
+
+    const projectRef =
+      new URL(supabaseUrl).hostname.split(".")[0];
+
+    const endpoint =
+      `https://${projectRef}.storage.supabase.co/storage/v1/upload/resumable`;
+
+    for (const item of pendingVideos) {
+      const file = item.file;
+
+      if (!file) {
+        continue;
+      }
+
+      const mediaId = crypto.randomUUID();
+
+      const uploadFile = item.preparedFile ?? file;
+
+      if (shouldTranscodeVideo(file) && !item.preparedFile) {
+        throw new Error(
+          `Відео "${item.name}" ще не підготовлене до збереження.`,
+        );
+      }
+
+      const extension = "mp4";
+      const contentType = "video/mp4";
+
+      const storagePath =
+        `${targetProjectId}/videos/${mediaId}.${extension}`;
+
+      setMedia((current) =>
+        current.map((currentItem) =>
+          currentItem.id === item.id
+            ? {
+                ...currentItem,
+                uploadProgress: 0,
+                processingLabel:
+                  "Завантаження 0%",
+              }
+            : currentItem,
+        ),
+      );
+
+      await new Promise<void>((resolve, reject) => {
+        const upload = new Upload(uploadFile, {
+          endpoint,
+          retryDelays: [0, 1000, 3000, 5000],
+          headers: {
+            authorization:
+              `Bearer ${session.access_token}`,
+          },
+          uploadDataDuringCreation: true,
+          removeFingerprintOnSuccess: true,
+          metadata: {
+            bucketName: "portfolio-videos",
+            objectName: storagePath,
+            contentType,
+            cacheControl: "31536000",
+          },
+          chunkSize: 6 * 1024 * 1024,
+          onError(error) {
+            void upload
+              .abort(true)
+              .catch((abortError) => {
+                console.error(
+                  "Failed to terminate interrupted TUS upload:",
+                  abortError,
+                );
+              })
+              .finally(() => reject(error));
+          },
+          onProgress(bytesUploaded, bytesTotal) {
+            const progress =
+              bytesTotal > 0
+                ? Math.round(
+                    (bytesUploaded / bytesTotal) * 100,
+                  )
+                : 0;
+
+            setMedia((current) =>
+              current.map((currentItem) =>
+                currentItem.id === item.id
+                  ? {
+                      ...currentItem,
+                      uploadProgress: progress,
+                      processingLabel:
+                        `Завантаження ${progress}%`,
+                    }
+                  : currentItem,
+              ),
+            );
+          },
+          onSuccess() {
+            resolve();
+          },
+        });
+
+        upload.findPreviousUploads().then(
+          (previousUploads) => {
+            if (previousUploads.length) {
+              upload.resumeFromPreviousUpload(
+                previousUploads[0],
+              );
+            }
+
+            upload.start();
+          },
+          reject,
+        );
+      });
+
+      const { error: insertError } =
+        await supabase
+          .from("portfolio_media")
+          .insert({
+            id: mediaId,
+            project_id: targetProjectId,
+            media_type: "video",
+            sort_order: nextSortOrder,
+            original_path: null,
+            web_path: storagePath,
+            card_path: null,
+            is_cover: false,
+            processing_status: "ready",
+          });
+
+      if (insertError) {
+        const { error: cleanupError } =
+          await supabase.storage
+            .from("portfolio-videos")
+            .remove([storagePath]);
+
+        if (cleanupError) {
+          console.error(
+            "Video DB insert failed and Storage cleanup also failed:",
+            cleanupError,
+          );
+          throw new Error(
+            `${insertError.message} Також не вдалося автоматично очистити завантажений MP4.`,
+          );
+        }
+
+        throw insertError;
+      }
+
+      const publicUrl = supabase.storage
+        .from("portfolio-videos")
+        .getPublicUrl(storagePath)
+        .data.publicUrl;
+
+      URL.revokeObjectURL(item.url);
+
+      setMedia((current) =>
+        current.map((currentItem) =>
+          currentItem.id === item.id
+            ? {
+                id: mediaId,
+                name: item.name,
+                type: "video",
+                url: publicUrl,
+                size: item.size,
+                source: "stored",
+                webPath: storagePath,
+                cardPath: null,
+                sortOrder: nextSortOrder,
+                isCover: false,
+                processingStatus: "ready",
+                focalX: 0.5,
+                focalY: 0.5,
+                cropZoom: 1,
+                uploadProgress: 100,
+                processingLabel: undefined,
+              }
+            : currentItem,
+        ),
+      );
+
+      nextSortOrder += 1;
+    }
+  };
+
   const handleSaveDraft = async () => {
-    if (saveStatus === "saving") {
+    if (saveInFlightRef.current || saveStatus === "saving") {
+      return;
+    }
+
+    if (isMediaProcessing) {
+      setSaveStatus("error");
+      setSaveMessage("Дочекайтеся завершення оптимізації медіа.");
+      return;
+    }
+
+    if (hasFailedLocalMedia) {
+      setSaveStatus("error");
+      setSaveMessage(
+        "Є медіафайл, який не вдалося підготувати. Видаліть його та додайте повторно.",
+      );
       return;
     }
 
@@ -1770,6 +2213,7 @@ export function NewProjectForm({
       return;
     }
 
+    saveInFlightRef.current = true;
     setSaveStatus("saving");
     setSaveMessage("");
 
@@ -1839,10 +2283,11 @@ export function NewProjectForm({
         setProjectSlug(data.slug);
 
         await uploadPendingPhotos(data.id);
+        await uploadPendingVideos(data.id);
 
         setSaveStatus("saved");
         setSaveMessage(
-          "Чернетку та вибрані фото збережено.",
+          "Чернетку та медіафайли збережено.",
         );
 
         router.replace(
@@ -1862,10 +2307,11 @@ export function NewProjectForm({
       }
 
       await uploadPendingPhotos(projectId);
+      await uploadPendingVideos(projectId);
 
       setSaveStatus("saved");
       setSaveMessage(
-        "Зміни чернетки та вибрані фото збережено.",
+        "Зміни та медіафайли збережено.",
       );
     } catch (error) {
       console.error(
@@ -1880,6 +2326,8 @@ export function NewProjectForm({
           ? error.message
           : "Не вдалося зберегти чернетку.",
       );
+    } finally {
+      saveInFlightRef.current = false;
     }
   };
 
@@ -2040,9 +2488,11 @@ export function NewProjectForm({
             type="button"
             className={styles.secondary}
             onClick={handleSaveDraft}
-            disabled={saveStatus === "saving"}
+            disabled={saveStatus === "saving" || isMediaProcessing}
           >
-            {saveStatus === "saving"
+            {isMediaProcessing
+              ? "Оптимізація медіа…"
+              : saveStatus === "saving"
               ? "Зберігаємо..."
               : saveStatus === "saved"
                 ? "Збережено"
@@ -2081,7 +2531,7 @@ export function NewProjectForm({
                 ? handleUnpublish
                 : handlePublish
             }
-            disabled={saveStatus === "saving"}
+            disabled={saveStatus === "saving" || isMediaProcessing}
           >
             {projectStatus === "published"
               ? "Зняти з публікації"
@@ -2408,8 +2858,9 @@ export function NewProjectForm({
 
                 <p>
                   JPG / PNG автоматично
-                  підготуємо для web. Відео —
-                  максимум 2.
+                  підготуємо для web. MOV / WebM
+                  автоматично перетворимо у web MP4.
+                  Максимум 2 відео.
                 </p>
               </div>
 
@@ -2451,6 +2902,7 @@ export function NewProjectForm({
                 multiple
                 accept={accepted}
                 onChange={handleFiles}
+                disabled={saveStatus === "saving"}
               />
 
               <span
@@ -2468,7 +2920,7 @@ export function NewProjectForm({
               </span>
 
               <small>
-                JPG, PNG • MP4{" "}
+                JPG, PNG • MP4, WebM, MOV • до 100 MB • MOV → MP4 автоматично{" "}
                 {canAddVideo
                   ? "до 2 відео"
                   : "— ліміт відео використано"}
@@ -2599,13 +3051,52 @@ export function NewProjectForm({
                         </strong>
 
                         <span>
-                          {item.size != null
-                            ? formatMb(item.size)
-                            : item.source === "stored"
-                              ? "Збережено"
-                              : ""}
+                          {item.source === "local" &&
+                          item.processingLabel
+                            ? item.processingLabel
+                            : item.size != null
+                              ? formatMb(item.size)
+                              : item.source === "stored"
+                                ? "Збережено"
+                                : ""}
                         </span>
+
+                        {item.source === "local" &&
+                          item.uploadProgress != null &&
+                          item.processingStatus === "processing" && (
+                            <div
+                              className={styles.videoProgress}
+                              aria-label={`Підготовлено ${item.uploadProgress}%`}
+                            >
+                              <span
+                                style={{
+                                  width: `${item.uploadProgress}%`,
+                                }}
+                              />
+                            </div>
+                          )}
+
+                        {item.type === "video" &&
+                          item.source === "stored" && (
+                            <span className={styles.readyState}>
+                              ✓ Готово
+                            </span>
+                          )}
                       </div>
+
+                      {item.source === "local" &&
+                        item.processingStatus === "failed" && (
+                          <button
+                            type="button"
+                            className={styles.processAction}
+                            onClick={() =>
+                              retryLocalMediaPreparation(item.id)
+                            }
+                            disabled={saveStatus === "saving"}
+                          >
+                            Повторити підготовку
+                          </button>
+                        )}
 
                       {item.type === "photo" &&
                         item.source === "stored" &&
@@ -2700,6 +3191,7 @@ export function NewProjectForm({
                           )
                         }
                         aria-label={`Видалити ${item.name}`}
+                        disabled={saveStatus === "saving"}
                       >
                         ×
                       </button>
