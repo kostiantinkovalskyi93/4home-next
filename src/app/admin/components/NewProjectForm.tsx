@@ -767,23 +767,44 @@ export function NewProjectForm({
         );
       }
 
-      setMedia((current) =>
-        current
-          .filter((item) => item.id !== id)
-          .map((item, index) => ({
-            ...item,
-            isCover:
-              item.type === "photo" &&
-              item.source === "stored"
-                ? item.id === result?.newCoverId
-                : item.isCover,
-            sortOrder:
-              item.type === "photo" &&
-              item.source === "stored"
-                ? index
-                : item.sortOrder,
-          })),
+      const remainingMedia = media.filter(
+        (item) => item.id !== id,
       );
+      const storedMediaIds = remainingMedia
+        .filter((item) => item.source === "stored")
+        .map((item) => item.id);
+      const normalizedMedia = remainingMedia.map(
+        (item) => ({
+          ...item,
+          isCover:
+            item.type === "photo" &&
+            item.source === "stored"
+              ? item.id === result?.newCoverId
+              : item.isCover,
+          sortOrder:
+            item.source === "stored"
+              ? storedMediaIds.indexOf(item.id)
+              : item.sortOrder,
+        }),
+      );
+
+      setMedia(normalizedMedia);
+
+      try {
+        await persistStoredMediaOrder(normalizedMedia);
+      } catch (reorderError) {
+        console.error(
+          "Failed to normalize portfolio media after delete:",
+          reorderError,
+        );
+
+        setSaveStatus("error");
+        setSaveMessage(
+          "Медіа видалено, але не вдалося нормалізувати порядок. Оновіть сторінку та повторіть сортування.",
+        );
+        router.refresh();
+        return;
+      }
 
       if (
         result?.newCoverId &&
@@ -804,14 +825,16 @@ export function NewProjectForm({
       setSaveStatus("saved");
       setSaveMessage(
         result?.cleanupWarnings?.length
-          ? "Фото видалено. Частина старих файлів потребує фонової очистки."
-          : "Фото видалено. Порядок та обкладинку оновлено.",
+          ? "Медіа видалено. Частина старих файлів потребує фонової очистки."
+          : isStoredVideo
+            ? "Відео видалено. Порядок медіа оновлено."
+            : "Фото видалено. Порядок медіа та обкладинку оновлено.",
       );
 
       router.refresh();
     } catch (error) {
       console.error(
-        "Failed to delete portfolio photo:",
+        "Failed to delete portfolio media:",
         error,
       );
 
@@ -819,12 +842,12 @@ export function NewProjectForm({
       setSaveMessage(
         error instanceof Error
           ? error.message
-          : "Не вдалося видалити фото.",
+          : "Не вдалося видалити медіа.",
       );
     }
   };
 
-  const persistStoredPhotoOrder = async (
+  const persistStoredMediaOrder = async (
     nextMedia: MediaItem[],
   ) => {
     if (!projectId) {
@@ -832,11 +855,7 @@ export function NewProjectForm({
     }
 
     const mediaIds = nextMedia
-      .filter(
-        (item) =>
-          item.type === "photo" &&
-          item.source === "stored",
-      )
+      .filter((item) => item.source === "stored")
       .map((item) => item.id);
 
     const response = await fetch(
@@ -862,12 +881,12 @@ export function NewProjectForm({
     if (!response.ok) {
       throw new Error(
         result?.error ??
-          "Не вдалося зберегти порядок фото.",
+          "Не вдалося зберегти порядок медіа.",
       );
     }
   };
 
-  const moveStoredPhoto = async (
+  const moveStoredMedia = async (
     sourceId: string,
     targetId: string,
   ) => {
@@ -888,8 +907,6 @@ export function NewProjectForm({
     if (
       !source ||
       !target ||
-      source.type !== "photo" ||
-      target.type !== "photo" ||
       source.source !== "stored" ||
       target.source !== "stored"
     ) {
@@ -917,19 +934,14 @@ export function NewProjectForm({
       moved,
     );
 
-    const storedPhotoIds = nextMedia
-      .filter(
-        (item) =>
-          item.type === "photo" &&
-          item.source === "stored",
-      )
+    const storedMediaIds = nextMedia
+      .filter((item) => item.source === "stored")
       .map((item) => item.id);
 
     const normalized = nextMedia.map((item) => {
       const nextSortOrder =
-        item.type === "photo" &&
         item.source === "stored"
-          ? storedPhotoIds.indexOf(item.id)
+          ? storedMediaIds.indexOf(item.id)
           : item.sortOrder;
 
       return {
@@ -940,17 +952,17 @@ export function NewProjectForm({
 
     setMedia(normalized);
     setSaveStatus("saving");
-    setSaveMessage("Зберігаємо порядок фото…");
+    setSaveMessage("Зберігаємо порядок медіа…");
 
     try {
-      await persistStoredPhotoOrder(normalized);
+      await persistStoredMediaOrder(normalized);
 
       setSaveStatus("saved");
-      setSaveMessage("Порядок фото збережено.");
+      setSaveMessage("Порядок медіа збережено.");
       router.refresh();
     } catch (error) {
       console.error(
-        "Failed to reorder portfolio photos:",
+        "Failed to reorder portfolio media:",
         error,
       );
 
@@ -959,24 +971,22 @@ export function NewProjectForm({
       setSaveMessage(
         error instanceof Error
           ? error.message
-          : "Не вдалося змінити порядок фото.",
+          : "Не вдалося змінити порядок медіа.",
       );
     } finally {
       setDraggedMediaId(null);
     }
   };
 
-  const moveStoredPhotoByStep = (
+  const moveStoredMediaByStep = (
     id: string,
     direction: -1 | 1,
   ) => {
-    const storedPhotos = media.filter(
-      (item) =>
-        item.type === "photo" &&
-        item.source === "stored",
+    const storedMedia = media.filter(
+      (item) => item.source === "stored",
     );
 
-    const index = storedPhotos.findIndex(
+    const index = storedMedia.findIndex(
       (item) => item.id === id,
     );
 
@@ -985,14 +995,14 @@ export function NewProjectForm({
     if (
       index < 0 ||
       nextIndex < 0 ||
-      nextIndex >= storedPhotos.length
+      nextIndex >= storedMedia.length
     ) {
       return;
     }
 
-    void moveStoredPhoto(
+    void moveStoredMedia(
       id,
-      storedPhotos[nextIndex].id,
+      storedMedia[nextIndex].id,
     );
   };
 
@@ -2939,13 +2949,11 @@ export function NewProjectForm({
                       }`}
                       key={item.id}
                       draggable={
-                        item.type === "photo" &&
                         item.source === "stored" &&
                         saveStatus !== "saving"
                       }
                       onDragStart={() => {
                         if (
-                          item.type === "photo" &&
                           item.source === "stored"
                         ) {
                           setDraggedMediaId(item.id);
@@ -2957,7 +2965,6 @@ export function NewProjectForm({
                       onDragOver={(event) => {
                         if (
                           draggedMediaId &&
-                          item.type === "photo" &&
                           item.source === "stored"
                         ) {
                           event.preventDefault();
@@ -2967,7 +2974,7 @@ export function NewProjectForm({
                         event.preventDefault();
 
                         if (draggedMediaId) {
-                          void moveStoredPhoto(
+                          void moveStoredMedia(
                             draggedMediaId,
                             item.id,
                           );
@@ -3008,11 +3015,10 @@ export function NewProjectForm({
                           />
                         )}
 
-                        {item.type === "photo" &&
-                          item.source === "stored" && (
+                        {item.source === "stored" && (
                             <span
                               className={styles.orderBadge}
-                              title="Перетягніть картку, щоб змінити порядок"
+                              title="Перетягніть картку, щоб змінити порядок медіа"
                             >
                               ≡ {Number(item.sortOrder ?? 0) + 1}
                             </span>
@@ -3143,13 +3149,12 @@ export function NewProjectForm({
                           </button>
                         )}
 
-                      {item.type === "photo" &&
-                        item.source === "stored" && (
+                      {item.source === "stored" && (
                           <div className={styles.orderActions}>
                             <button
                               type="button"
                               onClick={() =>
-                                moveStoredPhotoByStep(
+                                moveStoredMediaByStep(
                                   item.id,
                                   -1,
                                 )
@@ -3165,7 +3170,7 @@ export function NewProjectForm({
                             <button
                               type="button"
                               onClick={() =>
-                                moveStoredPhotoByStep(
+                                moveStoredMediaByStep(
                                   item.id,
                                   1,
                                 )

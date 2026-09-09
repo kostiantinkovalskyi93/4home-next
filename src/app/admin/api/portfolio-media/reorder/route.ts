@@ -31,16 +31,17 @@ export async function POST(request: Request) {
     !Array.isArray(body.mediaIds) ||
     body.mediaIds.some(
       (id) => typeof id !== "string" || !id,
-    )
+    ) ||
+    new Set(body.mediaIds).size !== body.mediaIds.length
   ) {
     return NextResponse.json(
-      { error: "Некоректний порядок фото." },
+      { error: "Некоректний порядок медіа." },
       { status: 400 },
     );
   }
 
   const { error } = await supabase.rpc(
-    "reorder_portfolio_photos",
+    "reorder_portfolio_media",
     {
       p_project_id: body.projectId,
       p_media_ids: body.mediaIds,
@@ -49,14 +50,14 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error(
-      "Failed to reorder portfolio photos:",
+      "Failed to reorder portfolio media:",
       error,
     );
 
     return NextResponse.json(
       {
         error:
-          "Не вдалося зберегти порядок фото.",
+          "Не вдалося зберегти порядок медіа.",
       },
       { status: 500 },
     );
