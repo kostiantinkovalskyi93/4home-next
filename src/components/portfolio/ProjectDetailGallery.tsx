@@ -109,6 +109,7 @@ export function ProjectDetailGallery({
             ref={mainVideoRef}
             className={styles.mainVideo}
             src={item.src}
+            poster={item.posterSrc}
             controls
             playsInline
             preload="metadata"
@@ -176,15 +177,27 @@ export function ProjectDetailGallery({
             >
               {mediaItem.type === "video" ? (
                 <>
-                  <video
-                    className={styles.thumbVideo}
-                    src={mediaItem.src}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    tabIndex={-1}
-                    aria-hidden="true"
-                  />
+                  {mediaItem.posterSrc ? (
+                    <video
+                      className={styles.thumbVideo}
+                      poster={mediaItem.posterSrc}
+                      muted
+                      playsInline
+                      preload="none"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <video
+                      className={styles.thumbVideo}
+                      src={mediaItem.src}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    />
+                  )}
                   <span className={styles.thumbPlay} aria-hidden="true">
                     ▶
                   </span>
@@ -273,6 +286,7 @@ export function ProjectDetailGallery({
                   ref={lightVideoRef}
                   className={styles.lightVideo}
                   src={item.src}
+                  poster={item.posterSrc}
                   controls
                   playsInline
                   preload="metadata"
@@ -322,15 +336,27 @@ export function ProjectDetailGallery({
                 >
                   {mediaItem.type === "video" ? (
                     <>
-                      <video
-                        className={styles.thumbVideo}
-                        src={mediaItem.src}
-                        muted
-                        playsInline
-                        preload="metadata"
-                        tabIndex={-1}
-                        aria-hidden="true"
-                      />
+                      {mediaItem.posterSrc ? (
+                        <video
+                          className={styles.thumbVideo}
+                          poster={mediaItem.posterSrc}
+                          muted
+                          playsInline
+                          preload="none"
+                          tabIndex={-1}
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <video
+                          className={styles.thumbVideo}
+                          src={mediaItem.src}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          tabIndex={-1}
+                          aria-hidden="true"
+                        />
+                      )}
                       <span
                         className={styles.thumbPlay}
                         aria-hidden="true"

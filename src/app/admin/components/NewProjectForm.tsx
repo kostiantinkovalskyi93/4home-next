@@ -19,6 +19,7 @@ import {
   shouldTranscodeVideo,
   transcodeVideoForWeb,
 } from "@/lib/video-transcode";
+import { createVideoPoster } from "@/lib/video-poster";
 
 import {
   ArrowLeftIcon,
@@ -49,6 +50,9 @@ type MediaItem = {
   uploadProgress?: number;
   processingLabel?: string;
   preparedFile?: File;
+  posterFile?: File;
+  posterUrl?: string;
+  posterPath?: string | null;
 };
 
 export type StoredPortfolioMedia = {
@@ -66,6 +70,8 @@ export type StoredPortfolioMedia = {
   focalY: number;
   cropZoom: number;
   size?: number | null;
+  posterUrl?: string;
+  posterPath?: string | null;
 };
 
 type SpecificationItem = {
@@ -560,18 +566,47 @@ export function NewProjectForm({
         bitmap.close();
       }
 
+      let posterFile: File | undefined;
+      let posterUrl: string | undefined;
+
+      if (item.type === "video") {
+        setMedia((current) =>
+          current.map((currentItem) =>
+            currentItem.id === item.id
+              ? {
+                  ...currentItem,
+                  processingLabel: "Створення poster…",
+                }
+              : currentItem,
+          ),
+        );
+
+        posterFile = await createVideoPoster(preparedFile);
+        posterUrl = URL.createObjectURL(posterFile);
+      }
+
       setMedia((current) =>
-        current.map((currentItem) =>
-          currentItem.id === item.id
-            ? {
-                ...currentItem,
-                preparedFile,
-                processingStatus: "ready",
-                uploadProgress: 100,
-                processingLabel: "Готово до збереження",
-              }
-            : currentItem,
-        ),
+        current.map((currentItem) => {
+          if (currentItem.id !== item.id) return currentItem;
+
+          if (
+            currentItem.posterUrl &&
+            currentItem.posterUrl.startsWith("blob:") &&
+            currentItem.posterUrl !== posterUrl
+          ) {
+            URL.revokeObjectURL(currentItem.posterUrl);
+          }
+
+          return {
+            ...currentItem,
+            preparedFile,
+            posterFile,
+            posterUrl,
+            processingStatus: "ready",
+            uploadProgress: 100,
+            processingLabel: "Готово до збереження",
+          };
+        }),
       );
     } catch (error) {
       console.error("Local media preparation failed:", error);
@@ -582,6 +617,7 @@ export function NewProjectForm({
             ? {
                 ...currentItem,
                 preparedFile: undefined,
+                posterFile: undefined,
                 processingStatus: "failed",
                 uploadProgress: undefined,
                 processingLabel: "Не вдалося підготувати файл",
@@ -703,6 +739,9 @@ export function NewProjectForm({
 
     if (target.source === "local") {
       URL.revokeObjectURL(target.url);
+      if (target.posterUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(target.posterUrl);
+      }
 
       setMedia((current) =>
         current.filter((item) => item.id !== id),
@@ -1742,6 +1781,101 @@ export function NewProjectForm({
     }
   };
 
+  const generateStoredVideoPoster = async (mediaId: string) => {
+    if (!projectId || saveStatus === "saving") return;
+
+    const target = media.find(
+      (item) =>
+        item.id === mediaId &&
+        item.type === "video" &&
+        item.source === "stored" &&
+        item.webPath,
+    );
+
+    if (!target?.webPath) return;
+
+    setSaveStatus("saving");
+    setSaveMessage("Створюємо poster для відео…");
+
+    const posterPath =
+      `${projectId}/videos/${target.id}-poster.webp`;
+
+    try {
+      const response = await fetch(target.url);
+
+      if (!response.ok) {
+        throw new Error("Не вдалося завантажити відео для створення poster.");
+      }
+
+      const videoBlob = await response.blob();
+      const videoFile = new File(
+        [videoBlob],
+        target.name.toLowerCase().endsWith(".mp4")
+          ? target.name
+          : `${target.name}.mp4`,
+        {
+          type: videoBlob.type || "video/mp4",
+          lastModified: Date.now(),
+        },
+      );
+      const posterFile = await createVideoPoster(videoFile);
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from("portfolio-video-posters")
+          .upload(posterPath, posterFile, {
+            cacheControl: "31536000",
+            contentType: "image/webp",
+            upsert: true,
+          });
+
+      if (uploadError) throw uploadError;
+
+      const { error: updateError } = await supabase
+        .from("portfolio_media")
+        .update({ video_poster_path: posterPath })
+        .eq("id", target.id)
+        .eq("project_id", projectId)
+        .eq("media_type", "video");
+
+      if (updateError) {
+        await supabase.storage
+          .from("portfolio-video-posters")
+          .remove([posterPath]);
+        throw updateError;
+      }
+
+      const posterUrl = supabase.storage
+        .from("portfolio-video-posters")
+        .getPublicUrl(posterPath)
+        .data.publicUrl;
+
+      setMedia((current) =>
+        current.map((item) =>
+          item.id === target.id
+            ? {
+                ...item,
+                posterPath,
+                posterUrl,
+              }
+            : item,
+        ),
+      );
+
+      setSaveStatus("saved");
+      setSaveMessage("Poster відео створено.");
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to generate stored video poster:", error);
+      setSaveStatus("error");
+      setSaveMessage(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося створити poster відео.",
+      );
+    }
+  };
+
   const uploadPendingPhotos = async (
     targetProjectId: string,
   ) => {
@@ -2098,6 +2232,38 @@ export function NewProjectForm({
         );
       });
 
+      const posterFile = item.posterFile;
+
+      if (!posterFile) {
+        await supabase.storage
+          .from("portfolio-videos")
+          .remove([storagePath]);
+
+        throw new Error(
+          `Для відео "${item.name}" не підготовлено poster-зображення.`,
+        );
+      }
+
+      const posterPath =
+        `${targetProjectId}/videos/${mediaId}-poster.webp`;
+
+      const { error: posterUploadError } =
+        await supabase.storage
+          .from("portfolio-video-posters")
+          .upload(posterPath, posterFile, {
+            cacheControl: "31536000",
+            contentType: "image/webp",
+            upsert: false,
+          });
+
+      if (posterUploadError) {
+        await supabase.storage
+          .from("portfolio-videos")
+          .remove([storagePath]);
+
+        throw posterUploadError;
+      }
+
       const { error: insertError } =
         await supabase
           .from("portfolio_media")
@@ -2109,23 +2275,31 @@ export function NewProjectForm({
             original_path: null,
             web_path: storagePath,
             card_path: null,
+            video_poster_path: posterPath,
             is_cover: false,
             processing_status: "ready",
           });
 
       if (insertError) {
-        const { error: cleanupError } =
-          await supabase.storage
+        const cleanupResults = await Promise.all([
+          supabase.storage
             .from("portfolio-videos")
-            .remove([storagePath]);
+            .remove([storagePath]),
+          supabase.storage
+            .from("portfolio-video-posters")
+            .remove([posterPath]),
+        ]);
+        const cleanupErrors = cleanupResults
+          .map((result) => result.error)
+          .filter(Boolean);
 
-        if (cleanupError) {
+        if (cleanupErrors.length) {
           console.error(
             "Video DB insert failed and Storage cleanup also failed:",
-            cleanupError,
+            cleanupErrors,
           );
           throw new Error(
-            `${insertError.message} Також не вдалося автоматично очистити завантажений MP4.`,
+            `${insertError.message} Також не вдалося повністю очистити завантажені файли.`,
           );
         }
 
@@ -2136,8 +2310,15 @@ export function NewProjectForm({
         .from("portfolio-videos")
         .getPublicUrl(storagePath)
         .data.publicUrl;
+      const posterPublicUrl = supabase.storage
+        .from("portfolio-video-posters")
+        .getPublicUrl(posterPath)
+        .data.publicUrl;
 
       URL.revokeObjectURL(item.url);
+      if (item.posterUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(item.posterUrl);
+      }
 
       setMedia((current) =>
         current.map((currentItem) =>
@@ -2151,6 +2332,8 @@ export function NewProjectForm({
                 source: "stored",
                 webPath: storagePath,
                 cardPath: null,
+                posterPath,
+                posterUrl: posterPublicUrl,
                 sortOrder: nextSortOrder,
                 isCover: false,
                 processingStatus: "ready",
@@ -3007,6 +3190,12 @@ export function NewProjectForm({
                               }
                             />
                           )
+                        ) : item.posterUrl ? (
+                          <img
+                            src={item.posterUrl}
+                            alt=""
+                            className={styles.previewImage}
+                          />
                         ) : (
                           <video
                             src={item.url}
@@ -3146,6 +3335,21 @@ export function NewProjectForm({
                             }
                           >
                             Налаштувати кадр 4:3
+                          </button>
+                        )}
+
+                      {item.type === "video" &&
+                        item.source === "stored" &&
+                        !item.posterUrl && (
+                          <button
+                            type="button"
+                            className={styles.processAction}
+                            onClick={() =>
+                              void generateStoredVideoPoster(item.id)
+                            }
+                            disabled={saveStatus === "saving"}
+                          >
+                            Створити poster
                           </button>
                         )}
 

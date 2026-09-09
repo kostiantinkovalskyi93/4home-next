@@ -19,6 +19,7 @@ type MediaRow = {
   original_path: string | null;
   web_path: string | null;
   card_path: string | null;
+  video_poster_path: string | null;
   sort_order: number;
   is_cover: boolean;
   focal_x: number;
@@ -81,6 +82,7 @@ export default async function EditProjectPage({
         original_path,
         web_path,
         card_path,
+        video_poster_path,
         sort_order,
         is_cover,
         focal_x,
@@ -162,6 +164,13 @@ export default async function EditProjectPage({
         ? "Відео"
         : "Фото");
 
+    const posterUrl =
+      media.media_type === "video" && media.video_poster_path
+        ? supabase.storage
+            .from("portfolio-video-posters")
+            .getPublicUrl(media.video_poster_path).data.publicUrl
+        : undefined;
+
     initialMedia.push({
       id: media.id,
       name: fileName,
@@ -171,6 +180,8 @@ export default async function EditProjectPage({
         media.original_path ?? undefined,
       webPath: media.web_path,
       cardPath: media.card_path,
+      posterPath: media.video_poster_path,
+      posterUrl,
       sortOrder: media.sort_order,
       isCover:
         media.media_type === "photo" &&

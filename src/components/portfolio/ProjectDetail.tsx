@@ -11,6 +11,7 @@ export type ProjectDetailImage = {
 export type ProjectDetailMedia = {
   type: "photo" | "video";
   src: string;
+  posterSrc?: string;
   alt: string;
 };
 

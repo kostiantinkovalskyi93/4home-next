@@ -14,6 +14,7 @@ export type PublicPortfolioImage = {
 export type PublicPortfolioMedia = {
   type: "photo" | "video";
   src: string;
+  posterSrc?: string;
   alt: string;
 };
 
@@ -57,6 +58,7 @@ type MediaRow = {
   media_type: "photo" | "video";
   web_path: string | null;
   card_path: string | null;
+  video_poster_path: string | null;
   sort_order: number;
   is_cover: boolean;
   processing_status: "pending" | "processing" | "ready" | "failed";
@@ -93,7 +95,7 @@ export async function getPublishedPortfolioProjects() {
   const { data: mediaRows, error: mediaError } = await supabase
     .from("portfolio_media")
     .select(
-      "id, project_id, media_type, web_path, card_path, sort_order, is_cover, processing_status",
+      "id, project_id, media_type, web_path, card_path, video_poster_path, sort_order, is_cover, processing_status",
     )
     .in(
       "project_id",
@@ -148,6 +150,12 @@ export async function getPublishedPortfolioProjects() {
               : "portfolio-public",
           )
           .getPublicUrl(item.web_path!).data.publicUrl,
+        posterSrc:
+          item.media_type === "video" && item.video_poster_path
+            ? supabase.storage
+                .from("portfolio-video-posters")
+                .getPublicUrl(item.video_poster_path).data.publicUrl
+            : undefined,
         alt:
           item.media_type === "video"
             ? `${project.title} — відео ${index + 1}`

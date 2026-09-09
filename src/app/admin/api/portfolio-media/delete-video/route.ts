@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   const { data: media, error: mediaError } =
     await supabase
       .from("portfolio_media")
-      .select("id, project_id, media_type, web_path")
+      .select("id, project_id, media_type, web_path, video_poster_path")
       .eq("id", body.mediaId)
       .eq("media_type", "video")
       .maybeSingle();
@@ -43,6 +43,28 @@ export async function POST(request: Request) {
       { error: "Відео не знайдено." },
       { status: 404 },
     );
+  }
+
+  if (media.video_poster_path) {
+    const { error: posterStorageError } =
+      await supabase.storage
+        .from("portfolio-video-posters")
+        .remove([media.video_poster_path]);
+
+    if (posterStorageError) {
+      console.error(
+        "Failed to remove portfolio video poster:",
+        posterStorageError,
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Не вдалося видалити poster-зображення відео зі сховища.",
+        },
+        { status: 500 },
+      );
+    }
   }
 
   if (media.web_path) {

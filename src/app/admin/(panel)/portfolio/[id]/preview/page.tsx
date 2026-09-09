@@ -42,7 +42,7 @@ export default async function Preview({ params }: Props) {
 
   const { data: mediaRows } = await supabase
     .from("portfolio_media")
-    .select("id,media_type,web_path,sort_order")
+    .select("id,media_type,web_path,video_poster_path,sort_order")
     .eq("project_id", id)
     .eq("processing_status", "ready")
     .order("sort_order", { ascending: true });
@@ -67,6 +67,12 @@ export default async function Preview({ params }: Props) {
             : "portfolio-public",
         )
         .getPublicUrl(item.web_path).data.publicUrl,
+      posterSrc:
+        item.media_type === "video" && item.video_poster_path
+          ? supabase.storage
+              .from("portfolio-video-posters")
+              .getPublicUrl(item.video_poster_path).data.publicUrl
+          : undefined,
       alt:
         item.media_type === "video"
           ? `${project.title} — відео ${index + 1}`
