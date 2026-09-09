@@ -19,6 +19,8 @@ export type ProjectDetailData = {
   title: string;
   category: string;
   shortDescription?: string | null;
+  clientTask?: string | null;
+  solution?: string | null;
   location?: string | null;
   color?: string | null;
   productionTerm?: string | null;
@@ -107,6 +109,39 @@ export function ProjectDetail({
           </div>
         </div>
       </section>
+
+      {(project.clientTask || project.solution) && (
+        <section className={styles.story}>
+          <div className={styles.shell}>
+            <div className={styles.storyIntro}>
+              <p className={styles.eyebrow}>ІСТОРІЯ ПРОЄКТУ</p>
+              <h2>Від задачі до готового рішення.</h2>
+            </div>
+
+            <div className={styles.storyGrid}>
+              {project.clientTask && (
+                <article className={styles.storyCard}>
+                  <div className={styles.storyCardHead}>
+                    <span className={styles.storyNumber}>01</span>
+                    <h3>Задача клієнта</h3>
+                  </div>
+                  <p>{project.clientTask}</p>
+                </article>
+              )}
+
+              {project.solution && (
+                <article className={styles.storyCard}>
+                  <div className={styles.storyCardHead}>
+                    <span className={styles.storyNumber}>02</span>
+                    <h3>Що реалізували</h3>
+                  </div>
+                  <p>{project.solution}</p>
+                </article>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {(project.materials?.length ||
         project.hardware?.length ||

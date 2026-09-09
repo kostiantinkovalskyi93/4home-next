@@ -102,6 +102,8 @@ type InitialProject = {
   category: ProjectCategory;
   wardrobe_type: WardrobeType | null;
   short_description: string;
+  client_task: string | null;
+  solution: string | null;
   materials: unknown;
   hardware: unknown;
   features: string | null;
@@ -329,6 +331,14 @@ export function NewProjectForm({
     setShortDescription,
   ] = useState(
     initialProject?.short_description ?? "",
+  );
+
+  const [clientTask, setClientTask] = useState(
+    initialProject?.client_task ?? "",
+  );
+
+  const [solution, setSolution] = useState(
+    initialProject?.solution ?? "",
   );
 
   const [features, setFeatures] = useState(
@@ -2437,6 +2447,8 @@ export function NewProjectForm({
             : null,
         short_description:
           cleanDescription,
+        client_task: clientTask.trim() || null,
+        solution: solution.trim() || null,
         materials: cleanMaterials,
         hardware: cleanHardware,
         features:
@@ -2589,6 +2601,8 @@ export function NewProjectForm({
               ? wardrobeType
               : null,
           short_description: cleanDescription,
+          client_task: clientTask.trim() || null,
+          solution: solution.trim() || null,
           materials: normalizeSpecifications(materials),
           hardware: normalizeSpecifications(hardware),
           features: features.trim() || null,
@@ -2887,6 +2901,40 @@ export function NewProjectForm({
                   handleDescriptionChange
                 }
                 placeholder="Коротко про проєкт, стиль та головну ідею."
+              />
+            </Field>
+
+            <div className={styles.sectionTitle}>
+              <div>
+                <h2>Історія проєкту</h2>
+
+                <p>
+                  Додайте контекст, який пояснює задачу та ваше рішення.
+                </p>
+              </div>
+            </div>
+
+            <Field label="Задача клієнта (необов’язково)">
+              <textarea
+                rows={4}
+                value={clientTask}
+                onChange={(event) => {
+                  setClientTask(event.target.value);
+                  markAsChanged();
+                }}
+                placeholder="Наприклад: організувати максимум зберігання без візуального перевантаження простору."
+              />
+            </Field>
+
+            <Field label="Що реалізували (необов’язково)">
+              <textarea
+                rows={4}
+                value={solution}
+                onChange={(event) => {
+                  setSolution(event.target.value);
+                  markAsChanged();
+                }}
+                placeholder="Наприклад: використали шафи до стелі, інтегровану техніку та приховані системи зберігання."
               />
             </Field>
 

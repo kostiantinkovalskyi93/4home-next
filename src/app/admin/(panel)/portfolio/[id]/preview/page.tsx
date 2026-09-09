@@ -33,7 +33,7 @@ export default async function Preview({ params }: Props) {
   const { data: project } = await supabase
     .from("portfolio_projects")
     .select(
-      "id,title,category,wardrobe_type,short_description,materials,hardware,features,year,location,color,production_term",
+      "id,title,category,wardrobe_type,short_description,client_task,solution,materials,hardware,features,year,location,color,production_term",
     )
     .eq("id", id)
     .maybeSingle();
@@ -100,6 +100,8 @@ export default async function Preview({ params }: Props) {
         title: project.title,
         category,
         shortDescription: project.short_description,
+        clientTask: project.client_task,
+        solution: project.solution,
         materials: specs(project.materials),
         hardware: specs(project.hardware),
         features: project.features,

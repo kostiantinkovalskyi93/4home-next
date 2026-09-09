@@ -48,6 +48,8 @@ export default async function EditProjectPage({
         category,
         wardrobe_type,
         short_description,
+        client_task,
+        solution,
         materials,
         hardware,
         features,

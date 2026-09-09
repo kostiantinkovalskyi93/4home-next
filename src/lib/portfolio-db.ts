@@ -27,6 +27,8 @@ export type PublicPortfolioProject = {
   images: PublicPortfolioImage[];
   media: PublicPortfolioMedia[];
   shortDescription: string | null;
+  clientTask: string | null;
+  solution: string | null;
   materials: Array<{ label: string; value: string }>;
   hardware: Array<{ label: string; value: string }>;
   features: string | null;
@@ -43,6 +45,8 @@ type ProjectRow = {
   category: "kitchen" | "wardrobe" | "furniture";
   wardrobe_type: "hinged" | "sliding" | null;
   short_description: string | null;
+  client_task: string | null;
+  solution: string | null;
   materials: unknown;
   hardware: unknown;
   features: string | null;
@@ -79,7 +83,7 @@ export async function getPublishedPortfolioProjects() {
   const { data: projectRows, error: projectError } = await supabase
     .from("portfolio_projects")
     .select(
-      "id, slug, title, category, wardrobe_type, short_description, materials, hardware, features, year, location, color, production_term",
+      "id, slug, title, category, wardrobe_type, short_description, client_task, solution, materials, hardware, features, year, location, color, production_term",
     )
     .eq("status", "published")
     .order("published_at", { ascending: false });
@@ -173,6 +177,8 @@ export async function getPublishedPortfolioProjects() {
         images,
         media: mixedMedia,
         shortDescription: project.short_description,
+        clientTask: project.client_task,
+        solution: project.solution,
         materials: Array.isArray(project.materials)
           ? (project.materials as Array<{ label: string; value: string }>)
           : [],
