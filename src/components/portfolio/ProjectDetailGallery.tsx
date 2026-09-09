@@ -6,6 +6,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type TouchEvent,
 } from "react";
 
 import type { ProjectDetailMedia } from "./ProjectDetail";
@@ -26,8 +27,14 @@ export function ProjectDetailGallery({
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const mainVideoRef = useRef<HTMLVideoElement>(null);
   const lightVideoRef = useRef<HTMLVideoElement>(null);
+  const thumbRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const lightThumbRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const didMountRef = useRef(false);
   const count = media.length;
 
   const pauseVideos = useCallback(() => {
@@ -61,10 +68,71 @@ export function ProjectDetailGallery({
     );
   }, [count, pauseVideos]);
 
+  const openLightbox = useCallback(() => {
+    pauseVideos();
+    previouslyFocusedRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setLightbox(true);
+  }, [pauseVideos]);
+
   const closeLightbox = useCallback(() => {
     pauseVideos();
     setLightbox(false);
   }, [pauseVideos]);
+
+  const handleTouchStart = useCallback((event: TouchEvent) => {
+    if (event.touches.length !== 1) {
+      touchStartRef.current = null;
+      return;
+    }
+
+    const touch = event.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (event: TouchEvent) => {
+      const start = touchStartRef.current;
+      touchStartRef.current = null;
+
+      if (!start || event.changedTouches.length !== 1 || count < 2) return;
+
+      const touch = event.changedTouches[0];
+      const deltaX = touch.clientX - start.x;
+      const deltaY = touch.clientY - start.y;
+
+      if (Math.abs(deltaX) < 52 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.15) {
+        return;
+      }
+
+      if (deltaX < 0) showNext();
+      else showPrevious();
+    },
+    [count, showNext, showPrevious],
+  );
+
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    thumbRefs.current[active]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+
+    if (lightbox) {
+      lightThumbRefs.current[active]?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [active, lightbox]);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -73,9 +141,49 @@ export function ProjectDetailGallery({
     document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeLightbox();
-      if (event.key === "ArrowLeft") showPrevious();
-      if (event.key === "ArrowRight") showNext();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeLightbox();
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        showPrevious();
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        showNext();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = Array.from(
+        lightboxRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), video[controls], [href], [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((element) => !element.hasAttribute("disabled"));
+
+      if (!focusable.length) {
+        event.preventDefault();
+        closeButtonRef.current?.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const current = document.activeElement;
+
+      if (event.shiftKey && current === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && current === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -87,6 +195,9 @@ export function ProjectDetailGallery({
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      requestAnimationFrame(() => {
+        previouslyFocusedRef.current?.focus();
+      });
     };
   }, [closeLightbox, lightbox, showNext, showPrevious]);
 
@@ -104,7 +215,11 @@ export function ProjectDetailGallery({
   return (
     <div className={styles.gallery}>
       {isVideo ? (
-        <div className={styles.mainVideoWrap}>
+        <div
+          className={styles.mainVideoWrap}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <video
             ref={mainVideoRef}
             className={styles.mainVideo}
@@ -119,10 +234,7 @@ export function ProjectDetailGallery({
           <button
             className={styles.videoExpand}
             type="button"
-            onClick={() => {
-              pauseVideos();
-              setLightbox(true);
-            }}
+            onClick={openLightbox}
             aria-label="Відкрити відео на весь екран"
           >
             ↗
@@ -137,14 +249,16 @@ export function ProjectDetailGallery({
         <button
           className={styles.mainImage}
           type="button"
-          onClick={() => setLightbox(true)}
+          onClick={openLightbox}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
           aria-label="Відкрити фото на весь екран"
         >
           <Image
             src={item.src}
             alt={item.alt}
             fill
-            priority
+            priority={active === 0}
             sizes="(max-width: 900px) 100vw, 62vw"
           />
 
@@ -164,6 +278,9 @@ export function ProjectDetailGallery({
             <button
               key={`${mediaItem.type}-${mediaItem.src}-${index}`}
               type="button"
+              ref={(element) => {
+                thumbRefs.current[index] = element;
+              }}
               onClick={() => selectMedia(index)}
               className={`${styles.thumb} ${
                 index === active ? styles.thumbActive : ""
@@ -237,8 +354,12 @@ export function ProjectDetailGallery({
 
       {lightbox && (
         <div
+          ref={lightboxRef}
           className={styles.lightbox}
           role="dialog"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeLightbox();
+          }}
           aria-modal="true"
           aria-label={`Галерея проєкту ${title}`}
         >
@@ -268,7 +389,11 @@ export function ProjectDetailGallery({
             </div>
           </div>
 
-          <div className={styles.lightStage}>
+          <div
+            className={styles.lightStage}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {count > 1 && (
               <button
                 type="button"
@@ -300,7 +425,7 @@ export function ProjectDetailGallery({
                   src={item.src}
                   alt={item.alt}
                   fill
-                  priority
+                  priority={active === 0}
                   sizes="100vw"
                 />
               </div>
@@ -324,6 +449,9 @@ export function ProjectDetailGallery({
                 <button
                   key={`light-${mediaItem.type}-${mediaItem.src}-${index}`}
                   type="button"
+                  ref={(element) => {
+                    lightThumbRefs.current[index] = element;
+                  }}
                   onClick={() => selectMedia(index)}
                   className={`${styles.lightThumb} ${
                     index === active ? styles.lightThumbActive : ""
