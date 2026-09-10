@@ -299,6 +299,27 @@ function createSlug(title: string) {
     .slice(0, 8)}`;
 }
 
+
+function parseProjectYear(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const parsed = Number(trimmed);
+
+  if (
+    !Number.isInteger(parsed) ||
+    parsed < 2020 ||
+    parsed > 2100
+  ) {
+    throw new Error("Перевірте рік роботи.");
+  }
+
+  return parsed;
+}
+
 export function NewProjectForm({
   initialProject,
   initialMedia = [],
@@ -2387,31 +2408,21 @@ export function NewProjectForm({
     if (!cleanTitle) {
       setSaveStatus("error");
       setSaveMessage(
-        "Вкажіть назву роботи.",
+        "Вкажіть назву роботи, щоб зберегти чернетку.",
       );
       return;
     }
 
-    if (!cleanDescription) {
+    let parsedYear: number | null;
+
+    try {
+      parsedYear = parseProjectYear(year);
+    } catch (error) {
       setSaveStatus("error");
       setSaveMessage(
-        "Додайте короткий опис роботи.",
-      );
-      return;
-    }
-
-    const parsedYear =
-      year.trim() === "" ? null : Number(year);
-
-    if (
-      parsedYear !== null &&
-      (!Number.isInteger(parsedYear) ||
-        parsedYear < 2020 ||
-        parsedYear > 2100)
-    ) {
-      setSaveStatus("error");
-      setSaveMessage(
-        "Перевірте рік роботи.",
+        error instanceof Error
+          ? error.message
+          : "Перевірте рік роботи.",
       );
       return;
     }
@@ -2537,58 +2548,114 @@ export function NewProjectForm({
   };
 
   const handlePublish = async () => {
-    if (!projectId || saveStatus === "saving") {
+    if (
+      !projectId ||
+      saveInFlightRef.current ||
+      saveStatus === "saving"
+    ) {
+      if (!projectId) {
+        setSaveStatus("error");
+        setSaveMessage(
+          "Спочатку збережіть роботу як чернетку.",
+        );
+      }
+
+      return;
+    }
+
+    if (isMediaProcessing) {
       setSaveStatus("error");
       setSaveMessage(
-        "Спочатку збережіть роботу як чернетку.",
+        "Дочекайтеся завершення оптимізації медіа.",
+      );
+      return;
+    }
+
+    if (hasFailedLocalMedia) {
+      setSaveStatus("error");
+      setSaveMessage(
+        "Є медіафайл, який не вдалося підготувати. Видаліть його або повторіть підготовку.",
       );
       return;
     }
 
     const cleanTitle = title.trim();
-    const cleanDescription = shortDescription.trim();
+    const cleanDescription =
+      shortDescription.trim();
 
-    if (!cleanTitle || !cleanDescription) {
+    if (!cleanTitle) {
       setSaveStatus("error");
       setSaveMessage(
-        "Для публікації потрібні назва та короткий опис.",
+        "Для публікації потрібна назва роботи.",
       );
       return;
     }
 
-    const readyPhotos = media.filter(
-      (item) =>
-        item.type === "photo" &&
-        item.source === "stored" &&
-        item.processingStatus === "ready",
-    );
-
-    const readyCover = readyPhotos.find(
-      (item) => item.isCover,
-    );
-
-    if (!readyPhotos.length || !readyCover) {
+    if (!cleanDescription) {
       setSaveStatus("error");
       setSaveMessage(
-        "Для публікації потрібне хоча б одне готове фото та вибрана обкладинка.",
+        "Для публікації потрібен короткий опис роботи.",
       );
       return;
     }
 
+    let parsedYear: number | null;
+
+    try {
+      parsedYear = parseProjectYear(year);
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveMessage(
+        error instanceof Error
+          ? error.message
+          : "Перевірте рік роботи.",
+      );
+      return;
+    }
+
+    saveInFlightRef.current = true;
     setSaveStatus("saving");
     setSaveMessage("");
 
     try {
-      const parsedYear =
-        year.trim() === "" ? null : Number(year);
+      /*
+       * Recheck publication readiness against stored Supabase data.
+       * Browser state may be stale after another tab/session changes media.
+       */
+      const {
+        data: storedPhotos,
+        error: mediaReadinessError,
+      } = await supabase
+        .from("portfolio_media")
+        .select(
+          "id,is_cover,processing_status",
+        )
+        .eq("project_id", projectId)
+        .eq("media_type", "photo");
 
-      if (
-        parsedYear !== null &&
-        (!Number.isInteger(parsedYear) ||
-          parsedYear < 2020 ||
-          parsedYear > 2100)
-      ) {
-        throw new Error("Перевірте рік роботи.");
+      if (mediaReadinessError) {
+        throw mediaReadinessError;
+      }
+
+      const readyPhotos = (storedPhotos ?? []).filter(
+        (item) =>
+          item.processing_status === "ready",
+      );
+
+      const readyCover = readyPhotos.find(
+        (item) => item.is_cover,
+      );
+
+      if (!readyPhotos.length) {
+        throw new Error(
+          "Для публікації потрібне хоча б одне готове фото.",
+        );
+      }
+
+      if (!readyCover) {
+        throw new Error(
+          "Для публікації виберіть готове фото як обкладинку.",
+        );
       }
 
       const { error } = await supabase
@@ -2601,41 +2668,63 @@ export function NewProjectForm({
               ? wardrobeType
               : null,
           short_description: cleanDescription,
-          client_task: clientTask.trim() || null,
-          solution: solution.trim() || null,
-          materials: normalizeSpecifications(materials),
-          hardware: normalizeSpecifications(hardware),
-          features: features.trim() || null,
+          client_task:
+            clientTask.trim() || null,
+          solution:
+            solution.trim() || null,
+          materials:
+            normalizeSpecifications(materials),
+          hardware:
+            normalizeSpecifications(hardware),
+          features:
+            features.trim() || null,
           year: parsedYear,
-          location: location.trim() || null,
-          color: color.trim() || null,
+          location:
+            location.trim() || null,
+          color:
+            color.trim() || null,
           production_term:
             productionTerm.trim() || null,
           status: "published",
-          published_at: new Date().toISOString(),
+          published_at:
+            new Date().toISOString(),
         })
         .eq("id", projectId);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       setProjectStatus("published");
       setSaveStatus("saved");
       setSaveMessage(
         "Роботу опубліковано на сайті.",
       );
+
       router.refresh();
     } catch (error) {
+      console.error(
+        "Failed to publish portfolio project:",
+        error,
+      );
+
       setSaveStatus("error");
       setSaveMessage(
         error instanceof Error
           ? error.message
           : "Не вдалося опублікувати роботу.",
       );
+    } finally {
+      saveInFlightRef.current = false;
     }
   };
 
   const handleUnpublish = async () => {
-    if (!projectId || saveStatus === "saving") {
+    if (
+      !projectId ||
+      saveInFlightRef.current ||
+      saveStatus === "saving"
+    ) {
       return;
     }
 
@@ -2647,6 +2736,7 @@ export function NewProjectForm({
       return;
     }
 
+    saveInFlightRef.current = true;
     setSaveStatus("saving");
     setSaveMessage("");
 
@@ -2668,14 +2758,22 @@ export function NewProjectForm({
       setSaveMessage(
         "Роботу знято з публікації.",
       );
+
       router.refresh();
     } catch (error) {
+      console.error(
+        "Failed to unpublish portfolio project:",
+        error,
+      );
+
       setSaveStatus("error");
       setSaveMessage(
         error instanceof Error
           ? error.message
           : "Не вдалося зняти роботу з публікації.",
       );
+    } finally {
+      saveInFlightRef.current = false;
     }
   };
 

@@ -36,12 +36,20 @@
 
 .primary,
 .secondary {
+  display: inline-flex;
   min-height: 42px;
   padding: 0 16px;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #ddd4cc;
   border-radius: 8px;
   cursor: pointer;
   background: #fff;
+  font: inherit;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .primary {
