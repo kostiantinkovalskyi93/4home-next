@@ -3,7 +3,8 @@ import Link from "next/link";
 import { SearchIcon } from "@/app/admin/components/AdminIcons";
 import { createClient } from "@/lib/supabase/server";
 
-import { updateLeadStatus } from "./actions";
+import { LeadActionsMenu, LeadStatusMenu } from "./LeadRowControls";
+
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -271,13 +272,12 @@ export default async function AdminLeadsPage({
                 <table>
                   <thead>
                     <tr>
-                      <th>Клієнт</th>
-                      <th>Запит</th>
-                      <th>Джерело</th>
+                      <th>Ім’я</th>
+                      <th>Телефон</th>
+                      <th>Повідомлення</th>
                       <th>Дата</th>
-                      <th>Telegram</th>
                       <th>Статус</th>
-                      <th aria-label="Дії" />
+                      <th>Дії</th>
                     </tr>
                   </thead>
 
@@ -286,6 +286,9 @@ export default async function AdminLeadsPage({
                       <tr key={lead.id}>
                         <td>
                           <strong className={styles.clientName}>{lead.name}</strong>
+                        </td>
+
+                        <td>
                           <a
                             className={styles.phone}
                             href={`tel:${lead.phone.replace(/\s+/g, "")}`}
@@ -295,52 +298,19 @@ export default async function AdminLeadsPage({
                         </td>
 
                         <td>
-                          {lead.furniture_type ? (
-                            <strong className={styles.requestType}>
-                              {lead.furniture_type}
-                            </strong>
-                          ) : null}
+                          <div className={styles.messageCell}>
+                            {lead.furniture_type ? (
+                              <strong className={styles.requestType}>
+                                {lead.furniture_type}
+                              </strong>
+                            ) : null}
 
-                          {lead.dimensions ? (
-                            <span className={styles.dimensions}>
-                              {lead.dimensions}
-                            </span>
-                          ) : null}
-
-                          {lead.comment ? (
-                            <p className={styles.message}>{lead.comment}</p>
-                          ) : (
-                            <p className={styles.messageMuted}>Без коментаря</p>
-                          )}
-                        </td>
-
-                        <td>
-                          {lead.lead_source === "portfolio_project" ? (
-                            <div className={styles.sourceBlock}>
-                              <span className={styles.sourceBadge}>Портфоліо</span>
-
-                              {lead.project_id && lead.project_title ? (
-                                <Link
-                                  href={`/admin/portfolio/${lead.project_id}/edit`}
-                                  className={styles.projectLink}
-                                >
-                                  {lead.project_title}
-                                </Link>
-                              ) : lead.project_title ? (
-                                <span className={styles.projectTitle}>
-                                  {lead.project_title}
-                                </span>
-                              ) : null}
-
-                              {lead.project_category ? (
-                                <span className={styles.sourceMeta}>
-                                  {lead.project_category}
-                                </span>
-                              ) : null}
-                            </div>
-                          ) : (
-                            <span className={styles.sourceBadge}>Контакти</span>
-                          )}
+                            {lead.comment ? (
+                              <p className={styles.message}>{lead.comment}</p>
+                            ) : (
+                              <p className={styles.messageMuted}>Без коментаря</p>
+                            )}
+                          </div>
                         </td>
 
                         <td className={styles.date}>
@@ -348,48 +318,24 @@ export default async function AdminLeadsPage({
                         </td>
 
                         <td>
-                          <span
-                            className={
-                              lead.telegram_sent_at
-                                ? styles.telegramOk
-                                : styles.telegramPending
-                            }
-                          >
-                            {lead.telegram_sent_at
-                              ? "Надіслано"
-                              : "Немає підтвердження"}
-                          </span>
-                        </td>
-
-                        <td>
-                          <form
-                            action={updateLeadStatus}
-                            className={styles.statusForm}
-                          >
-                            <input type="hidden" name="leadId" value={lead.id} />
-                            <select
-                              name="status"
-                              defaultValue={lead.status}
-                              aria-label={`Статус заявки від ${lead.name}`}
-                            >
-                              <option value="new">{statusLabels.new}</option>
-                              <option value="in_progress">
-                                {statusLabels.in_progress}
-                              </option>
-                              <option value="done">{statusLabels.done}</option>
-                            </select>
-                            <button type="submit">Зберегти</button>
-                          </form>
+                          <LeadStatusMenu
+                            leadId={lead.id}
+                            leadName={lead.name}
+                            status={lead.status}
+                          />
                         </td>
 
                         <td className={styles.actionsCell}>
-                          <Link
-                            className={styles.detailsLink}
-                            href={`/admin/leads/${lead.id}`}
-                            aria-label={`Відкрити заявку від ${lead.name}`}
-                          >
-                            Відкрити
-                          </Link>
+                          <div className={styles.actionsGroup}>
+                            <LeadActionsMenu
+                              leadId={lead.id}
+                              name={lead.name}
+                              phone={lead.phone}
+                              furnitureType={lead.furniture_type}
+                              dimensions={lead.dimensions}
+                              comment={lead.comment}
+                            />
+                          </div>
                         </td>
                       </tr>
                     ))}

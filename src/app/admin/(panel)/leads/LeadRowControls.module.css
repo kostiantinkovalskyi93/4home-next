@@ -1,0 +1,381 @@
+.statusControl {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionsControl {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusTrigger {
+  display: inline-grid;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 0 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.statusTrigger > span:first-child {
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.statusTrigger:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.statusTrigger:focus-visible,
+.moreButton:focus-visible,
+.statusOption:focus-visible,
+.actionItem:focus-visible,
+.confirmActions button:focus-visible {
+  outline: 2px solid rgba(154, 104, 69, 0.9);
+  outline-offset: 2px;
+}
+
+.statusTrigger:disabled {
+  cursor: wait;
+  opacity: 0.66;
+}
+
+.status_new {
+  border-color: #c8e2f3;
+  color: #2f668d;
+  background: #e8f4fb;
+}
+
+.status_in_progress {
+  border-color: #f2d4aa;
+  color: #9d5b13;
+  background: #fff0dc;
+}
+
+.status_done {
+  border-color: #c7ead6;
+  color: #28724c;
+  background: #e4f5eb;
+}
+
+.chevron {
+  display: block;
+  justify-self: center;
+  color: currentColor;
+  transition: transform 180ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.statusMenu,
+.actionsMenu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 10px);
+  border: 1px solid rgba(86, 68, 54, 0.11);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.995);
+  box-shadow:
+    0 18px 44px rgba(55, 39, 27, 0.12),
+    0 5px 14px rgba(55, 39, 27, 0.045);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transition:
+    opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 240ms;
+}
+
+.statusMenu {
+  left: 50%;
+  width: 222px;
+  padding: 7px;
+  transform: translate3d(-50%, -10px, 0) scale(0.975);
+  transform-origin: top center;
+}
+
+.actionsMenu {
+  right: 0;
+  width: 224px;
+  padding: 7px;
+  transform: translate3d(0, -10px, 0) scale(0.975);
+  transform-origin: top right;
+}
+
+.statusMenu.popoverOpen {
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+
+.actionsMenu.popoverOpen {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.popoverOpen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
+}
+
+.popoverClosed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.statusOption,
+.actionItem {
+  width: 100%;
+  border: 0;
+  color: #302d2a;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.statusOption {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 18px;
+  min-height: 42px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 11px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.statusOption > span:nth-child(2) {
+  text-align: left;
+}
+
+.statusOption:hover {
+  background: #f7f3ef;
+}
+
+.option_new:hover,
+.option_new[aria-checked="true"] {
+  color: #2f668d;
+  background: #eef7fc;
+}
+
+.option_in_progress:hover,
+.option_in_progress[aria-checked="true"] {
+  color: #9d5b13;
+  background: #fff4e6;
+}
+
+.option_done:hover,
+.option_done[aria-checked="true"] {
+  color: #28724c;
+  background: #eaf7ef;
+}
+
+.statusDot {
+  width: 9px;
+  height: 9px;
+  justify-self: center;
+  border-radius: 999px;
+}
+
+.dot_new {
+  background: #79bce6;
+  box-shadow: 0 0 0 4px rgba(121, 188, 230, 0.12);
+}
+
+.dot_in_progress {
+  background: #e9a13f;
+  box-shadow: 0 0 0 4px rgba(233, 161, 63, 0.12);
+}
+
+.dot_done {
+  background: #40b878;
+  box-shadow: 0 0 0 4px rgba(64, 184, 120, 0.12);
+}
+
+.optionCheck {
+  display: inline-flex;
+  justify-self: center;
+}
+
+.moreButton {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #ded7cf;
+  border-radius: 11px;
+  color: #625d57;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.moreButton:hover {
+  color: #8d5d3d;
+  border-color: #c6aa96;
+  background: #f8f3ef;
+  box-shadow: 0 7px 18px rgba(55, 39, 27, 0.07);
+  transform: translateY(-1px);
+}
+
+.actionItem {
+  display: grid;
+  grid-template-columns: 21px minmax(0, 1fr);
+  min-height: 42px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.actionItem svg {
+  justify-self: center;
+  color: #766e67;
+}
+
+.actionItem:hover {
+  background: #f7f3ef;
+}
+
+.actionItem:hover svg {
+  color: #9a6845;
+}
+
+.menuDivider {
+  height: 1px;
+  margin: 6px 8px;
+  background: #eee6df;
+}
+
+.deleteItem {
+  color: #a64d45;
+}
+
+.deleteItem svg {
+  color: #a64d45;
+}
+
+.deleteItem:hover {
+  background: #fff1ef;
+}
+
+.deleteConfirm {
+  display: grid;
+  gap: 5px;
+  padding: 9px 8px 8px;
+  animation: confirmIn 160ms ease both;
+}
+
+.deleteConfirm strong {
+  color: #302d2a;
+  font-size: 12px;
+}
+
+.deleteConfirm > span {
+  color: #827a73;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.confirmActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.confirmActions button {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #ddd6cf;
+  border-radius: 9px;
+  color: #302d2a;
+  background: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirmActions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.confirmActions .confirmDeleteButton {
+  border-color: #bd675e;
+  color: #fff;
+  background: #a95149;
+}
+
+
+@keyframes confirmIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusMenu,
+  .actionsMenu {
+    transition: none;
+  }
+
+  .deleteConfirm {
+    animation: none;
+  }
+
+  .chevron,
+  .statusTrigger,
+  .moreButton {
+    transition: none;
+  }
+}

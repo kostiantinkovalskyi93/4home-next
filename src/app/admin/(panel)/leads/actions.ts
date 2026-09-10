@@ -39,3 +39,30 @@ export async function updateLeadStatus(formData: FormData) {
   revalidatePath("/admin/leads");
   revalidatePath(`/admin/leads/${leadId}`);
 }
+
+export async function deleteLead(leadId: string) {
+  const cleanLeadId = String(leadId ?? "").trim();
+
+  if (!cleanLeadId) {
+    throw new Error("Некоректний ID заявки.");
+  }
+
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+
+  if (!claimsData?.claims?.sub) {
+    throw new Error("Потрібна авторизація адміністратора.");
+  }
+
+  const { error } = await supabase
+    .from("leads")
+    .delete()
+    .eq("id", cleanLeadId);
+
+  if (error) {
+    console.error("Failed to delete lead:", error);
+    throw new Error("Не вдалося видалити заявку.");
+  }
+
+  revalidatePath("/admin/leads");
+}
