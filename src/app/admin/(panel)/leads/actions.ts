@@ -37,4 +37,5 @@ export async function updateLeadStatus(formData: FormData) {
   }
 
   revalidatePath("/admin/leads");
+  revalidatePath(`/admin/leads/${leadId}`);
 }
