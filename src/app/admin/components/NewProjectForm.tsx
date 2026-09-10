@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChangeEvent,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -505,6 +506,148 @@ export function NewProjectForm({
       "image/jpeg,image/png,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov",
     [],
   );
+
+  const formSignature = useMemo(
+    () =>
+      JSON.stringify({
+        title: title.trim(),
+        category,
+        wardrobeType:
+          category === "wardrobe"
+            ? wardrobeType
+            : null,
+        shortDescription:
+          shortDescription.trim(),
+        clientTask: clientTask.trim(),
+        solution: solution.trim(),
+        materials:
+          normalizeSpecifications(materials),
+        hardware:
+          normalizeSpecifications(hardware),
+        features: features.trim(),
+        year: year.trim(),
+        location: location.trim(),
+        color: color.trim(),
+        productionTerm:
+          productionTerm.trim(),
+      }),
+    [
+      category,
+      clientTask,
+      color,
+      features,
+      hardware,
+      location,
+      materials,
+      productionTerm,
+      shortDescription,
+      solution,
+      title,
+      wardrobeType,
+      year,
+    ],
+  );
+
+  const [
+    savedFormSignature,
+    setSavedFormSignature,
+  ] = useState(formSignature);
+
+  const hasPendingLocalMedia = media.some(
+    (item) => item.source === "local",
+  );
+
+  const hasUnsavedChanges =
+    formSignature !== savedFormSignature ||
+    hasPendingLocalMedia;
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) {
+      return;
+    }
+
+    const handleBeforeUnload = (
+      event: BeforeUnloadEvent,
+    ) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    const handleDocumentClick = (
+      event: MouseEvent,
+    ) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const target =
+        event.target instanceof Element
+          ? event.target
+          : null;
+
+      const anchor = target?.closest(
+        "a[href]",
+      ) as HTMLAnchorElement | null;
+
+      if (
+        !anchor ||
+        anchor.target === "_blank" ||
+        anchor.hasAttribute("download")
+      ) {
+        return;
+      }
+
+      const href = anchor.getAttribute("href");
+
+      if (
+        !href ||
+        href.startsWith("#") ||
+        href.startsWith("javascript:")
+      ) {
+        return;
+      }
+
+      const confirmed = window.confirm(
+        "Є незбережені зміни. Вийти зі сторінки без збереження?",
+      );
+
+      if (!confirmed) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    window.addEventListener(
+      "beforeunload",
+      handleBeforeUnload,
+    );
+
+    document.addEventListener(
+      "click",
+      handleDocumentClick,
+      true,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "beforeunload",
+        handleBeforeUnload,
+      );
+
+      document.removeEventListener(
+        "click",
+        handleDocumentClick,
+        true,
+      );
+    };
+  }, [hasUnsavedChanges]);
 
   const markAsChanged = () => {
     if (
@@ -2501,6 +2644,10 @@ export function NewProjectForm({
         await uploadPendingPhotos(data.id);
         await uploadPendingVideos(data.id);
 
+        setSavedFormSignature(
+          formSignature,
+        );
+
         setSaveStatus("saved");
         setSaveMessage(
           "Чернетку та медіафайли збережено.",
@@ -2524,6 +2671,10 @@ export function NewProjectForm({
 
       await uploadPendingPhotos(projectId);
       await uploadPendingVideos(projectId);
+
+      setSavedFormSignature(
+        formSignature,
+      );
 
       setSaveStatus("saved");
       setSaveMessage(
@@ -2694,6 +2845,10 @@ export function NewProjectForm({
       if (error) {
         throw error;
       }
+
+      setSavedFormSignature(
+        formSignature,
+      );
 
       setProjectStatus("published");
       setSaveStatus("saved");
