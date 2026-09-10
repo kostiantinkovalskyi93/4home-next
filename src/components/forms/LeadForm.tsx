@@ -22,6 +22,8 @@ import styles from "./LeadForm.module.css";
 
 const MAX_FILES = 3;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_COMMENT_LENGTH = 1500;
+const ATTRIBUTED_COMMENT_MAX_LENGTH = 1250;
 
 const TURNSTILE_SCRIPT_ID = "cloudflare-turnstile-script";
 
@@ -48,6 +50,19 @@ type FormState = {
   dimensions: string;
   comment: string;
   website: string;
+};
+
+export type LeadSourceContext = {
+  type: "portfolio_project";
+  projectId: string;
+  projectSlug: string;
+  projectTitle: string;
+  projectCategory: string;
+  projectPath: string;
+};
+
+type LeadFormProps = {
+  sourceContext?: LeadSourceContext | null;
 };
 
 type FilePreview = {
@@ -94,6 +109,28 @@ const initialFormState: FormState = {
   comment: "",
   website: "",
 };
+
+function getFurnitureTypeForSource(sourceContext?: LeadSourceContext | null) {
+  if (!sourceContext) return initialFormState.furnitureType;
+
+  if (sourceContext.projectCategory === "Кухні") return "Кухня";
+  if (sourceContext.projectCategory === "Розпашні шафи") {
+    return "Розпашна шафа";
+  }
+  if (sourceContext.projectCategory === "Шафи-купе") return "Шафа-купе";
+  if (sourceContext.projectCategory === "Інші меблі") return "Інші меблі";
+
+  return initialFormState.furnitureType;
+}
+
+function createInitialFormState(
+  sourceContext?: LeadSourceContext | null,
+): FormState {
+  return {
+    ...initialFormState,
+    furnitureType: getFurnitureTypeForSource(sourceContext),
+  };
+}
 
 function isValidPhone(value: string) {
   const digits = value.replace(/\D/g, "");
@@ -198,9 +235,10 @@ function getSubmitError({
   };
 }
 
-export function LeadForm() {
-  const [form, setForm] =
-    useState<FormState>(initialFormState);
+export function LeadForm({ sourceContext = null }: LeadFormProps) {
+  const [form, setForm] = useState<FormState>(() =>
+    createInitialFormState(sourceContext),
+  );
 
   const [files, setFiles] = useState<FilePreview[]>([]);
 
@@ -221,6 +259,8 @@ export function LeadForm() {
   >("idle");
 
   const filesRef = useRef<FilePreview[]>([]);
+
+  const submissionIdRef = useRef<string | null>(null);
 
   const phoneInputRef = useRef<HTMLInputElement>(null);
 
@@ -538,7 +578,7 @@ export function LeadForm() {
     });
 
     setFiles([]);
-    setForm(initialFormState);
+    setForm(createInitialFormState(sourceContext));
     setPhoneError("");
     setFileError("");
     setSubmitError(null);
@@ -612,6 +652,12 @@ export function LeadForm() {
 
       const formData = new FormData();
 
+      const submissionId =
+        submissionIdRef.current ?? crypto.randomUUID();
+
+      submissionIdRef.current = submissionId;
+      formData.append("submissionId", submissionId);
+
       formData.append(
         "name",
         form.name.trim(),
@@ -632,10 +678,26 @@ export function LeadForm() {
         form.dimensions.trim(),
       );
 
-      formData.append(
-        "comment",
-        form.comment.trim(),
-      );
+      const userComment = form.comment.trim();
+      const portfolioReference = sourceContext
+        ? `Референс із портфоліо: «${sourceContext.projectTitle}» (${sourceContext.projectPath})`
+        : "";
+      const submittedComment = portfolioReference
+        ? [userComment, portfolioReference].filter(Boolean).join("\n\n")
+        : userComment;
+
+      formData.append("comment", submittedComment);
+
+      if (sourceContext) {
+        formData.append("leadSource", sourceContext.type);
+        formData.append("projectId", sourceContext.projectId);
+        formData.append("projectSlug", sourceContext.projectSlug);
+        formData.append("projectTitle", sourceContext.projectTitle);
+        formData.append("projectCategory", sourceContext.projectCategory);
+        formData.append("sourcePath", sourceContext.projectPath);
+      } else {
+        formData.append("leadSource", "contacts");
+      }
 
       formData.append(
         "website",
@@ -697,6 +759,7 @@ export function LeadForm() {
         return;
       }
 
+      submissionIdRef.current = null;
       resetForm();
       setStatus("success");
     } catch {
@@ -742,8 +805,16 @@ export function LeadForm() {
             </h2>
 
             <p className={styles.successText}>
-              Сергій зв&apos;яжеться з вами для
-              уточнення деталей проєкту.
+              {sourceContext ? (
+                <>
+                  Заявку щодо «{sourceContext.projectTitle}» отримано. Сергій
+                  зв&apos;яжеться з вами для уточнення деталей.
+                </>
+              ) : (
+                <>
+                  Сергій зв&apos;яжеться з вами для уточнення деталей проєкту.
+                </>
+              )}
             </p>
 
             <div
@@ -958,6 +1029,24 @@ export function LeadForm() {
               onSubmit={handleSubmit}
               noValidate
             >
+              {sourceContext && (
+                <div className={styles.sourceContext}>
+                  <div>
+                    <span className={styles.sourceContextLabel}>
+                      Референс із портфоліо
+                    </span>
+                    <strong>{sourceContext.projectTitle}</strong>
+                  </div>
+
+                  <Link
+                    href={sourceContext.projectPath}
+                    className={styles.sourceContextLink}
+                  >
+                    Переглянути роботу <span aria-hidden="true">↗</span>
+                  </Link>
+                </div>
+              )}
+
               <div className={styles.field}>
                 <label htmlFor="lead-name">
                   Ім’я
@@ -1100,7 +1189,11 @@ export function LeadForm() {
                   id="lead-comment"
                   name="comment"
                   rows={5}
-                  maxLength={1500}
+                  maxLength={
+                    sourceContext
+                      ? ATTRIBUTED_COMMENT_MAX_LENGTH
+                      : MAX_COMMENT_LENGTH
+                  }
                   placeholder="Опишіть задачу, стиль, побажання..."
                   value={form.comment}
                   onChange={(event) =>
