@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 
 export type PublicPortfolioCategory =
   | "Кухні"
@@ -242,7 +242,7 @@ function buildPublicProject(
 }
 
 export async function getPublishedPortfolioProjects() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const {
     data: projectRows,
@@ -323,7 +323,7 @@ export async function getPublishedPortfolioProjects() {
 export async function getPublishedPortfolioProject(
   slug: string,
 ) {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const {
     data: projectRow,

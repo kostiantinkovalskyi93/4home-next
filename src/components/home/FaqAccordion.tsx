@@ -34,10 +34,18 @@ export function FaqAccordion({ items }: FaqAccordionProps) {
       }
     }
 
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpenIndex(null);
+      }
+    }
+
     document.addEventListener("pointerdown", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("pointerdown", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [openIndex]);
 

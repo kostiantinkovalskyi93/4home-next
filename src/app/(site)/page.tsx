@@ -4,9 +4,16 @@ import Link from "next/link";
 
 import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { CONTACTS } from "@/data/contacts";
+import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 
 import styles from "./page.module.css";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
@@ -101,33 +108,6 @@ const categories = [
     image: "/images/portfolio/media-console/media_console_2.webp",
     alt: "Корпусні меблі на замовлення",
     layout: "minor",
-  },
-];
-
-const portfolioProjects = [
-  {
-    number: "01",
-    title: "Світла кухня",
-    category: "Кухня на замовлення",
-    image: "/images/portfolio/kitchen-luxury/luxury_kitchen_1.webp",
-    alt: "Світла кухня на замовлення",
-    size: "featured",
-  },
-  {
-    number: "02",
-    title: "Вбудована шафа",
-    category: "Розпашні шафи",
-    image: "/images/portfolio/hinged-02.webp",
-    alt: "Вбудована розпашна шафа",
-    size: "small",
-  },
-  {
-    number: "03",
-    title: "Меблі для передпокою",
-    category: "Індивідуальні меблі",
-    image: "/images/home/portfolio/hall-furniture.webp",
-    alt: "Меблі для передпокою на замовлення",
-    size: "small",
   },
 ];
 
@@ -286,7 +266,37 @@ const serviceJsonLd = {
   ],
 };
 
-export default function Home() {
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
+
+export default async function Home() {
+  let homePortfolioProjects:
+    Awaited<
+      ReturnType<
+        typeof getPublishedPortfolioProjects
+      >
+    > = [];
+
+  try {
+    homePortfolioProjects = (
+      await getPublishedPortfolioProjects()
+    ).slice(0, 3);
+  } catch (error) {
+    console.error(
+      "Failed to load homepage portfolio projects:",
+      error,
+    );
+  }
   return (
     <>
       <script
@@ -300,6 +310,15 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(serviceJsonLd),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            faqJsonLd,
+          ).replace(/</g, "\\u003c"),
         }}
       />
 
@@ -339,7 +358,7 @@ export default function Home() {
                   fill
                   priority
                   fetchPriority="high"
-                  sizes="(max-width: 900px) 100vw, 55vw"
+                  sizes="(max-width: 900px) 100vw, (max-width: 1328px) 55vw, 670px"
                   className={styles.heroImage}
                 />
               </div>
@@ -420,9 +439,10 @@ export default function Home() {
                         alt={category.alt}
                         fill
                         sizes={
-                          category.layout === "primary"
-                            ? "(max-width: 760px) 100vw, 60vw"
-                            : "(max-width: 760px) 100vw, 40vw"
+                          category.layout === "primary" ||
+                          category.layout === "tertiary"
+                            ? "(max-width: 760px) 100vw, (max-width: 1328px) 58vw, 737px"
+                            : "(max-width: 760px) 100vw, (max-width: 1328px) 42vw, 519px"
                         }
                         className={styles.categoryImage}
                       />
@@ -483,52 +503,79 @@ export default function Home() {
               </div>
             </div>
 
-            <div className={styles.portfolioGrid}>
-              {portfolioProjects.map((project) => (
-                <article
-                  key={project.number}
-                  className={
-                    project.size === "featured"
-                      ? styles.portfolioFeatured
-                      : styles.portfolioSmall
-                  }
-                >
-                  <Link href="/portfolio" className={styles.portfolioLink}>
-                    <div className={styles.portfolioImageWrapper}>
-                      <Image
-                        src={project.image}
-                        alt={project.alt}
-                        fill
-                        sizes={
-                          project.size === "featured"
-                            ? "(max-width: 760px) 100vw, 58vw"
-                            : "(max-width: 760px) 100vw, 38vw"
+            {homePortfolioProjects.length > 0 ? (
+              <div className={styles.portfolioGrid}>
+                {homePortfolioProjects.map(
+                  (project, index) => {
+                    const featured =
+                      index === 0;
+
+                    return (
+                      <article
+                        key={project.id}
+                        className={
+                          featured
+                            ? styles.portfolioFeatured
+                            : styles.portfolioSmall
                         }
-                        className={styles.portfolioImage}
-                      />
+                      >
+                        <Link
+                          href={`/portfolio/${project.slug}`}
+                          scroll={false}
+                          className={styles.portfolioLink}
+                        >
+                          <div className={styles.portfolioImageWrapper}>
+                            <Image
+                              src={project.coverImage}
+                              alt={`${project.title} — 4HOME`}
+                              fill
+                              sizes={
+                                featured
+                                  ? "(max-width: 760px) 100vw, (max-width: 1328px) 58vw, 737px"
+                                  : "(max-width: 760px) 100vw, (max-width: 1328px) 42vw, 519px"
+                              }
+                              className={styles.portfolioImage}
+                            />
 
-                      <span className={styles.portfolioNumber}>
-                        {project.number}
-                      </span>
+                            <span className={styles.portfolioNumber}>
+                              {String(index + 1).padStart(2, "0")}
+                            </span>
 
-                      <span className={styles.portfolioArrow} aria-hidden="true">
-                        ↗
-                      </span>
-                    </div>
+                            <span
+                              className={styles.portfolioArrow}
+                              aria-hidden="true"
+                            >
+                              ↗
+                            </span>
+                          </div>
 
-                    <div className={styles.portfolioInfo}>
-                      <p className={styles.portfolioCategory}>
-                        {project.category}
-                      </p>
+                          <div className={styles.portfolioInfo}>
+                            <p className={styles.portfolioCategory}>
+                              {project.category}
+                            </p>
 
-                      <h3 className={styles.portfolioProjectTitle}>
-                        {project.title}
-                      </h3>
-                    </div>
-                  </Link>
-                </article>
-              ))}
-            </div>
+                            <h3 className={styles.portfolioProjectTitle}>
+                              {project.title}
+                            </h3>
+                          </div>
+                        </Link>
+                      </article>
+                    );
+                  },
+                )}
+              </div>
+            ) : (
+              <div className={styles.portfolioUnavailable}>
+                <p>
+                  Нові роботи готуємо до публікації.
+                </p>
+
+                <Link href="/portfolio">
+                  Перейти до портфоліо
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            )}
 
             <div className={styles.portfolioMobileAction}>
               <Link href="/portfolio" className={styles.portfolioMobileLink}>

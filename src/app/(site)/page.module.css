@@ -2071,3 +2071,81 @@
     transition: none;
   }
 }
+
+/* N17.2 — Home page final production audit */
+
+.portfolioUnavailable {
+  display: flex;
+  min-height: 190px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 56px;
+  padding: 28px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.portfolioUnavailable p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.portfolioUnavailable a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.portfolioUnavailable a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+  .portfolioUnavailable {
+    align-items: flex-start;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
+
+@media (hover: none) {
+  .primaryButton:hover,
+  .aboutButton:hover,
+  .finalCtaPrimary:hover,
+  .finalCtaSecondary:hover,
+  .materialCard:hover {
+    transform: none;
+  }
+
+  .categoryLink:hover .categoryImage,
+  .portfolioLink:hover .portfolioImage {
+    transform: none;
+  }
+
+  .categoryLink:hover .categoryMore,
+  .portfolioAllLink:hover,
+  .materialsLink:hover,
+  .aboutLink:hover {
+    gap: 10px;
+  }
+
+  .finalContactItem:hover,
+  .materialCard:hover {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolioUnavailable a {
+    scroll-behavior: auto;
+  }
+}
