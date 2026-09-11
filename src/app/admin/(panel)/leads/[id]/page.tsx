@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { updateLeadStatus } from "../actions";
+import { LeadStatusMenu } from "../LeadRowControls";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -103,7 +103,11 @@ export default async function LeadDetailPage({
   return (
     <section className={styles.panel}>
       <div className={styles.topbar}>
-        <Link href="/admin/leads" className={styles.backLink}>
+        <Link
+          href="/admin/leads"
+          className={styles.backLink}
+          aria-label="Повернутися до списку заявок"
+        >
           ← До заявок
         </Link>
 
@@ -119,7 +123,11 @@ export default async function LeadDetailPage({
           <p>Отримано {formatDateTime(lead.created_at)}</p>
         </div>
 
-        <a className={styles.callButton} href={phoneHref}>
+        <a
+          className={styles.callButton}
+          href={phoneHref}
+          aria-label={`Подзвонити ${lead.name}`}
+        >
           Подзвонити
         </a>
       </header>
@@ -220,21 +228,17 @@ export default async function LeadDetailPage({
           <section className={styles.sideCard}>
             <span className={styles.sideLabel}>СТАТУС</span>
 
-            <form action={updateLeadStatus} className={styles.statusForm}>
-              <input type="hidden" name="leadId" value={lead.id} />
+            <div className={styles.statusControlWrap}>
+              <LeadStatusMenu
+                leadId={lead.id}
+                leadName={lead.name}
+                status={lead.status}
+              />
+            </div>
 
-              <select
-                name="status"
-                defaultValue={lead.status}
-                aria-label={`Статус заявки від ${lead.name}`}
-              >
-                <option value="new">{statusLabels.new}</option>
-                <option value="in_progress">{statusLabels.in_progress}</option>
-                <option value="done">{statusLabels.done}</option>
-              </select>
-
-              <button type="submit">Зберегти статус</button>
-            </form>
+            <p className={styles.statusHint}>
+              Статус зберігається одразу після вибору.
+            </p>
           </section>
 
           <section className={styles.sideCard}>
