@@ -1,0 +1,264 @@
+.page {
+  width: min(100%, 1500px);
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.searchSkeleton,
+.profileSkeleton,
+.titleSkeleton,
+.subtitleSkeleton,
+.buttonSkeleton,
+.selectSkeleton,
+.tabsSkeleton span,
+.imageSkeleton,
+.cardTitleSkeleton,
+.cardMetaSkeleton,
+.cardCountsSkeleton {
+  position: relative;
+  overflow: hidden;
+  background: #ece7e2;
+}
+
+.searchSkeleton::after,
+.profileSkeleton::after,
+.titleSkeleton::after,
+.subtitleSkeleton::after,
+.buttonSkeleton::after,
+.selectSkeleton::after,
+.tabsSkeleton span::after,
+.imageSkeleton::after,
+.cardTitleSkeleton::after,
+.cardMetaSkeleton::after,
+.cardCountsSkeleton::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 76%
+  );
+  content: "";
+  transform: translateX(-100%);
+  animation: shimmer 1.45s ease-in-out infinite;
+}
+
+.searchSkeleton {
+  width: min(600px, 58vw);
+  height: 48px;
+  border-radius: 10px;
+}
+
+.profileSkeleton {
+  width: 135px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.panel {
+  width: 100%;
+  min-width: 0;
+  padding: clamp(22px, 3vw, 38px);
+  border: 1px solid rgba(80, 58, 43, 0.06);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.headingRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.titleSkeleton {
+  width: 220px;
+  height: 48px;
+  border-radius: 9px;
+}
+
+.subtitleSkeleton {
+  width: 175px;
+  height: 18px;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+.buttonSkeleton {
+  width: 150px;
+  height: 48px;
+  border-radius: 9px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 28px 0 22px;
+}
+
+.tabsSkeleton {
+  display: flex;
+  gap: 8px;
+}
+
+.tabsSkeleton span {
+  width: 84px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.tabsSkeleton span:last-child {
+  width: 112px;
+}
+
+.selectSkeleton {
+  width: 170px;
+  height: 42px;
+  border-radius: 9px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e6dfd8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.imageSkeleton {
+  aspect-ratio: 4 / 3;
+}
+
+.cardBody {
+  padding: 13px 14px 15px;
+}
+
+.cardTitleSkeleton {
+  width: 74%;
+  height: 19px;
+  border-radius: 6px;
+}
+
+.cardMetaSkeleton {
+  width: 46%;
+  height: 13px;
+  margin-top: 8px;
+  border-radius: 5px;
+}
+
+.cardCountsSkeleton {
+  width: 72px;
+  height: 16px;
+  margin-top: 14px;
+  border-radius: 5px;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 1250px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 840px) {
+  .profileSkeleton {
+    display: none;
+  }
+
+  .searchSkeleton {
+    width: 100%;
+  }
+
+  .panel {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tabsSkeleton {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tabsSkeleton span,
+  .tabsSkeleton span:last-child,
+  .selectSkeleton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .headingRow {
+    flex-direction: column;
+  }
+
+  .buttonSkeleton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 580px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel {
+    padding: 15px;
+  }
+
+  .tabsSkeleton {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searchSkeleton::after,
+  .profileSkeleton::after,
+  .titleSkeleton::after,
+  .subtitleSkeleton::after,
+  .buttonSkeleton::after,
+  .selectSkeleton::after,
+  .tabsSkeleton span::after,
+  .imageSkeleton::after,
+  .cardTitleSkeleton::after,
+  .cardMetaSkeleton::after,
+  .cardCountsSkeleton::after {
+    animation: none;
+    display: none;
+  }
+}

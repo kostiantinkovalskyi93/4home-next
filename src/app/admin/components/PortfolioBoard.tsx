@@ -98,7 +98,7 @@ export function PortfolioBoard({
             onChange={(event) =>
               setQuery(event.target.value)
             }
-            placeholder="Пошук за назвою, описом..."
+            placeholder="Пошук за назвою, категорією..."
           />
         </label>
 
@@ -266,10 +266,32 @@ export function PortfolioBoard({
         </div>
 
         {projects.length === 0 && (
-          <div className={styles.empty}>
-            За цими параметрами робіт не
-            знайдено.
-          </div>
+          sourceProjects.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateIcon}>
+                <ImageIcon />
+              </div>
+
+              <strong>Поки немає робіт</strong>
+
+              <p>
+                Додайте перший проєкт — після збереження він з’явиться тут.
+              </p>
+
+              <Link
+                href="/admin/portfolio/new"
+                className={styles.emptyStateAction}
+              >
+                <PlusIcon />
+                Додати роботу
+              </Link>
+            </div>
+          ) : (
+            <div className={styles.empty}>
+              За цими параметрами робіт не
+              знайдено.
+            </div>
+          )
         )}
       </section>
     </div>
