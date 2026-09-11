@@ -414,3 +414,16 @@
     transform: none;
   }
 }
+
+
+/* N15.8.4 — Detail edge-case safeguards */
+
+.header h1,
+.detailsGrid dd,
+.commentBlock p,
+.metaRows strong,
+.deliveryRow,
+.backLink {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

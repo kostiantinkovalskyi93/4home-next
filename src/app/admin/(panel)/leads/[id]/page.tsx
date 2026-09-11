@@ -48,6 +48,12 @@ function formatDateTime(value: string | null) {
     return "—";
   }
 
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Дата недоступна";
+  }
+
   return new Intl.DateTimeFormat("uk-UA", {
     timeZone: "Europe/Kyiv",
     day: "2-digit",
@@ -55,7 +61,7 @@ function formatDateTime(value: string | null) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 export default async function LeadDetailPage({
@@ -90,6 +96,7 @@ export default async function LeadDetailPage({
 
   if (error) {
     console.error("Failed to load lead:", error);
+    throw new Error("Не вдалося завантажити заявку.");
   }
 
   const lead = data as LeadRow | null;

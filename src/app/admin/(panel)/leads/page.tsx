@@ -60,6 +60,12 @@ function normalizeSearch(value?: string) {
 }
 
 function formatCreatedAt(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Дата недоступна";
+  }
+
   return new Intl.DateTimeFormat("uk-UA", {
     timeZone: "Europe/Kyiv",
     day: "2-digit",
@@ -67,7 +73,7 @@ function formatCreatedAt(value: string) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 function matchesSearch(lead: LeadRow, query: string) {
@@ -181,7 +187,15 @@ export default async function AdminLeadsPage({
       {error ? (
         <div className={styles.stateCard} role="alert">
           <strong>Не вдалося завантажити заявки.</strong>
-          <p>Перевірте таблицю leads та RLS-політики в Supabase.</p>
+          <p>
+            Дані тимчасово недоступні. Оновіть сторінку або спробуйте ще раз трохи пізніше.
+          </p>
+          <Link
+            href="/admin/leads"
+            className={styles.retryLink}
+          >
+            Спробувати ще раз
+          </Link>
         </div>
       ) : (
         <>
