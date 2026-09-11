@@ -144,6 +144,51 @@ function usePopoverState() {
   };
 }
 
+
+function focusMenuItem(
+  menu: HTMLElement | null,
+  direction: "first" | "last" | "next" | "previous",
+) {
+  if (!menu) {
+    return;
+  }
+
+  const items = Array.from(
+    menu.querySelectorAll<HTMLElement>(
+      '[role="menuitem"]:not([aria-disabled="true"]), [role="menuitemradio"]:not([aria-disabled="true"])',
+    ),
+  ).filter((item) => item.tabIndex >= 0);
+
+  if (!items.length) {
+    return;
+  }
+
+  const currentIndex = items.findIndex(
+    (item) => item === document.activeElement,
+  );
+
+  if (direction === "first") {
+    items[0]?.focus();
+    return;
+  }
+
+  if (direction === "last") {
+    items.at(-1)?.focus();
+    return;
+  }
+
+  const nextIndex =
+    direction === "next"
+      ? currentIndex < 0
+        ? 0
+        : (currentIndex + 1) % items.length
+      : currentIndex <= 0
+        ? items.length - 1
+        : currentIndex - 1;
+
+  items[nextIndex]?.focus();
+}
+
 export function LeadStatusMenu({
   leadId,
   leadName,
@@ -152,8 +197,12 @@ export function LeadStatusMenu({
   const router = useRouter();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [currentStatus, setCurrentStatus] =
     useState<LeadStatus>(status);
+  const [statusError, setStatusError] =
+    useState("");
   const [isPending, startTransition] =
     useTransition();
   const {
@@ -191,6 +240,37 @@ export function LeadStatusMenu({
     };
   }, [isStatusMenuOpen, hideStatusMenu]);
 
+  useEffect(() => {
+    if (!isStatusMenuOpen) {
+      return;
+    }
+
+    const selected =
+      menuRef.current?.querySelector<HTMLElement>(
+        '[role="menuitemradio"][aria-checked="true"]',
+      );
+
+    selected?.focus();
+  }, [isStatusMenuOpen]);
+
+  const handleStatusMenuKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "next");
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "previous");
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "first");
+    } else if (event.key === "End") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "last");
+    }
+  };
+
   const currentLabel =
     statusOptions.find(
       (item) => item.value === currentStatus,
@@ -206,8 +286,10 @@ export function LeadStatusMenu({
     }
 
     const previousStatus = currentStatus;
+    setStatusError("");
     setCurrentStatus(nextStatus);
     hideStatusMenu();
+    triggerRef.current?.focus();
 
     startTransition(async () => {
       const formData = new FormData();
@@ -223,6 +305,9 @@ export function LeadStatusMenu({
           error,
         );
         setCurrentStatus(previousStatus);
+        setStatusError(
+          "Не вдалося змінити статус. Спробуйте ще раз.",
+        );
       }
     });
   };
@@ -233,6 +318,7 @@ export function LeadStatusMenu({
       className={styles.statusControl}
     >
       <button
+        ref={triggerRef}
         type="button"
         className={`${styles.statusTrigger} ${
           styles[`status_${currentStatus}`]
@@ -249,6 +335,7 @@ export function LeadStatusMenu({
       </button>
 
       <div
+        ref={menuRef}
         id={menuId}
         className={`${styles.statusMenu} ${
           isStatusMenuOpen
@@ -258,6 +345,7 @@ export function LeadStatusMenu({
         role="menu"
         aria-hidden={!isStatusMenuOpen}
         aria-label={`Статус заявки від ${leadName}`}
+        onKeyDown={handleStatusMenuKeyDown}
       >
         {statusOptions.map((option) => {
           const selected =
@@ -291,6 +379,14 @@ export function LeadStatusMenu({
           );
         })}
       </div>
+
+      <span
+        className={styles.srOnly}
+        role="status"
+        aria-live="polite"
+      >
+        {statusError}
+      </span>
     </div>
   );
 }
@@ -306,18 +402,45 @@ export function LeadActionsMenu({
   const router = useRouter();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const cancelDeleteRef =
+    useRef<HTMLButtonElement>(null);
   const {
     open: isActionsMenuOpen,
     hide: hideActionsMenu,
     toggle: toggleActionsMenu,
   } = usePopoverState();
   const [copyState, setCopyState] = useState<
-    "idle" | "phone" | "lead"
+    "idle" | "phone" | "lead" | "error"
   >("idle");
+  const [actionError, setActionError] =
+    useState("");
   const [confirmDelete, setConfirmDelete] =
     useState(false);
   const [isPending, startTransition] =
     useTransition();
+
+  const closeActionsMenu = useCallback(() => {
+    setConfirmDelete(false);
+    hideActionsMenu();
+  }, [hideActionsMenu]);
+
+  const handleActionsToggle = useCallback(() => {
+    setActionError("");
+
+    if (isActionsMenuOpen) {
+      setConfirmDelete(false);
+      hideActionsMenu();
+      return;
+    }
+
+    toggleActionsMenu();
+  }, [
+    hideActionsMenu,
+    isActionsMenuOpen,
+    toggleActionsMenu,
+  ]);
 
   useEffect(() => {
     if (!isActionsMenuOpen) {
@@ -329,7 +452,7 @@ export function LeadActionsMenu({
         rootRef.current &&
         !rootRef.current.contains(event.target as Node)
       ) {
-        hideActionsMenu();
+        closeActionsMenu();
       }
     };
 
@@ -338,7 +461,8 @@ export function LeadActionsMenu({
         if (confirmDelete) {
           setConfirmDelete(false);
         } else {
-          hideActionsMenu();
+          closeActionsMenu();
+          triggerRef.current?.focus();
         }
       }
     };
@@ -350,7 +474,49 @@ export function LeadActionsMenu({
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [isActionsMenuOpen, confirmDelete, hideActionsMenu]);
+  }, [
+    isActionsMenuOpen,
+    confirmDelete,
+    closeActionsMenu,
+  ]);
+
+  useEffect(() => {
+    if (!isActionsMenuOpen) {
+      return;
+    }
+
+    focusMenuItem(menuRef.current, "first");
+  }, [isActionsMenuOpen]);
+
+  useEffect(() => {
+    if (!confirmDelete) {
+      return;
+    }
+
+    cancelDeleteRef.current?.focus();
+  }, [confirmDelete]);
+
+  const handleActionsMenuKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (confirmDelete) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "next");
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "previous");
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "first");
+    } else if (event.key === "End") {
+      event.preventDefault();
+      focusMenuItem(menuRef.current, "last");
+    }
+  };
 
   useEffect(() => {
     if (copyState === "idle") {
@@ -369,11 +535,17 @@ export function LeadActionsMenu({
     value: string,
     kind: "phone" | "lead",
   ) => {
+    setActionError("");
+
     try {
       await navigator.clipboard.writeText(value);
       setCopyState(kind);
     } catch (error) {
       console.error("Clipboard error:", error);
+      setCopyState("error");
+      setActionError(
+        "Не вдалося скопіювати дані.",
+      );
     }
   };
 
@@ -390,16 +562,20 @@ export function LeadActionsMenu({
       return;
     }
 
+    setActionError("");
+
     startTransition(async () => {
       try {
         await deleteLead(leadId);
-        setConfirmDelete(false);
-        hideActionsMenu();
+        closeActionsMenu();
         router.refresh();
       } catch (error) {
         console.error(
           "Failed to delete lead:",
           error,
+        );
+        setActionError(
+          "Не вдалося видалити заявку. Спробуйте ще раз.",
         );
       }
     });
@@ -411,9 +587,10 @@ export function LeadActionsMenu({
       className={styles.actionsControl}
     >
       <button
+        ref={triggerRef}
         type="button"
         className={styles.moreButton}
-        onClick={toggleActionsMenu}
+        onClick={handleActionsToggle}
         aria-haspopup="menu"
         aria-expanded={isActionsMenuOpen}
         aria-controls={menuId}
@@ -423,6 +600,7 @@ export function LeadActionsMenu({
       </button>
 
       <div
+        ref={menuRef}
         id={menuId}
         className={`${styles.actionsMenu} ${
           isActionsMenuOpen
@@ -432,6 +610,7 @@ export function LeadActionsMenu({
         role="menu"
         aria-hidden={!isActionsMenuOpen}
         aria-label={`Дії із заявкою від ${name}`}
+        onKeyDown={handleActionsMenuKeyDown}
       >
         <a
           className={styles.actionItem}
@@ -493,6 +672,7 @@ export function LeadActionsMenu({
 
             <div className={styles.confirmActions}>
               <button
+                ref={cancelDeleteRef}
                 type="button"
                 onClick={() =>
                   setConfirmDelete(false)
@@ -529,6 +709,29 @@ export function LeadActionsMenu({
             <span>Видалити</span>
           </button>
         )}
+
+        {actionError ? (
+          <p
+            className={styles.menuError}
+            role="alert"
+          >
+            {actionError}
+          </p>
+        ) : null}
+
+        <span
+          className={styles.srOnly}
+          role="status"
+          aria-live="polite"
+        >
+          {copyState === "phone"
+            ? "Номер скопійовано"
+            : copyState === "lead"
+              ? "Дані заявки скопійовано"
+              : copyState === "error"
+                ? "Помилка копіювання"
+                : ""}
+        </span>
       </div>
     </div>
   );

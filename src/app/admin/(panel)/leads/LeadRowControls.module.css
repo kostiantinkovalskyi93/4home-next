@@ -379,3 +379,39 @@
     transition: none;
   }
 }
+
+
+/* N15.8.2 — Leads interaction final */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.menuError {
+  margin: 6px 8px 4px;
+  padding: 8px 9px;
+  border-radius: 9px;
+  color: #9d4039;
+  background: #fff0ee;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.statusOption:focus-visible,
+.actionItem:focus-visible,
+.confirmActions button:focus-visible {
+  position: relative;
+  z-index: 1;
+}
+
+.statusOption[aria-checked="true"] {
+  font-weight: 750;
+}
