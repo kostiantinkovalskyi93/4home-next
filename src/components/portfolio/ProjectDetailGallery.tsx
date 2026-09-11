@@ -259,7 +259,7 @@ export function ProjectDetailGallery({
             alt={item.alt}
             fill
             priority={active === 0}
-            sizes="(max-width: 900px) 100vw, 62vw"
+            sizes="(max-width: 900px) 100vw, (max-width: 1444px) 68vw, 920px"
           />
 
           <span className={styles.zoom} aria-hidden="true">
@@ -295,14 +295,12 @@ export function ProjectDetailGallery({
               {mediaItem.type === "video" ? (
                 <>
                   {mediaItem.posterSrc ? (
-                    <video
+                    <Image
                       className={styles.thumbVideo}
-                      poster={mediaItem.posterSrc}
-                      muted
-                      playsInline
-                      preload="none"
-                      tabIndex={-1}
-                      aria-hidden="true"
+                      src={mediaItem.posterSrc}
+                      alt=""
+                      fill
+                      sizes="90px"
                     />
                   ) : (
                     <video
@@ -310,7 +308,7 @@ export function ProjectDetailGallery({
                       src={mediaItem.src}
                       muted
                       playsInline
-                      preload="metadata"
+                      preload="none"
                       tabIndex={-1}
                       aria-hidden="true"
                     />
@@ -470,14 +468,12 @@ export function ProjectDetailGallery({
                   {mediaItem.type === "video" ? (
                     <>
                       {mediaItem.posterSrc ? (
-                        <video
+                        <Image
                           className={styles.thumbVideo}
-                          poster={mediaItem.posterSrc}
-                          muted
-                          playsInline
-                          preload="none"
-                          tabIndex={-1}
-                          aria-hidden="true"
+                          src={mediaItem.posterSrc}
+                          alt=""
+                          fill
+                          sizes="76px"
                         />
                       ) : (
                         <video
@@ -485,7 +481,7 @@ export function ProjectDetailGallery({
                           src={mediaItem.src}
                           muted
                           playsInline
-                          preload="metadata"
+                          preload="none"
                           tabIndex={-1}
                           aria-hidden="true"
                         />

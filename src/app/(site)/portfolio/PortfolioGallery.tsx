@@ -29,13 +29,13 @@ type Filter = (typeof filters)[number];
 type Project = PublicPortfolioProject;
 
 const LARGE_IMAGE_SIZES =
-  "(max-width: 650px) 100vw, (max-width: 1000px) 50vw, 58vw";
+  "(max-width: 650px) 100vw, (max-width: 1000px) 50vw, (max-width: 1328px) 58vw, 737px";
 
 const SMALL_IMAGE_SIZES =
-  "(max-width: 650px) 100vw, (max-width: 1000px) 50vw, 42vw";
+  "(max-width: 650px) 100vw, (max-width: 1000px) 50vw, (max-width: 1328px) 42vw, 525px";
 
 const FULL_IMAGE_SIZES =
-  "(max-width: 650px) 100vw, 100vw";
+  "(max-width: 650px) 100vw, (max-width: 1328px) 100vw, 1280px";
 
 function getProjectLayout(
   index: number,
