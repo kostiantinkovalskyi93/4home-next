@@ -447,3 +447,118 @@
   box-shadow:
     0 0 0 3px rgba(154, 104, 69, 0.16);
 }
+
+/* N15.9.1 — CMS shell / navigation final audit */
+
+.brand,
+.navItem,
+.mobileBrand,
+.mobileUser,
+.mobileLogout,
+.mobileNavItem {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.brand:focus-visible,
+.navItem:focus-visible,
+.mobileBrand:focus-visible,
+.mobileUser:focus-visible,
+.mobileLogout:focus-visible,
+.mobileNavItem:focus-visible {
+  outline: 2px solid rgba(193, 132, 90, 0.92);
+  outline-offset: 3px;
+}
+
+.mobileHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobileLogoutForm {
+  margin: 0;
+}
+
+.mobileLogout {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.055);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.mobileLogout svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mobileUser:hover,
+  .mobileLogout:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .mobileLogout:hover {
+    border-color: rgba(193, 132, 90, 0.42);
+  }
+}
+
+@media (max-width: 380px) {
+  .mobileHeader {
+    padding-inline: 14px;
+  }
+
+  .mobileHeaderActions {
+    gap: 6px;
+  }
+
+  .mobileUser,
+  .mobileLogout {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mobileNav {
+    padding-inline: 8px;
+  }
+
+  .mobileNavItem {
+    gap: 6px;
+  }
+}
+
+@media (hover: none) {
+  .logout:hover,
+  .mobileLogout:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navItem,
+  .logout,
+  .logout svg,
+  .mobileUser,
+  .mobileLogout,
+  .mobileNavItem {
+    transition: none;
+  }
+
+  .logout:hover,
+  .logout:hover svg,
+  .mobileLogout:hover {
+    transform: none;
+  }
+}

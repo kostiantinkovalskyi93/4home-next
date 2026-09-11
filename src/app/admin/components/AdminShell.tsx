@@ -69,6 +69,7 @@ export function AdminShell({
                 className={`${styles.navItem} ${
                   active ? styles.navItemActive : ""
                 }`}
+                aria-current={active ? "page" : undefined}
               >
                 <Icon />
                 <span>{item.label}</span>
@@ -109,13 +110,29 @@ export function AdminShell({
             4HOME
           </Link>
 
-          <Link
-            className={styles.mobileUser}
-            href="/admin/profile"
-            aria-label="Профіль адміністратора"
-          >
-            <UserIcon />
-          </Link>
+          <div className={styles.mobileHeaderActions}>
+            <Link
+              className={styles.mobileUser}
+              href="/admin/profile"
+              aria-label="Профіль адміністратора"
+            >
+              <UserIcon />
+            </Link>
+
+            <form
+              className={styles.mobileLogoutForm}
+              action="/admin/logout"
+              method="post"
+            >
+              <button
+                className={styles.mobileLogout}
+                type="submit"
+                aria-label="Вийти з Portfolio Manager"
+              >
+                <LogoutIcon />
+              </button>
+            </form>
+          </div>
         </header>
 
         <main className={styles.main}>
@@ -137,6 +154,7 @@ export function AdminShell({
                 className={`${styles.mobileNavItem} ${
                   active ? styles.mobileNavActive : ""
                 }`}
+                aria-current={active ? "page" : undefined}
               >
                 <Icon />
                 <span>{item.label}</span>
