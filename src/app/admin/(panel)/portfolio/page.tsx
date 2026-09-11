@@ -34,6 +34,10 @@ export default async function AdminPortfolioPage() {
       "Failed to load portfolio projects:",
       projectsError,
     );
+
+    throw new Error(
+      "Не вдалося завантажити портфоліо.",
+    );
   }
 
   const projectsData =
@@ -68,6 +72,10 @@ export default async function AdminPortfolioPage() {
       console.error(
         "Failed to load portfolio media:",
         mediaError,
+      );
+
+      throw new Error(
+        "Не вдалося завантажити медіа портфоліо.",
       );
     }
 

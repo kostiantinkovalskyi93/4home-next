@@ -30,7 +30,10 @@ export default async function Preview({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: project } = await supabase
+  const {
+    data: project,
+    error: projectError,
+  } = await supabase
     .from("portfolio_projects")
     .select(
       "id,title,category,wardrobe_type,short_description,client_task,solution,materials,hardware,features,year,location,color,production_term",
@@ -38,14 +41,41 @@ export default async function Preview({ params }: Props) {
     .eq("id", id)
     .maybeSingle();
 
-  if (!project) notFound();
+  if (projectError) {
+    console.error(
+      "Failed to load portfolio preview project:",
+      projectError,
+    );
 
-  const { data: mediaRows } = await supabase
+    throw new Error(
+      "Не вдалося завантажити попередній перегляд.",
+    );
+  }
+
+  if (!project) {
+    notFound();
+  }
+
+  const {
+    data: mediaRows,
+    error: mediaError,
+  } = await supabase
     .from("portfolio_media")
     .select("id,media_type,web_path,video_poster_path,sort_order")
     .eq("project_id", id)
     .eq("processing_status", "ready")
     .order("sort_order", { ascending: true });
+
+  if (mediaError) {
+    console.error(
+      "Failed to load portfolio preview media:",
+      mediaError,
+    );
+
+    throw new Error(
+      "Не вдалося завантажити медіа попереднього перегляду.",
+    );
+  }
 
   const media: ProjectDetailMedia[] = (mediaRows ?? [])
     .filter(

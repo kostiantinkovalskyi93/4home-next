@@ -68,7 +68,9 @@ export default async function EditProjectPage({
       projectError,
     );
 
-    notFound();
+    throw new Error(
+      "Не вдалося завантажити проєкт.",
+    );
   }
 
   if (!project) {
@@ -101,6 +103,10 @@ export default async function EditProjectPage({
     console.error(
       "Failed to load portfolio media:",
       mediaError,
+    );
+
+    throw new Error(
+      "Не вдалося завантажити медіа проєкту.",
     );
   }
 

@@ -1,0 +1,119 @@
+.panel {
+  width: min(100%, 900px);
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 48px);
+  border: 1px solid rgba(80, 58, 43, 0.06);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16px 45px rgba(50, 36, 25, 0.04);
+}
+
+.eyebrow,
+.title,
+.subtitle,
+.field,
+.note,
+.action {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #ece7e2;
+}
+
+.eyebrow::after,
+.title::after,
+.subtitle::after,
+.field::after,
+.note::after,
+.action::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 76%
+  );
+  content: "";
+  transform: translateX(-100%);
+  animation: shimmer 1.45s ease-in-out infinite;
+}
+
+.eyebrow {
+  width: 112px;
+  height: 11px;
+}
+
+.title {
+  width: 170px;
+  height: 48px;
+  margin-top: 10px;
+}
+
+.subtitle {
+  width: min(100%, 430px);
+  height: 16px;
+  margin-top: 10px;
+}
+
+.divider {
+  height: 1px;
+  margin: 26px 0;
+  background: #e8e1da;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  height: 70px;
+}
+
+.note {
+  height: 76px;
+  margin-top: 20px;
+}
+
+.action {
+  width: 150px;
+  height: 44px;
+  margin-top: 22px;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel {
+    padding: 22px 16px;
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow::after,
+  .title::after,
+  .subtitle::after,
+  .field::after,
+  .note::after,
+  .action::after {
+    display: none;
+    animation: none;
+  }
+}
