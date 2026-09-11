@@ -179,7 +179,22 @@ export async function POST(request: Request) {
       .eq("id", mediaId)
       .maybeSingle();
 
-  if (mediaError || !media) {
+  if (mediaError) {
+    console.error(
+      "Failed to load portfolio photo for processing:",
+      mediaError,
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Не вдалося завантажити фотографію для обробки.",
+      },
+      { status: 500 },
+    );
+  }
+
+  if (!media) {
     return NextResponse.json(
       { error: "Фото не знайдено." },
       { status: 404 },
@@ -220,10 +235,28 @@ export async function POST(request: Request) {
           ),
         );
 
-  await supabase
-    .from("portfolio_media")
-    .update({ processing_status: "processing" })
-    .eq("id", mediaId);
+  const { error: processingStatusError } =
+    await supabase
+      .from("portfolio_media")
+      .update({
+        processing_status: "processing",
+      })
+      .eq("id", mediaId);
+
+  if (processingStatusError) {
+    console.error(
+      "Failed to mark portfolio photo as processing:",
+      processingStatusError,
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Не вдалося розпочати обробку фотографії.",
+      },
+      { status: 500 },
+    );
+  }
 
   const galleryPath =
     `${media.project_id}/gallery/${mediaId}.webp`;

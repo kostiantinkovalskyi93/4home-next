@@ -36,6 +36,22 @@ export async function POST(request: Request) {
     );
   }
 
+  const {
+    data: admin,
+    error: adminError,
+  } = await supabase
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (adminError || !admin) {
+    return NextResponse.json(
+      { error: "Недостатньо прав адміністратора." },
+      { status: 403 },
+    );
+  }
+
   const body = (await request
     .json()
     .catch(() => null)) as
