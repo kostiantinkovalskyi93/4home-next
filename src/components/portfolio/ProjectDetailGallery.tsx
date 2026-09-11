@@ -461,6 +461,11 @@ export function ProjectDetailGallery({
                       ? `Показати відео ${index + 1}`
                       : `Показати фото ${index + 1}`
                   }
+                  aria-current={
+                    index === active
+                      ? "true"
+                      : undefined
+                  }
                 >
                   {mediaItem.type === "video" ? (
                     <>

@@ -342,3 +342,91 @@
     max-height:100%;
   }
 }
+
+
+/* N16.2 — Project detail responsive / interaction final audit */
+
+.mainImage:focus-visible,
+.primary:focus-visible,
+.back:focus-visible,
+.breadcrumbs a:focus-visible,
+.previewBar a:focus-visible {
+  outline: 2px solid #b78663;
+  outline-offset: 3px;
+}
+
+.copy h1,
+.lead,
+.specs dd,
+.storyCard p,
+.detailRow strong,
+.features,
+.cta h2 {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .thumb {
+    flex-basis: 66px;
+    width: 66px;
+  }
+
+  .galleryControls {
+    min-width: 0;
+  }
+
+  .thumbs {
+    min-width: 0;
+    max-width: 100%;
+    scroll-padding-inline: 4px;
+  }
+
+  .videoExpand {
+    width: 44px;
+    height: 44px;
+  }
+
+  .lightThumb {
+    flex-basis: 62px;
+    width: 62px;
+  }
+
+  .close {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (hover: none) {
+  .close:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.13);
+    transform: none;
+  }
+
+  .lightThumb:hover {
+    opacity: 0.45;
+  }
+
+  .lightThumbActive:hover {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumbs,
+  .lightThumbs {
+    scroll-behavior: auto;
+  }
+
+  .close,
+  .lightArrow,
+  .lightThumb {
+    transition: none;
+  }
+
+  .close:hover,
+  .lightArrow:hover {
+    transform: none;
+  }
+}

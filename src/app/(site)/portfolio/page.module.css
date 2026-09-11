@@ -1219,3 +1219,53 @@
     transition: none;
   }
 }
+
+/* N16.2 — Public Portfolio responsive / interaction final audit */
+
+@media (max-width: 650px) {
+  .filterButton {
+    min-height: 44px;
+    padding-block: 6px 9px;
+  }
+}
+
+@media (hover: none) {
+  .projectCard:hover .image {
+    transform: scale(1);
+  }
+
+  .projectCard:hover .overlay {
+    opacity: 0.78;
+  }
+
+  .projectCard:hover .projectText {
+    transform: translateY(5px);
+  }
+
+  .projectCard:hover .projectArrow {
+    border-color: rgba(255, 255, 255, 0.46);
+    background: transparent;
+    color: #fff;
+    transform: none;
+  }
+
+  .projectCard:hover .projectArrow > span {
+    transform: none;
+  }
+
+  .filterButton:hover {
+    color: var(--color-text-muted);
+  }
+
+  .filterButtonActive:hover {
+    color: var(--color-accent);
+  }
+
+  .filterButton:hover .filterLine {
+    transform: scaleX(0);
+  }
+
+  .filterButtonActive:hover .filterLine {
+    transform: scaleX(1);
+  }
+}
