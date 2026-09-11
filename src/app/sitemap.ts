@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 
-import { portfolioProjects } from "@/data/portfolioProjects";
+import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 import { SITE_URL } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -52,8 +54,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  const projects =
+    await getPublishedPortfolioProjects();
+
   const portfolioPages: MetadataRoute.Sitemap =
-    portfolioProjects.map((project) => ({
+    projects.map((project) => ({
       url: `${SITE_URL}/portfolio/${project.slug}`,
       changeFrequency: "yearly",
       priority: 0.7,

@@ -4,16 +4,37 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
 import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
+import {
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 
 import { PortfolioGallery } from "./PortfolioGallery";
 import styles from "./page.module.css";
 
+const PORTFOLIO_TITLE =
+  "Наші роботи — меблі на замовлення у Києві";
+const PORTFOLIO_DESCRIPTION =
+  "Реальні проєкти 4HOME: кухні, шафи та інші корпусні меблі на замовлення у Києві та передмісті.";
+
 export const metadata: Metadata = {
-  title: "Наші роботи — меблі на замовлення у Києві",
-  description:
-    "Реальні проєкти 4HOME: кухні, шафи та інші корпусні меблі на замовлення у Києві та передмісті.",
+  title: PORTFOLIO_TITLE,
+  description: PORTFOLIO_DESCRIPTION,
   alternates: {
     canonical: "/portfolio",
+  },
+  openGraph: {
+    type: "website",
+    url: "/portfolio",
+    siteName: SITE_NAME,
+    locale: "uk_UA",
+    title: PORTFOLIO_TITLE,
+    description: PORTFOLIO_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PORTFOLIO_TITLE,
+    description: PORTFOLIO_DESCRIPTION,
   },
 };
 
@@ -26,8 +47,43 @@ export default async function PortfolioPage() {
   const projectCount = String(
     portfolioProjects.length,
   ).padStart(2, "0");
+
+  const portfolioJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: PORTFOLIO_TITLE,
+    description: PORTFOLIO_DESCRIPTION,
+    url: `${SITE_URL}/portfolio`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: portfolioProjects.length,
+      itemListElement: portfolioProjects.map(
+        (project, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${SITE_URL}/portfolio/${project.slug}`,
+          name: project.title,
+          image: project.coverImage,
+        }),
+      ),
+    },
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            portfolioJsonLd,
+          ).replace(/</g, "\\u003c"),
+        }}
+      />
       <section className={styles.hero}>
         <div className={`container ${styles.pageContainer}`}>
           <div className={styles.heroTop}>
