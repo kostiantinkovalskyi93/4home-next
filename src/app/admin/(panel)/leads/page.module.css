@@ -851,3 +851,121 @@
     background: #9a6845;
   }
 }
+
+
+/* N15.8.1 — Leads final responsive / interaction audit */
+
+.leadIdentity {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.mobileQuickActions {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(148px, 1fr) 40px;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchForm button,
+.clearSearch,
+.leadCardActions a {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.searchForm button:focus-visible,
+.clearSearch:focus-visible,
+.leadCardActions a:focus-visible {
+  outline: 2px solid rgba(154, 104, 69, 0.9);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .leadCardActions a:hover {
+    border-color: #b98a68;
+    transform: translateY(-1px);
+  }
+
+  .leadCardActions a:last-child:hover {
+    border-color: #81583d;
+    background: #81583d;
+  }
+}
+
+@media (max-width: 520px) {
+  .leadCardTop {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mobileQuickActions {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 40px;
+  }
+
+  .leadCardActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .leadCardActions a {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filterChip {
+    min-width: 0;
+  }
+
+  .leadCard {
+    min-width: 0;
+    padding: 14px;
+  }
+
+  .cardMetaRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+}
+
+@media (hover: none) {
+  .searchForm button:hover,
+  .clearSearch:hover,
+  .leadCardActions a:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filterChip,
+  .searchField,
+  .searchField svg,
+  .searchField input::placeholder,
+  .searchForm button,
+  .clearSearch,
+  .leadCardActions a {
+    transition: none;
+  }
+
+  .leadCardActions a:hover {
+    transform: none;
+  }
+}

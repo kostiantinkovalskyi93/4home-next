@@ -37,12 +37,6 @@ type AdminLeadsPageProps = {
   }>;
 };
 
-const statusLabels: Record<LeadStatus, string> = {
-  new: "Нова",
-  in_progress: "В роботі",
-  done: "Опрацьовано",
-};
-
 const statusFilters: Array<{
   value: "all" | LeadStatus;
   label: string;
@@ -261,7 +255,11 @@ export default async function AdminLeadsPage({
             </div>
           ) : (
             <>
-              <div className={styles.resultMeta}>
+              <div
+                className={styles.resultMeta}
+                role="status"
+                aria-live="polite"
+              >
                 <span>
                   Показано <strong>{visibleLeads.length}</strong> із{" "}
                   <strong>{leads.length}</strong>
@@ -347,7 +345,7 @@ export default async function AdminLeadsPage({
                 {visibleLeads.map((lead) => (
                   <article className={styles.leadCard} key={lead.id}>
                     <div className={styles.leadCardTop}>
-                      <div>
+                      <div className={styles.leadIdentity}>
                         <strong className={styles.clientName}>{lead.name}</strong>
                         <a
                           className={styles.phone}
@@ -357,9 +355,22 @@ export default async function AdminLeadsPage({
                         </a>
                       </div>
 
-                      <span className={`${styles.statusBadge} ${styles[`status_${lead.status}`]}`}>
-                        {statusLabels[lead.status]}
-                      </span>
+                      <div className={styles.mobileQuickActions}>
+                        <LeadStatusMenu
+                          leadId={lead.id}
+                          leadName={lead.name}
+                          status={lead.status}
+                        />
+
+                        <LeadActionsMenu
+                          leadId={lead.id}
+                          name={lead.name}
+                          phone={lead.phone}
+                          furnitureType={lead.furniture_type}
+                          dimensions={lead.dimensions}
+                          comment={lead.comment}
+                        />
+                      </div>
                     </div>
 
                     <div className={styles.leadCardBody}>
