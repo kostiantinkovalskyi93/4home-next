@@ -445,3 +445,38 @@
     transition: none;
   }
 }
+
+/* N17.1 — Footer interaction final audit */
+
+@media (max-width: 390px) {
+  .navigationLink,
+  .socialLink {
+    min-height: 44px;
+  }
+}
+
+@media (hover: none) {
+  .navigationLink:hover {
+    color: inherit;
+    border-color: var(--color-border);
+  }
+
+  .phoneContact:hover,
+  .emailLink:hover,
+  .socialLink:hover {
+    color: inherit;
+  }
+
+  .emailLink:hover .contactIcon,
+  .socialLink:hover .contactIcon {
+    color: var(--color-text-muted);
+  }
+
+  .socialLink:hover {
+    border-color: var(--color-border);
+  }
+
+  .socialLink:hover .externalArrow {
+    transform: none;
+  }
+}

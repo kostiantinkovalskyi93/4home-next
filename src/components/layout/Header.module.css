@@ -630,3 +630,75 @@
     transition: none;
   }
 }
+
+/* N17.1 — Global navigation final audit */
+
+.navLinkActive {
+  color: var(--color-accent);
+}
+
+.navLinkActive::after {
+  transform: scaleX(1);
+}
+
+.mobileNavLinkActive {
+  padding-left: 5px;
+  color: #c89b78;
+}
+
+@media (hover: none) {
+  .navLink:hover {
+    color: inherit;
+  }
+
+  .navLink:hover::after {
+    transform: scaleX(0);
+  }
+
+  .navLinkActive:hover {
+    color: var(--color-accent);
+  }
+
+  .navLinkActive:hover::after {
+    transform: scaleX(1);
+  }
+
+  .cta:hover {
+    background: var(--color-accent);
+    transform: none;
+  }
+
+  .phone:hover {
+    color: inherit;
+  }
+
+  .menuButton:hover {
+    background: rgba(23, 22, 21, 0.04);
+  }
+
+  .mobileNavLink:hover {
+    padding-left: 0;
+    color: #ffffff;
+  }
+
+  .mobileNavLinkActive:hover {
+    padding-left: 5px;
+    color: #c89b78;
+  }
+
+  .mobileCta:hover {
+    background: var(--color-accent);
+  }
+
+  .mobilePhoneContact:hover {
+    color: #ffffff;
+  }
+
+  .mobileChannel:hover {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .mobileChannel:hover .mobileChannelIcon {
+    color: rgba(255, 255, 255, 0.58);
+  }
+}

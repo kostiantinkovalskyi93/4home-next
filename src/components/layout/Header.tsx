@@ -2,7 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   InstagramIcon,
@@ -49,7 +55,10 @@ const navigation = [
 ] as const;
 
 export function Header() {
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLElement>(null);
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
@@ -65,20 +74,95 @@ export function Header() {
     }
 
     const previousOverflow = document.body.style.overflow;
+    const menu = mobileMenuRef.current;
+    const desktopQuery = window.matchMedia(
+      "(min-width: 1181px)",
+    );
 
     document.body.style.overflow = "hidden";
 
+    const focusableSelector =
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const focusFirstItem = () => {
+      const firstFocusable =
+        menu?.querySelector<HTMLElement>(
+          focusableSelector,
+        );
+
+      firstFocusable?.focus();
+    };
+
+    const animationFrame =
+      window.requestAnimationFrame(focusFirstItem);
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        closeMenu();
+        menuButtonRef.current?.focus();
+        return;
+      }
+
+      if (event.key !== "Tab" || !menu) {
+        return;
+      }
+
+      const focusableItems = Array.from(
+        menu.querySelectorAll<HTMLElement>(
+          focusableSelector,
+        ),
+      ).filter(
+        (element) =>
+          element.getAttribute("tabindex") !== "-1",
+      );
+
+      if (focusableItems.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusableItems[0];
+      const last =
+        focusableItems[focusableItems.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        active === last
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const handleDesktopChange = (
+      event: MediaQueryListEvent,
+    ) => {
+      if (event.matches) {
         closeMenu();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
+    desktopQuery.addEventListener(
+      "change",
+      handleDesktopChange,
+    );
 
     return () => {
+      window.cancelAnimationFrame(animationFrame);
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+      desktopQuery.removeEventListener(
+        "change",
+        handleDesktopChange,
+      );
     };
   }, [closeMenu, isMenuOpen]);
 
@@ -109,7 +193,16 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={styles.navLink}
+                className={`${styles.navLink} ${
+                  pathname === item.href
+                    ? styles.navLinkActive
+                    : ""
+                }`}
+                aria-current={
+                  pathname === item.href
+                    ? "page"
+                    : undefined
+                }
               >
                 {item.label}
               </Link>
@@ -133,6 +226,7 @@ export function Header() {
           </div>
 
           <button
+            ref={menuButtonRef}
             type="button"
             className={`${styles.menuButton} ${
               isMenuOpen ? styles.menuButtonOpen : ""
@@ -161,12 +255,16 @@ export function Header() {
             : ""
         }`}
         aria-label="Закрити меню"
-        tabIndex={isMenuOpen ? 0 : -1}
+        tabIndex={-1}
         onClick={closeMenu}
       />
 
       <aside
+        ref={mobileMenuRef}
         id="mobile-navigation"
+        role="dialog"
+        aria-modal={isMenuOpen ? "true" : undefined}
+        aria-label="Мобільне меню"
         className={`${styles.mobileMenu} ${
           isMenuOpen ? styles.mobileMenuOpen : ""
         }`}
@@ -181,7 +279,16 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={styles.mobileNavLink}
+                className={`${styles.mobileNavLink} ${
+                  pathname === item.href
+                    ? styles.mobileNavLinkActive
+                    : ""
+                }`}
+                aria-current={
+                  pathname === item.href
+                    ? "page"
+                    : undefined
+                }
                 tabIndex={isMenuOpen ? 0 : -1}
                 onClick={closeMenu}
               >
