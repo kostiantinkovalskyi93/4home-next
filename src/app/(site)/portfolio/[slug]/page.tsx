@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProjectDetail } from "@/components/portfolio/ProjectDetail";
+import { ProjectDetailScrollReset } from "@/components/portfolio/ProjectDetailScrollReset";
 import { getPublishedPortfolioProject } from "@/lib/portfolio-db";
 import {
   SITE_NAME,
@@ -154,6 +155,10 @@ export default async function Page({
 
   return (
     <>
+      <ProjectDetailScrollReset
+        routeKey={project.slug}
+      />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

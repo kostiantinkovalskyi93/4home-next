@@ -123,6 +123,7 @@ function ProjectCard({
     <Link
       ref={cardRef}
       href={`/portfolio/${project.slug}`}
+      scroll={false}
       className={`${styles.projectCard} ${layout.className} ${
         isVisible ? styles.projectCardVisible : ""
       }`}
