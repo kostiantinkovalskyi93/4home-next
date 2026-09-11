@@ -116,12 +116,51 @@
   width: 40px;
   height: 40px;
 
+  flex: 0 0 40px;
   place-items: center;
 
   border-radius: 999px;
 
   color: #fff;
   background: #171b1c;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.avatar:focus-visible {
+  outline: 2px solid #9a6845;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .avatar:hover {
+    background: #242a2b;
+    box-shadow:
+      0 7px 18px rgba(23, 27, 28, 0.16);
+    transform: translateY(-1px);
+  }
+}
+
+@media (hover: none) {
+  .avatar:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar {
+    transition: none;
+  }
+
+  .avatar:hover {
+    transform: none;
+  }
 }
 
 .panel {

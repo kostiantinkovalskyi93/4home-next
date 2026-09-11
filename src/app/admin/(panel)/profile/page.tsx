@@ -1,17 +1,48 @@
+import { redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
+
+import { ProfileForm } from "./ProfileForm";
 import styles from "./page.module.css";
 
-export default function AdminProfilePage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminProfilePage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    redirect("/admin/login");
+  }
+
+  const displayName =
+    typeof user.user_metadata?.display_name === "string"
+      ? user.user_metadata.display_name
+      : "";
+
   return (
     <section className={styles.panel}>
-      <span className={styles.eyebrow}>АДМІНІСТРАТОР</span>
-      <h1>Профіль</h1>
-      <div className={styles.grid}>
-        <label><span>Ім’я</span><input defaultValue="Костянтин" /></label>
-        <label><span>Email</span><input defaultValue="you@4home.kyiv.ua" type="email" /></label>
-        <label><span>Новий пароль</span><input type="password" placeholder="Залиште порожнім, щоб не змінювати" /></label>
-        <label><span>Підтвердити пароль</span><input type="password" /></label>
-      </div>
-      <button type="button">Зберегти зміни</button>
+      <header className={styles.header}>
+        <span className={styles.eyebrow}>
+          АДМІНІСТРАТОР
+        </span>
+
+        <h1>Профіль</h1>
+
+        <p>
+          Дані облікового запису для входу та роботи
+          в Portfolio Manager.
+        </p>
+      </header>
+
+      <ProfileForm
+        initialName={displayName}
+        initialEmail={user.email ?? ""}
+      />
     </section>
   );
 }

@@ -105,9 +105,14 @@ export function PortfolioBoard({
         </label>
 
         <div className={styles.profile}>
-          <span className={styles.avatar}>
+          <Link
+            href="/admin/profile"
+            className={styles.avatar}
+            aria-label="Відкрити профіль адміністратора"
+            title="Профіль"
+          >
             К
-          </span>
+          </Link>
 
           <span>
             <strong>Костянтин</strong>
