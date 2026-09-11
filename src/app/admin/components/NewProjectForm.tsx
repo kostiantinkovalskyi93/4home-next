@@ -96,6 +96,12 @@ type SaveStatus =
   | "saved"
   | "error";
 
+type ActiveAction =
+  | "idle"
+  | "saving"
+  | "publishing"
+  | "unpublishing";
+
 type InitialProject = {
   id: string;
   slug: string;
@@ -400,6 +406,9 @@ export function NewProjectForm({
 
   const [saveStatus, setSaveStatus] =
     useState<SaveStatus>("idle");
+
+  const [activeAction, setActiveAction] =
+    useState<ActiveAction>("idle");
 
   const saveInFlightRef = useRef(false);
 
@@ -2571,6 +2580,7 @@ export function NewProjectForm({
     }
 
     saveInFlightRef.current = true;
+    setActiveAction("saving");
     setSaveStatus("saving");
     setSaveMessage("");
 
@@ -2695,6 +2705,7 @@ export function NewProjectForm({
       );
     } finally {
       saveInFlightRef.current = false;
+      setActiveAction("idle");
     }
   };
 
@@ -2765,6 +2776,7 @@ export function NewProjectForm({
     }
 
     saveInFlightRef.current = true;
+    setActiveAction("publishing");
     setSaveStatus("saving");
     setSaveMessage("");
 
@@ -2871,6 +2883,7 @@ export function NewProjectForm({
       );
     } finally {
       saveInFlightRef.current = false;
+      setActiveAction("idle");
     }
   };
 
@@ -2892,6 +2905,7 @@ export function NewProjectForm({
     }
 
     saveInFlightRef.current = true;
+    setActiveAction("unpublishing");
     setSaveStatus("saving");
     setSaveMessage("");
 
@@ -2929,8 +2943,12 @@ export function NewProjectForm({
       );
     } finally {
       saveInFlightRef.current = false;
+      setActiveAction("idle");
     }
   };
+
+  const isActionBusy =
+    activeAction !== "idle";
 
   return (
     <div className={styles.page}>
@@ -2948,24 +2966,46 @@ export function NewProjectForm({
             type="button"
             className={styles.secondary}
             onClick={handleSaveDraft}
-            disabled={saveStatus === "saving" || isMediaProcessing}
+            disabled={isActionBusy || isMediaProcessing}
+            aria-busy={activeAction === "saving"}
           >
             {isMediaProcessing
               ? "Оптимізація медіа…"
-              : saveStatus === "saving"
-              ? "Зберігаємо..."
-              : saveStatus === "saved"
-                ? "Збережено"
-                : projectStatus === "published"
-                  ? "Зберегти зміни"
-                  : "Зберегти чернетку"}
+              : activeAction === "saving"
+                ? "Зберігаємо…"
+                : saveStatus === "saved" &&
+                    !hasUnsavedChanges
+                  ? "Збережено"
+                  : projectStatus === "published"
+                    ? "Зберегти зміни"
+                    : "Зберегти чернетку"}
           </button>
 
           {projectId ? (
             <Link
               href={`/admin/portfolio/${projectId}/preview`}
-              className={styles.secondary}
+              className={`${styles.secondary} ${
+                isActionBusy || isMediaProcessing
+                  ? styles.actionLinkDisabled
+                  : ""
+              }`}
               target="_blank"
+              aria-disabled={
+                isActionBusy || isMediaProcessing
+              }
+              tabIndex={
+                isActionBusy || isMediaProcessing
+                  ? -1
+                  : undefined
+              }
+              onClick={(event) => {
+                if (
+                  isActionBusy ||
+                  isMediaProcessing
+                ) {
+                  event.preventDefault();
+                }
+              }}
             >
               Попередній перегляд
             </Link>
@@ -2991,12 +3031,39 @@ export function NewProjectForm({
                 ? handleUnpublish
                 : handlePublish
             }
-            disabled={saveStatus === "saving" || isMediaProcessing}
+            disabled={isActionBusy || isMediaProcessing}
+            aria-busy={
+              activeAction === "publishing" ||
+              activeAction === "unpublishing"
+            }
           >
-            {projectStatus === "published"
-              ? "Зняти з публікації"
-              : "Опублікувати"}
+            {activeAction === "publishing"
+              ? "Публікуємо…"
+              : activeAction === "unpublishing"
+                ? "Знімаємо…"
+                : projectStatus === "published"
+                  ? "Зняти з публікації"
+                  : "Опублікувати"}
           </button>
+
+          <div
+            className={styles.actionState}
+            aria-live="polite"
+          >
+            {isMediaProcessing
+              ? "Медіа готується до збереження."
+              : isActionBusy
+                ? activeAction === "saving"
+                  ? "Зберігаємо зміни…"
+                  : activeAction === "publishing"
+                    ? "Перевіряємо дані та публікуємо…"
+                    : "Знімаємо роботу з публікації…"
+                : hasUnsavedChanges
+                  ? "Є незбережені зміни."
+                  : projectId
+                    ? "Усі зміни збережено."
+                    : "Спочатку збережіть чернетку."}
+          </div>
         </div>
       </div>
 

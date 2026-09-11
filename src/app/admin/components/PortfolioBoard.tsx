@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   useMemo,
@@ -12,7 +13,6 @@ import type {
 } from "../portfolio-projects";
 
 import {
-  EyeIcon,
   ImageIcon,
   MoreIcon,
   PlusIcon,
@@ -189,9 +189,11 @@ export function PortfolioBoard({
                 className={styles.imageWrap}
               >
                 {project.coverImage ? (
-                  <img
+                  <Image
                     src={project.coverImage}
                     alt={project.title}
+                    fill
+                    sizes="(max-width: 580px) calc(100vw - 36px), (max-width: 1000px) 50vw, (max-width: 1250px) 33vw, 25vw"
                     className={styles.image}
                   />
                 ) : (
@@ -249,7 +251,7 @@ export function PortfolioBoard({
                   className={styles.meta}
                 >
                   <span>
-                    <EyeIcon />
+                    <ImageIcon />
                     {project.photoCount}
                   </span>
 
