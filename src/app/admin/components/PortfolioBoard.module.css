@@ -747,3 +747,72 @@
     transform: none;
   }
 }
+
+
+/* N15.7.3 — Portfolio Board interaction polish */
+
+.search:focus-within {
+  border-color: rgba(128, 86, 56, 0.42);
+  box-shadow: 0 0 0 3px rgba(128, 86, 56, 0.09);
+}
+
+.select:focus-visible,
+.tab:focus-visible,
+.tabActive:focus-visible,
+.addButton:focus-visible {
+  outline: 2px solid rgba(128, 86, 56, 0.76);
+  outline-offset: 3px;
+}
+
+.tab,
+.tabActive,
+.addButton,
+.card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabActive {
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    border-color: #d7cbc0;
+    transform: translateY(-2px);
+    box-shadow:
+      0 13px 30px rgba(38, 29, 22, 0.075);
+  }
+
+  .card:hover .image {
+    transform: scale(1.025);
+  }
+}
+
+@media (hover: none) {
+  .card:hover {
+    border-color: #e6dfd8;
+    transform: none;
+    box-shadow:
+      0 7px 20px rgba(38, 29, 22, 0.035);
+  }
+
+  .card:hover .image {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .image,
+  .tab,
+  .tabActive,
+  .addButton,
+  .search {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:hover .image {
+    transform: none;
+  }
+}

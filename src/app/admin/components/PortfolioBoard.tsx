@@ -99,6 +99,8 @@ export function PortfolioBoard({
               setQuery(event.target.value)
             }
             placeholder="Пошук за назвою, категорією..."
+            aria-label="Пошук робіт"
+            autoComplete="off"
           />
         </label>
 
@@ -146,6 +148,9 @@ export function PortfolioBoard({
                     ? styles.tabActive
                     : styles.tab
                 }
+                aria-pressed={
+                  category === item
+                }
               >
                 {item}
               </button>
@@ -183,7 +188,7 @@ export function PortfolioBoard({
               href={`/admin/portfolio/${project.id}/edit`}
               className={styles.card}
               key={project.id}
-              aria-label={`Редагувати ${project.title}`}
+              aria-label={`Редагувати роботу: ${project.title}`}
             >
               <div
                 className={styles.imageWrap}
