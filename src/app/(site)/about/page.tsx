@@ -155,7 +155,7 @@ export default function AboutPage() {
                 alt="Індивідуальні меблі 4HOME"
                 fill
                 priority
-                sizes="(max-width: 800px) 100vw, 48vw"
+                sizes="(max-width: 800px) 100vw, (max-width: 1328px) 48vw, 610px"
                 className={styles.heroImage}
               />
 
@@ -328,7 +328,7 @@ export default function AboutPage() {
                       src={project.image}
                       alt={project.alt}
                       fill
-                      sizes="(max-width: 700px) 100vw, 50vw"
+                      sizes="(max-width: 700px) 100vw, (max-width: 1328px) 50vw, 640px"
                       className={styles.projectImage}
                     />
 

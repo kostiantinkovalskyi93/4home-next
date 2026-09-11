@@ -1220,3 +1220,46 @@
     transition: none;
   }
 }
+
+/* N17.3 — Process final production audit */
+
+.heroTitle,
+.heroText,
+.sectionTitle,
+.stepTitle,
+.stepDescription,
+.approvalTitle,
+.approvalDescription,
+.startTitle,
+.startText,
+.ctaTitle,
+.ctaContent {
+  overflow-wrap: anywhere;
+}
+
+@media (hover: none) {
+  .primaryButton:hover,
+  .textLink:hover,
+  .ctaButton:hover {
+    transform: none;
+  }
+
+  .primaryButton:hover > span:last-child,
+  .textLink:hover > span,
+  .ctaButton:hover > span:last-child,
+  .processItem:hover .processMark {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton,
+  .primaryButton > span:last-child,
+  .textLink,
+  .textLink > span,
+  .processMark,
+  .ctaButton,
+  .ctaButton > span:last-child {
+    transition: none;
+  }
+}

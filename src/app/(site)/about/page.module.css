@@ -1216,3 +1216,50 @@
     transition: none;
   }
 }
+
+/* N17.3 — About final production audit */
+
+.heroTitle,
+.heroStatement,
+.heroText,
+.sectionTitle,
+.principleTitle,
+.journeyTitle,
+.projectLabel,
+.statementText,
+.ctaTitle,
+.ctaText {
+  overflow-wrap: anywhere;
+}
+
+@media (hover: none) {
+  .primaryButton:hover,
+  .textLink:hover,
+  .projectCard:hover,
+  .ctaButton:hover {
+    transform: none;
+  }
+
+  .primaryButton:hover > span:last-child,
+  .textLink:hover > span,
+  .projectCard:hover .projectImage,
+  .projectCard:hover .projectArrow {
+    transform: none;
+  }
+
+  .projectCard:hover .projectImage {
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton,
+  .primaryButton > span:last-child,
+  .textLink,
+  .textLink > span,
+  .projectImage,
+  .projectArrow,
+  .ctaButton {
+    transition: none;
+  }
+}

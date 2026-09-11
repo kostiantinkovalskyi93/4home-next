@@ -301,7 +301,7 @@ export default function MaterialsPage() {
                       alt={item.alt}
                       fill
                       className={styles.materialPhoto}
-                      sizes="(max-width: 650px) 100vw, (max-width: 1050px) 50vw, 55vw"
+                      sizes="(max-width: 650px) 100vw, (max-width: 1050px) 50vw, (max-width: 1328px) 55vw, 700px"
                     />
 
                     <div className={styles.materialOverlay} />
