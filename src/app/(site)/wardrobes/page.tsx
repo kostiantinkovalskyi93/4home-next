@@ -15,6 +15,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/wardrobes",
   },
+  openGraph: {
+    type: "website",
+    url: "/wardrobes",
+    locale: "uk_UA",
+    siteName: SITE_NAME,
+    title: "Шафи на замовлення у Києві",
+    description:
+      "Розпашні шафи та шафи-купе на замовлення у Києві та передмісті. Індивідуальні розміри, наповнення, матеріали, доставка та монтаж.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Шафи на замовлення у Києві",
+    description:
+      "Розпашні шафи та шафи-купе на замовлення у Києві та передмісті. Індивідуальні розміри, наповнення, матеріали, доставка та монтаж.",
+  },
 };
 
 const serviceJsonLd = {

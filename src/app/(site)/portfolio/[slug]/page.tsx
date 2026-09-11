@@ -102,6 +102,7 @@ export default async function Page({
   const projectJsonLd = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
+    "@id": `${projectUrl}#project`,
     name: project.title,
     description,
     url: projectUrl,
@@ -109,10 +110,18 @@ export default async function Page({
       (image) => image.src,
     ),
     creator: {
-      "@type": "Organization",
+      "@type": "LocalBusiness",
+      "@id": `${SITE_URL}/#business`,
       name: SITE_NAME,
       url: SITE_URL,
     },
+    isPartOf: {
+      "@type": "CollectionPage",
+      "@id": `${SITE_URL}/portfolio#collection`,
+      name: "Портфоліо 4HOME",
+      url: `${SITE_URL}/portfolio`,
+    },
+    inLanguage: "uk-UA",
     ...(project.year
       ? {
           dateCreated: String(project.year),

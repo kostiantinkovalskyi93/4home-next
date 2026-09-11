@@ -51,11 +51,14 @@ export default async function PortfolioPage() {
   const portfolioJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
+    "@id": `${SITE_URL}/portfolio#collection`,
     name: PORTFOLIO_TITLE,
     description: PORTFOLIO_DESCRIPTION,
     url: `${SITE_URL}/portfolio`,
+    inLanguage: "uk-UA",
     isPartOf: {
       "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
       name: SITE_NAME,
       url: SITE_URL,
     },

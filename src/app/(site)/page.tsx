@@ -216,6 +216,18 @@ const faqItems = [
       "Ні. 4HOME працює з індивідуальними замовленнями. Меблі створюються під конкретне приміщення, розміри та побажання замовника.",
   },
 ];
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  url: SITE_URL,
+  name: SITE_NAME,
+  inLanguage: "uk-UA",
+  publisher: {
+    "@id": `${SITE_URL}/#business`,
+  },
+};
+
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
@@ -224,13 +236,14 @@ const organizationJsonLd = {
   url: SITE_URL,
   description: SITE_DESCRIPTION,
 
-  telephone: "+380993002245",
-  email: "mebli.4home@gmail.com",
+  telephone: CONTACTS.primaryPhone.international.replace(/\s/g, ""),
+  email: CONTACTS.email.display,
 
   areaServed: "Київ та передмістя",
 
   sameAs: [
-    "https://www.instagram.com/mebli.4home/",
+    CONTACTS.instagram.href,
+    CONTACTS.telegram.href,
   ],
 
   knowsAbout: [
@@ -302,14 +315,27 @@ export default async function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationJsonLd),
+          __html: JSON.stringify(
+            websiteJsonLd,
+          ).replace(/</g, "\\u003c"),
         }}
       />
 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(serviceJsonLd),
+          __html: JSON.stringify(
+            organizationJsonLd,
+          ).replace(/</g, "\\u003c"),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            serviceJsonLd,
+          ).replace(/</g, "\\u003c"),
         }}
       />
 

@@ -15,6 +15,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/kitchens",
   },
+  openGraph: {
+    type: "website",
+    url: "/kitchens",
+    locale: "uk_UA",
+    siteName: SITE_NAME,
+    title: "Кухні на замовлення у Києві",
+    description:
+      "Кухні на замовлення у Києві та передмісті. Індивідуальні розміри, підбір матеріалів, виготовлення, доставка та монтаж.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Кухні на замовлення у Києві",
+    description:
+      "Кухні на замовлення у Києві та передмісті. Індивідуальні розміри, підбір матеріалів, виготовлення, доставка та монтаж.",
+  },
 };
 
 const serviceJsonLd = {

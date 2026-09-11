@@ -15,6 +15,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/furniture",
   },
+  openGraph: {
+    type: "website",
+    url: "/furniture",
+    locale: "uk_UA",
+    siteName: SITE_NAME,
+    title: "Інші меблі на замовлення у Києві",
+    description:
+      "Тумби, консолі, столи, меблі для передпокою, ТВ-зони та інші корпусні меблі на замовлення у Києві та передмісті.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Інші меблі на замовлення у Києві",
+    description:
+      "Тумби, консолі, столи, меблі для передпокою, ТВ-зони та інші корпусні меблі на замовлення у Києві та передмісті.",
+  },
 };
 
 const serviceJsonLd = {
