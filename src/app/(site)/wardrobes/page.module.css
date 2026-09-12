@@ -560,7 +560,7 @@
 .typeVisual {
   position: relative;
 
-  min-height: 630px;
+  min-height: 570px;
 
   overflow: hidden;
 
@@ -661,7 +661,7 @@
 }
 
 .typeDescription {
-  max-width: 450px;
+  max-width: 500px;
 
   margin-top: 23px;
 
@@ -669,6 +669,10 @@
 
   font-size: 14px;
   line-height: 1.68;
+}
+
+.typeDescription p + p {
+  margin-top: 14px;
 }
 
 .typeLines {
@@ -1793,6 +1797,10 @@
 
     font-size: 13px;
     line-height: 1.58;
+  }
+
+  .typeDescription p + p {
+    margin-top: 10px;
   }
 
   .typeLines {

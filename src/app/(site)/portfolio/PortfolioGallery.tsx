@@ -164,7 +164,15 @@ function ProjectCard({
               className={styles.projectArrow}
               aria-hidden="true"
             >
-              <span>→</span>
+              <svg
+                className={styles.projectArrowIcon}
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M3 10H16" />
+                <path d="M11.5 5.5L16 10L11.5 14.5" />
+              </svg>
             </span>
           </div>
         </div>

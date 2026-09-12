@@ -535,16 +535,13 @@
   width: 48px;
   height: 48px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
+  display: grid;
+  place-items: center;
 
   border: 1px solid rgba(255, 255, 255, 0.46);
   border-radius: 50%;
 
-  font-size: 18px;
+  color: #ffffff;
 
   transition:
     background-color 300ms ease,
@@ -553,64 +550,23 @@
     transform 300ms ease;
 }
 
-.projectArrow > span {
-  position: relative;
-
-  width: 16px;
-  height: 12px;
+.projectArrowIcon {
+  width: 20px;
+  height: 20px;
 
   display: block;
 
-  overflow: hidden;
+  overflow: visible;
 
-  color: transparent;
-  font-size: 0;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 
   transition:
     transform
     380ms
     cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.projectArrow > span::before {
-  content: "";
-
-  position: absolute;
-  top: 50%;
-  left: 1px;
-
-  width: 13px;
-  height: 1px;
-
-  background: currentColor;
-
-  color: #ffffff;
-
-  transform: translateY(-50%);
-}
-
-.projectArrow > span::after {
-  content: "";
-
-  position: absolute;
-  top: 50%;
-  right: 1px;
-
-  width: 6px;
-  height: 6px;
-
-  border-top: 1px solid currentColor;
-  border-right: 1px solid currentColor;
-
-  color: #ffffff;
-
-  transform: translateY(-50%) rotate(45deg);
-  transform-origin: center;
-}
-
-.projectCard:hover .projectArrow > span::before,
-.projectCard:hover .projectArrow > span::after {
-  color: var(--color-dark);
 }
 
 .projectCard:hover .image {
@@ -632,10 +588,6 @@
   color: var(--color-dark);
 
   transform: scale(1.04);
-}
-
-.projectCard:hover .projectArrow > span {
-  transform: translateX(3px);
 }
 
 /* ========================================
@@ -1263,7 +1215,7 @@
   .overlay,
   .projectText,
   .projectArrow,
-  .projectArrow > span,
+  .projectArrowIcon,
   .darkTextLink,
   .darkTextLink > span,
   .primaryButton,
@@ -1302,7 +1254,7 @@
     transform: none;
   }
 
-  .projectCard:hover .projectArrow > span {
+  .projectCard:hover .projectArrowIcon {
     transform: none;
   }
 
