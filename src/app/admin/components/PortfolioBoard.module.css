@@ -328,18 +328,15 @@
 }
 
 .card {
+  position: relative;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 
   border: 1px solid #e6dfd8;
   border-radius: 12px;
 
   color: inherit;
   background: #fff;
-
-  text-decoration: none;
-
-  cursor: pointer;
 
   box-shadow:
     0 7px 20px rgba(38, 29, 22, 0.035);
@@ -362,6 +359,101 @@
 .card:focus-visible {
   outline: 2px solid #9a6845;
   outline-offset: 3px;
+}
+
+.cardLink,
+.cardTitleLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink {
+  display: block;
+}
+
+.cardTitleLink {
+  min-width: 0;
+}
+
+.cardTitleLink:focus-visible {
+  outline: 2px solid #9a6845;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.actionsWrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.moreButton {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: #57514c;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.moreButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.moreButton:hover,
+.moreButton[aria-expanded="true"] {
+  color: #805638;
+  background: #f1ece7;
+}
+
+.moreButton:focus-visible {
+  outline: 2px solid #9a6845;
+  outline-offset: 2px;
+}
+
+.actionsMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  width: 168px;
+  padding: 5px;
+  border: 1px solid #e1d8cf;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow:
+    0 14px 36px rgba(39, 28, 20, 0.13);
+}
+
+.deleteMenuItem {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  color: #a33f36;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.deleteMenuItem:hover {
+  background: #fff0ee;
+}
+
+.deleteMenuItem:focus-visible {
+  outline: 2px solid #b74a40;
+  outline-offset: 1px;
 }
 
 .imageWrap {
@@ -425,32 +517,7 @@
   line-height: 1.35;
 }
 
-.more {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 auto;
 
-  place-items: center;
-
-  border-radius: 6px;
-
-  color: #57514c;
-
-  transition:
-    color 160ms ease,
-    background-color 160ms ease;
-}
-
-.card:hover .more {
-  color: #805638;
-  background: #f1ece7;
-}
-
-.more svg {
-  width: 18px;
-  height: 18px;
-}
 
 .cardBody > p {
   margin-top: 5px;
@@ -853,5 +920,165 @@
   .card:hover,
   .card:hover .image {
     transform: none;
+  }
+}
+
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(22, 18, 15, 0.54);
+  backdrop-filter: blur(4px);
+}
+
+.deleteDialog {
+  width: min(100%, 520px);
+  padding: 26px;
+  border: 1px solid #e0d5cb;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow:
+    0 30px 80px rgba(27, 19, 14, 0.22);
+}
+
+.deleteEyebrow {
+  color: #a33f36;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.deleteDialog h2 {
+  margin: 8px 0 0;
+  color: #1d1b19;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.8px;
+}
+
+.deleteDescription,
+.deletePermanent,
+.publishedWarning {
+  margin: 14px 0 0;
+  color: #6f6963;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.deleteDescription strong {
+  color: #2f2a26;
+}
+
+.publishedWarning {
+  padding: 11px 12px;
+  border: 1px solid #ecd1ad;
+  border-radius: 9px;
+  color: #82501e;
+  background: #fff6e9;
+}
+
+.deletePermanent {
+  font-weight: 700;
+}
+
+.deleteError {
+  margin-top: 14px;
+  padding: 11px 12px;
+  border-radius: 9px;
+  color: #973d36;
+  background: #fff0ee;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.deleteDialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.cancelDeleteButton,
+.confirmDeleteButton {
+  min-height: 42px;
+  padding: 0 15px;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancelDeleteButton {
+  border: 1px solid #ddd4cc;
+  color: #3d3935;
+  background: #fff;
+}
+
+.confirmDeleteButton {
+  border: 1px solid #9c4038;
+  color: #fff;
+  background: #a8463d;
+}
+
+.cancelDeleteButton:hover:not(:disabled) {
+  background: #f6f2ee;
+}
+
+.confirmDeleteButton:hover:not(:disabled) {
+  background: #943a33;
+}
+
+.cancelDeleteButton:focus-visible,
+.confirmDeleteButton:focus-visible {
+  outline: 2px solid #9a6845;
+  outline-offset: 3px;
+}
+
+.cancelDeleteButton:disabled,
+.confirmDeleteButton:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+@media (max-width: 520px) {
+  .modalBackdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .deleteDialog {
+    padding: 22px 18px;
+    border-radius: 15px;
+  }
+
+  .deleteDialogActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelDeleteButton,
+  .confirmDeleteButton {
+    width: 100%;
+  }
+}
+
+@media (hover: none) {
+  .moreButton:hover {
+    background: transparent;
+  }
+
+  .moreButton[aria-expanded="true"] {
+    background: #f1ece7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moreButton {
+    transition: none;
   }
 }

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useMemo,
   useState,
@@ -40,6 +41,8 @@ const categoryFilters: CategoryFilter[] = [
 export function PortfolioBoard({
   projects: sourceProjects,
 }: PortfolioBoardProps) {
+  const router = useRouter();
+
   const [query, setQuery] = useState("");
   const [category, setCategory] =
     useState<CategoryFilter>("Усі");
@@ -47,6 +50,17 @@ export function PortfolioBoard({
   const [status, setStatus] = useState<
     "all" | "published" | "draft"
   >("all");
+
+  const [actionProjectId, setActionProjectId] =
+    useState<string | null>(null);
+
+  const [deleteProject, setDeleteProject] =
+    useState<AdminPortfolioProject | null>(null);
+
+  const [deletingProjectId, setDeletingProjectId] =
+    useState<string | null>(null);
+
+  const [deleteError, setDeleteError] = useState("");
 
   const projects = useMemo(() => {
     const normalizedQuery = query
@@ -86,6 +100,76 @@ export function PortfolioBoard({
     category,
     status,
   ]);
+
+  const openDeleteConfirmation = (
+    project: AdminPortfolioProject,
+  ) => {
+    setActionProjectId(null);
+    setDeleteError("");
+    setDeleteProject(project);
+  };
+
+  const closeDeleteConfirmation = () => {
+    if (deletingProjectId) {
+      return;
+    }
+
+    setDeleteError("");
+    setDeleteProject(null);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!deleteProject || deletingProjectId) {
+      return;
+    }
+
+    setDeletingProjectId(deleteProject.id);
+    setDeleteError("");
+
+    try {
+      const response = await fetch(
+        "/admin/api/portfolio-project/delete",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectId: deleteProject.id,
+          }),
+        },
+      );
+
+      const result = (await response
+        .json()
+        .catch(() => null)) as
+        | { ok?: boolean; error?: string }
+        | null;
+
+      if (!response.ok || !result?.ok) {
+        throw new Error(
+          result?.error ||
+            "Не вдалося видалити роботу.",
+        );
+      }
+
+      setDeleteProject(null);
+      router.refresh();
+    } catch (error) {
+      console.error(
+        "Failed to delete portfolio project:",
+        error,
+      );
+
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося видалити роботу.",
+      );
+    } finally {
+      setDeletingProjectId(null);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -188,91 +272,118 @@ export function PortfolioBoard({
         </div>
 
         <div className={styles.grid}>
-          {projects.map((project) => (
-            <Link
-              href={`/admin/portfolio/${project.id}/edit`}
-              className={styles.card}
-              key={project.id}
-              aria-label={`Редагувати роботу: ${project.title}`}
-            >
-              <div
-                className={styles.imageWrap}
-              >
-                {project.coverImage ? (
-                  <Image
-                    src={project.coverImage}
-                    alt={project.title}
-                    fill
-                    sizes="(max-width: 580px) calc(100vw - 36px), (max-width: 1000px) 50vw, (max-width: 1250px) 33vw, 25vw"
-                    className={styles.image}
-                  />
-                ) : (
-                  <div
-                    className={
-                      styles.emptyCover
-                    }
-                  >
-                    <ImageIcon />
+          {projects.map((project) => {
+            const actionsOpen =
+              actionProjectId === project.id;
 
-                    <span>
-                      Фото ще не додано
+            return (
+              <article
+                className={styles.card}
+                key={project.id}
+              >
+                <Link
+                  href={`/admin/portfolio/${project.id}/edit`}
+                  className={styles.cardLink}
+                  aria-label={`Редагувати роботу: ${project.title}`}
+                >
+                  <div className={styles.imageWrap}>
+                    {project.coverImage ? (
+                      <Image
+                        src={project.coverImage}
+                        alt={project.title}
+                        fill
+                        sizes="(max-width: 580px) calc(100vw - 36px), (max-width: 1000px) 50vw, (max-width: 1250px) 33vw, 25vw"
+                        className={styles.image}
+                      />
+                    ) : (
+                      <div className={styles.emptyCover}>
+                        <ImageIcon />
+                        <span>Фото ще не додано</span>
+                      </div>
+                    )}
+
+                    <span
+                      className={`${styles.status} ${
+                        project.status === "draft"
+                          ? styles.draft
+                          : styles.published
+                      }`}
+                    >
+                      {project.status === "draft"
+                        ? "Чернетка"
+                        : "Опубліковано"}
                     </span>
                   </div>
-                )}
+                </Link>
 
-                <span
-                  className={`${styles.status} ${
-                    project.status === "draft"
-                      ? styles.draft
-                      : styles.published
-                  }`}
-                >
-                  {project.status === "draft"
-                    ? "Чернетка"
-                    : "Опубліковано"}
-                </span>
-              </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.cardTitleRow}>
+                    <Link
+                      href={`/admin/portfolio/${project.id}/edit`}
+                      className={styles.cardTitleLink}
+                    >
+                      <h2>{project.title}</h2>
+                    </Link>
 
-              <div
-                className={styles.cardBody}
-              >
-                <div
-                  className={
-                    styles.cardTitleRow
-                  }
-                >
-                  <h2>{project.title}</h2>
+                    <div className={styles.actionsWrap}>
+                      <button
+                        type="button"
+                        className={styles.moreButton}
+                        aria-label={`Дії з роботою: ${project.title}`}
+                        aria-haspopup="menu"
+                        aria-expanded={actionsOpen}
+                        onClick={() =>
+                          setActionProjectId(
+                            actionsOpen
+                              ? null
+                              : project.id,
+                          )
+                        }
+                      >
+                        <MoreIcon />
+                      </button>
 
-                  <span
-                    className={styles.more}
-                    aria-hidden="true"
-                  >
-                    <MoreIcon />
-                  </span>
+                      {actionsOpen ? (
+                        <div
+                          className={styles.actionsMenu}
+                          role="menu"
+                        >
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className={styles.deleteMenuItem}
+                            onClick={() =>
+                              openDeleteConfirmation(project)
+                            }
+                          >
+                            Видалити роботу
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <p>
+                    {project.category}
+                    <span> • </span>
+                    {project.year ?? "Рік не вказано"}
+                  </p>
+
+                  <div className={styles.meta}>
+                    <span>
+                      <ImageIcon />
+                      {project.photoCount}
+                    </span>
+
+                    <span>
+                      <VideoIcon />
+                      {project.videoCount}
+                    </span>
+                  </div>
                 </div>
-
-                <p>
-                  {project.category}
-                  <span> • </span>
-                  {project.year ?? "Рік не вказано"}
-                </p>
-
-                <div
-                  className={styles.meta}
-                >
-                  <span>
-                    <ImageIcon />
-                    {project.photoCount}
-                  </span>
-
-                  <span>
-                    <VideoIcon />
-                    {project.videoCount}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </article>
+            );
+          })}
         </div>
 
         {projects.length === 0 && (
@@ -304,6 +415,95 @@ export function PortfolioBoard({
           )
         )}
       </section>
+
+      {deleteProject ? (
+        <div
+          className={styles.modalBackdrop}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeDeleteConfirmation();
+            }
+          }}
+        >
+          <div
+            className={styles.deleteDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-project-title"
+            aria-describedby="delete-project-description"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                closeDeleteConfirmation();
+              }
+            }}
+          >
+            <span className={styles.deleteEyebrow}>
+              НЕЗВОРОТНА ДІЯ
+            </span>
+
+            <h2 id="delete-project-title">
+              Видалити роботу?
+            </h2>
+
+            <p
+              id="delete-project-description"
+              className={styles.deleteDescription}
+            >
+              Роботу{" "}
+              <strong>
+                «{deleteProject.title}»
+              </strong>{" "}
+              буде видалено разом із її фото та відео.
+            </p>
+
+            {deleteProject.status === "published" ? (
+              <p className={styles.publishedWarning}>
+                Ця робота зараз опублікована. Після
+                видалення вона одразу зникне з
+                публічного портфоліо.
+              </p>
+            ) : null}
+
+            <p className={styles.deletePermanent}>
+              Відновити видалену роботу через CMS
+              буде неможливо.
+            </p>
+
+            {deleteError ? (
+              <div
+                className={styles.deleteError}
+                role="alert"
+              >
+                {deleteError}
+              </div>
+            ) : null}
+
+            <div className={styles.deleteDialogActions}>
+              <button
+                type="button"
+                className={styles.cancelDeleteButton}
+                disabled={Boolean(deletingProjectId)}
+                onClick={closeDeleteConfirmation}
+              >
+                Скасувати
+              </button>
+
+              <button
+                type="button"
+                className={styles.confirmDeleteButton}
+                disabled={Boolean(deletingProjectId)}
+                aria-busy={Boolean(deletingProjectId)}
+                onClick={handleDeleteProject}
+              >
+                {deletingProjectId
+                  ? "Видаляємо…"
+                  : "Так, видалити назавжди"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
