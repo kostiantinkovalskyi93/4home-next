@@ -85,7 +85,7 @@
 
   align-items: end;
 
-  gap: clamp(60px, 8vw, 135px);
+  gap: clamp(56px, 7vw, 116px);
 
   padding-block: 36px;
 }
@@ -273,7 +273,7 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
   margin-top: 27px;
 }
@@ -311,7 +311,7 @@
 
   align-items: end;
 
-  gap: 80px;
+  gap: 72px;
 
   margin-bottom: 64px;
 }
@@ -541,7 +541,7 @@
 
   align-items: end;
 
-  gap: 80px;
+  gap: 72px;
 
   margin-bottom: 66px;
 }
@@ -640,7 +640,7 @@
 
   align-items: end;
 
-  gap: 80px;
+  gap: 72px;
 
   margin-bottom: 58px;
 }
@@ -792,7 +792,7 @@
 
   align-items: start;
 
-  gap: 110px;
+  gap: 90px;
 }
 
 .combinationsHeading {
@@ -922,7 +922,7 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
   margin-top: 27px;
 }

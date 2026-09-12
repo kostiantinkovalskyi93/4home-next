@@ -306,7 +306,7 @@ export async function POST(request: Request) {
         withoutEnlargement: true,
       })
       .webp({
-        quality: 82,
+        quality: 88,
         effort: 4,
       })
       .toBuffer();
@@ -328,7 +328,7 @@ export async function POST(request: Request) {
         withoutEnlargement: false,
       })
       .webp({
-        quality: 82,
+        quality: 88,
         effort: 4,
       })
       .toBuffer();

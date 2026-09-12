@@ -20,7 +20,7 @@
 
   align-items: center;
 
-  gap: 72px;
+  gap: 64px;
 
   padding-block: 72px;
 }
@@ -176,7 +176,7 @@
     minmax(0, 0.85fr)
     minmax(280px, 0.55fr);
 
-  column-gap: 80px;
+  column-gap: 72px;
   row-gap: 18px;
 
   align-items: end;
@@ -223,7 +223,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 
-  margin-top: 72px;
+  margin-top: 64px;
 
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
@@ -311,7 +311,7 @@
 
   align-items: end;
 
-  gap: 72px;
+  gap: 64px;
 }
 
 .categoriesEyebrow {
@@ -351,7 +351,7 @@
 
   gap: 30px 24px;
 
-  margin-top: 70px;
+  margin-top: 64px;
 }
 
 .categoryCard {
@@ -549,7 +549,7 @@
 
   align-items: end;
 
-  gap: 72px;
+  gap: 64px;
 }
 
 .portfolioEyebrow {
@@ -612,7 +612,7 @@
   column-gap: 24px;
   row-gap: 34px;
 
-  margin-top: 70px;
+  margin-top: 64px;
 }
 
 .portfolioFeatured {
@@ -725,7 +725,7 @@
 
   align-items: end;
 
-  gap: 72px;
+  gap: 64px;
 }
 
 .processEyebrow {
@@ -767,7 +767,7 @@
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
 
-  margin-top: 76px;
+  margin-top: 68px;
 }
 
 .processTimeline::before {
@@ -895,7 +895,7 @@
 
   align-items: end;
 
-  gap: 72px;
+  gap: 64px;
 }
 
 .materialsEyebrow {
@@ -931,7 +931,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 
-  margin-top: 72px;
+  margin-top: 64px;
 
   border-top: 1px solid rgba(255, 255, 255, 0.14);
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
@@ -1024,7 +1024,7 @@
     minmax(0, 1fr)
     minmax(360px, 0.9fr);
 
-  gap: 88px;
+  gap: 76px;
 
   align-items: start;
 }
@@ -1137,7 +1137,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 
-  margin-top: 82px;
+  margin-top: 72px;
 
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
@@ -1194,7 +1194,7 @@
     minmax(300px, 0.72fr)
     minmax(0, 1.28fr);
 
-  gap: 96px;
+  gap: 80px;
 
   align-items: start;
 }
@@ -1369,7 +1369,7 @@
 
   align-items: end;
 
-  gap: 88px;
+  gap: 76px;
 }
 
   .finalCtaMain {
@@ -1475,7 +1475,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 
-  margin-top: 84px;
+  margin-top: 72px;
 
   border-top: 1px solid rgba(255, 255, 255, 0.14);
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);

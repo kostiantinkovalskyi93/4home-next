@@ -31,6 +31,10 @@ import {
 
 import styles from "./NewProjectForm.module.css";
 
+const MAX_VIDEO_FILE_SIZE =
+  150 * 1024 * 1024;
+const MAX_VIDEO_FILE_SIZE_LABEL = "150 MB";
+
 type MediaItem = {
   id: string;
   name: string;
@@ -866,10 +870,10 @@ export function NewProjectForm({
         continue;
       }
 
-      if (isVideo && file.size > 100 * 1024 * 1024) {
+      if (isVideo && file.size > MAX_VIDEO_FILE_SIZE) {
         setSaveStatus("error");
         setSaveMessage(
-          `"${file.name}" перевищує ліміт 100 MB.`,
+          `"${file.name}" перевищує ліміт ${MAX_VIDEO_FILE_SIZE_LABEL}.`,
         );
         continue;
       }
@@ -3481,7 +3485,7 @@ export function NewProjectForm({
               </span>
 
               <small>
-                JPG, PNG • MP4, WebM, MOV • до 100 MB • MOV → MP4 автоматично{" "}
+                JPG, PNG • MP4, WebM, MOV • до 150 MB • MOV → MP4 автоматично{" "}
                 {canAddVideo
                   ? "до 2 відео"
                   : "— ліміт відео використано"}

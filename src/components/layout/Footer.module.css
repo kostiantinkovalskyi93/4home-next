@@ -16,10 +16,10 @@
     minmax(360px, 1fr)
     minmax(320px, 1fr);
 
-  gap: 72px;
+  gap: 64px;
 
-  padding-top: 72px;
-  padding-bottom: 58px;
+  padding-top: 60px;
+  padding-bottom: 32px;
 }
 
 /* ========================================
@@ -48,7 +48,7 @@
 ======================================== */
 
 .sectionTitle {
-  margin-bottom: 26px;
+  margin-bottom: 22px;
 
   color: var(--color-accent);
 
@@ -109,7 +109,7 @@
 
   gap: 16px;
 
-  padding-bottom: 26px;
+  padding-bottom: 22px;
 
   border-bottom: 1px solid var(--color-border);
 }
@@ -195,7 +195,7 @@
 .socialLinks {
   display: grid;
 
-  margin-bottom: 6px;
+  margin-bottom: 0;
 }
 
 .socialLink {
@@ -244,7 +244,7 @@
 ======================================== */
 
 .bottomBar {
-  min-height: 72px;
+  min-height: 64px;
 
   display: flex;
   align-items: center;
@@ -280,7 +280,7 @@
   .mainGrid {
     grid-template-columns: 1fr 1fr;
 
-    gap: 54px 48px;
+    gap: 48px 42px;
   }
 
   .brand {
@@ -304,10 +304,10 @@
   .mainGrid {
     grid-template-columns: 1fr;
 
-    gap: 34px;
+    gap: 30px;
 
-    padding-top: 38px;
-    padding-bottom: 28px;
+    padding-top: 34px;
+    padding-bottom: 20px;
   }
 
   .brand {

@@ -88,7 +88,7 @@
 
   align-items: center;
 
-  gap: clamp(56px, 7vw, 116px);
+  gap: clamp(52px, 6.5vw, 96px);
 
   padding-block: 42px;
 }
@@ -467,7 +467,7 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
   margin-top: 26px;
 }
@@ -505,7 +505,7 @@
 
   align-items: end;
 
-  gap: 70px;
+  gap: 64px;
 
   margin-bottom: 64px;
 }
@@ -806,7 +806,7 @@
 
   align-items: end;
 
-  gap: 80px;
+  gap: 72px;
 
   margin-bottom: 68px;
 }
@@ -1182,7 +1182,7 @@
 
   align-items: end;
 
-  gap: 88px;
+  gap: 76px;
 
   margin-top: 27px;
 }

@@ -85,7 +85,7 @@
 
   align-items: end;
 
-  gap: clamp(60px, 8vw, 130px);
+  gap: clamp(56px, 7vw, 112px);
 
   padding-block: 36px;
 }
@@ -260,7 +260,7 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
   margin-top: 27px;
 }
@@ -451,7 +451,7 @@
 
   align-items: end;
 
-  gap: 80px;
+  gap: 72px;
 
   margin-bottom: 68px;
 }
@@ -550,7 +550,7 @@
 
   align-items: start;
 
-  gap: 100px;
+  gap: 84px;
 }
 
 .startHeading .sectionTitle {
@@ -666,7 +666,7 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
   margin-top: 27px;
 }

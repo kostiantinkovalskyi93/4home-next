@@ -88,7 +88,7 @@
 
   align-items: center;
 
-  gap: clamp(44px, 6vw, 96px);
+  gap: clamp(44px, 5.5vw, 84px);
 
   padding-block: 48px;
 }
@@ -429,7 +429,7 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
   margin-top: 28px;
 }
@@ -465,9 +465,9 @@
 
   align-items: end;
 
-  gap: 70px;
+  gap: 64px;
 
-  margin-bottom: 70px;
+  margin-bottom: 64px;
 }
 
 .advantagesLead {
@@ -587,9 +587,9 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
-  margin-bottom: 84px;
+  margin-bottom: 72px;
 }
 
 .planningHeader .darkTitle {
@@ -1012,7 +1012,7 @@
 
   align-items: end;
 
-  gap: 90px;
+  gap: 76px;
 
   margin-top: 28px;
 }
