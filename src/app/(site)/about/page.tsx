@@ -77,23 +77,23 @@ const journey = [
 const projects = [
   {
     image: "/images/portfolio/kitchen-luxury/luxury_kitchen_1.webp",
-    alt: "Індивідуальна кухня 4HOME",
+    alt: "Кухня на замовлення 4HOME",
     label: "Кухні",
     href: "/kitchens",
     className: styles.projectLarge,
   },
   {
-    image: "/images/portfolio/kitchen-white/big_white_kitchen_2.webp",
-    alt: "Світлі меблі на замовлення 4HOME",
-    label: "Наші роботи",
-    href: "/portfolio",
+    image: "/images/portfolio/hinged-02.webp",
+    alt: "Розпашна шафа на замовлення 4HOME",
+    label: "Шафи",
+    href: "/wardrobes",
     className: styles.projectTall,
   },
   {
-    image: "/images/kitchens/kitchen-02.webp",
-    alt: "Меблі в сучасному інтер’єрі 4HOME",
-    label: "Портфоліо",
-    href: "/portfolio",
+    image: "/images/portfolio/media-console/media_console_4.webp",
+    alt: "Інші меблі на замовлення 4HOME",
+    label: "Інші меблі",
+    href: "/furniture",
     className: styles.projectSmall,
   },
 ] as const;

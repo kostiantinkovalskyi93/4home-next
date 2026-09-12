@@ -554,10 +554,63 @@
 }
 
 .projectArrow > span {
+  position: relative;
+
+  width: 16px;
+  height: 12px;
+
+  display: block;
+
+  overflow: hidden;
+
+  color: transparent;
+  font-size: 0;
+
   transition:
     transform
     380ms
     cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.projectArrow > span::before {
+  content: "";
+
+  position: absolute;
+  top: 50%;
+  left: 1px;
+
+  width: 13px;
+  height: 1px;
+
+  background: currentColor;
+
+  color: #ffffff;
+
+  transform: translateY(-50%);
+}
+
+.projectArrow > span::after {
+  content: "";
+
+  position: absolute;
+  top: 50%;
+  right: 1px;
+
+  width: 6px;
+  height: 6px;
+
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+
+  color: #ffffff;
+
+  transform: translateY(-50%) rotate(45deg);
+  transform-origin: center;
+}
+
+.projectCard:hover .projectArrow > span::before,
+.projectCard:hover .projectArrow > span::after {
+  color: var(--color-dark);
 }
 
 .projectCard:hover .image {

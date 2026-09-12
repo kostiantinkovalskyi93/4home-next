@@ -6,7 +6,7 @@ const ROOT = path.resolve("public/images");
 const BACKUP_ROOT = path.resolve("image-backup-before-n10-6");
 
 const MAX_LONG_SIDE = 2560;
-const WEBP_QUALITY = 82;
+const WEBP_QUALITY = 88;
 
 function getFiles(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

@@ -41,7 +41,11 @@ function getProjectLayout(
   index: number,
   total: number,
 ) {
-  if (total === 1) {
+  const isLastProject = index === total - 1;
+  const hasOrphanLastProject =
+    total > 1 && (total % 5 === 1 || total % 5 === 3);
+
+  if (total === 1 || (isLastProject && hasOrphanLastProject)) {
     return {
       className: styles.projectFull,
       sizes: FULL_IMAGE_SIZES,

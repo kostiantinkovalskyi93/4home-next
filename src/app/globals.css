@@ -112,3 +112,10 @@ ol {
     padding-block: var(--space-8);
   }
 }
+
+/* N16.5.5 — optical alignment for inline CTA arrow glyphs */
+a > span[aria-hidden="true"]:last-child,
+button > span[aria-hidden="true"]:last-child {
+  line-height: 1;
+  vertical-align: middle;
+}
