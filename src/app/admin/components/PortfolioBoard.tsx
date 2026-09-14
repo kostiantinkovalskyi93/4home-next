@@ -3,8 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { flushSync } from "react-dom";
 import {
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -23,12 +27,26 @@ import {
 
 import styles from "./PortfolioBoard.module.css";
 
-type CategoryFilter =
-  | "Усі"
-  | AdminProjectCategory;
+type CategoryFilter = "Усі" | AdminProjectCategory;
 
 type PortfolioBoardProps = {
   projects: AdminPortfolioProject[];
+};
+
+type Point = {
+  x: number;
+  y: number;
+};
+
+type DragSession = {
+  pointerId: number;
+  activeId: string;
+  sourceIndex: number;
+  targetIndex: number;
+  startPointer: Point;
+  activeRect: DOMRect;
+  slotRects: DOMRect[];
+  visibleIds: string[];
 };
 
 const categoryFilters: CategoryFilter[] = [
@@ -38,10 +56,80 @@ const categoryFilters: CategoryFilter[] = [
   "Інші меблі",
 ];
 
-export function PortfolioBoard({
+function moveItem<T>(
+  items: T[],
+  sourceIndex: number,
+  targetIndex: number,
+) {
+  const next = [...items];
+  const [moved] = next.splice(sourceIndex, 1);
+
+  next.splice(targetIndex, 0, moved);
+
+  return next;
+}
+
+function getStableTargetIndex(
+  x: number,
+  y: number,
+  rects: DOMRect[],
+  currentIndex: number,
+) {
+  const distances = rects.map((rect) => {
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    return Math.hypot(centerX - x, centerY - y);
+  });
+
+  let nearestIndex = currentIndex;
+  let nearestDistance =
+    distances[currentIndex] ?? Number.POSITIVE_INFINITY;
+
+  distances.forEach((distance, index) => {
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = index;
+    }
+  });
+
+  if (nearestIndex === currentIndex) {
+    return currentIndex;
+  }
+
+  const currentDistance =
+    distances[currentIndex] ?? Number.POSITIVE_INFINITY;
+  const hysteresisPx = 18;
+
+  return nearestDistance + hysteresisPx < currentDistance
+    ? nearestIndex
+    : currentIndex;
+}
+
+function DragHandleIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      aria-hidden="true"
+      fill="currentColor"
+    >
+      <circle cx="6" cy="5" r="1.35" />
+      <circle cx="14" cy="5" r="1.35" />
+      <circle cx="6" cy="10" r="1.35" />
+      <circle cx="14" cy="10" r="1.35" />
+      <circle cx="6" cy="15" r="1.35" />
+      <circle cx="14" cy="15" r="1.35" />
+    </svg>
+  );
+}
+
+function PortfolioBoardState({
   projects: sourceProjects,
 }: PortfolioBoardProps) {
   const router = useRouter();
+
+  const [allProjects, setAllProjects] =
+    useState(sourceProjects);
 
   const [query, setQuery] = useState("");
   const [category, setCategory] =
@@ -62,44 +150,405 @@ export function PortfolioBoard({
 
   const [deleteError, setDeleteError] = useState("");
 
+  const [savingOrder, setSavingOrder] = useState(false);
+  const [reorderError, setReorderError] = useState("");
+
+  const [activeDragId, setActiveDragId] =
+    useState<string | null>(null);
+
+  const [activeDragOffset, setActiveDragOffset] =
+    useState<Point>({ x: 0, y: 0 });
+
+  const [previewTransforms, setPreviewTransforms] =
+    useState<Record<string, Point>>({});
+
+  const cardRefs = useRef(
+    new Map<string, HTMLElement>(),
+  );
+
+  const dragSessionRef =
+    useRef<DragSession | null>(null);
+
+
   const projects = useMemo(() => {
     const normalizedQuery = query
       .trim()
       .toLocaleLowerCase("uk");
 
-    return sourceProjects.filter(
-      (project) => {
-        const searchableText =
-          `${project.title} ${project.category}`
-            .toLocaleLowerCase("uk");
+    return allProjects.filter((project) => {
+      const searchableText =
+        `${project.title} ${project.category}`
+          .toLocaleLowerCase("uk");
 
-        const matchesQuery =
-          !normalizedQuery ||
-          searchableText.includes(
-            normalizedQuery,
-          );
+      const matchesQuery =
+        !normalizedQuery ||
+        searchableText.includes(normalizedQuery);
 
-        const matchesCategory =
-          category === "Усі" ||
-          project.category === category;
+      const matchesCategory =
+        category === "Усі" ||
+        project.category === category;
 
-        const matchesStatus =
-          status === "all" ||
-          project.status === status;
+      const matchesStatus =
+        status === "all" ||
+        project.status === status;
 
-        return (
-          matchesQuery &&
-          matchesCategory &&
-          matchesStatus
-        );
-      },
+      return (
+        matchesQuery &&
+        matchesCategory &&
+        matchesStatus
+      );
+    });
+  }, [allProjects, query, category, status]);
+
+  const reorderEnabled =
+    !savingOrder &&
+    query.trim() === "" &&
+    category === "Усі" &&
+    status === "all";
+
+  const resetDragVisuals = () => {
+    dragSessionRef.current = null;
+    setActiveDragId(null);
+    setActiveDragOffset({ x: 0, y: 0 });
+    setPreviewTransforms({});
+  };
+
+  const updatePreviewTransforms = (
+    session: DragSession,
+    targetIndex: number,
+  ) => {
+    const previewIds = moveItem(
+      session.visibleIds,
+      session.sourceIndex,
+      targetIndex,
     );
-  }, [
-    sourceProjects,
-    query,
-    category,
-    status,
-  ]);
+
+    const nextTransforms: Record<string, Point> = {};
+
+    session.visibleIds.forEach((id, originalIndex) => {
+      if (id === session.activeId) {
+        return;
+      }
+
+      const previewIndex = previewIds.indexOf(id);
+
+      if (previewIndex === originalIndex) {
+        return;
+      }
+
+      const from = session.slotRects[originalIndex];
+      const to = session.slotRects[previewIndex];
+
+      nextTransforms[id] = {
+        x: to.left - from.left,
+        y: to.top - from.top,
+      };
+    });
+
+    setPreviewTransforms(nextTransforms);
+  };
+
+  const handleDragStart = (
+    event: ReactPointerEvent<HTMLButtonElement>,
+    projectId: string,
+  ) => {
+    if (!reorderEnabled || event.button !== 0) {
+      return;
+    }
+
+    const visibleIds = projects.map(
+      (project) => project.id,
+    );
+
+    const sourceIndex = visibleIds.indexOf(projectId);
+
+    if (sourceIndex < 0) {
+      return;
+    }
+
+    const slotRects = visibleIds.map((id) => {
+      const node = cardRefs.current.get(id);
+
+      if (!node) {
+        throw new Error(
+          `Missing portfolio card ref for ${id}`,
+        );
+      }
+
+      return node.getBoundingClientRect();
+    });
+
+    event.preventDefault();
+    setReorderError("");
+    event.currentTarget.setPointerCapture(
+      event.pointerId,
+    );
+
+    const session: DragSession = {
+      pointerId: event.pointerId,
+      activeId: projectId,
+      sourceIndex,
+      targetIndex: sourceIndex,
+      startPointer: {
+        x: event.clientX,
+        y: event.clientY,
+      },
+      activeRect: slotRects[sourceIndex],
+      slotRects,
+      visibleIds,
+    };
+
+    dragSessionRef.current = session;
+    setActionProjectId(null);
+    setActiveDragId(projectId);
+    setActiveDragOffset({ x: 0, y: 0 });
+    setPreviewTransforms({});
+  };
+
+  const handleDragMove = (
+    event: ReactPointerEvent<HTMLButtonElement>,
+  ) => {
+    const session = dragSessionRef.current;
+
+    if (
+      !session ||
+      session.pointerId !== event.pointerId
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const offset = {
+      x: event.clientX - session.startPointer.x,
+      y: event.clientY - session.startPointer.y,
+    };
+
+    setActiveDragOffset(offset);
+
+    const draggedCenterX =
+      session.activeRect.left +
+      session.activeRect.width / 2 +
+      offset.x;
+    const draggedCenterY =
+      session.activeRect.top +
+      session.activeRect.height / 2 +
+      offset.y;
+
+    const targetIndex = getStableTargetIndex(
+      draggedCenterX,
+      draggedCenterY,
+      session.slotRects,
+      session.targetIndex,
+    );
+
+    if (targetIndex === session.targetIndex) {
+      return;
+    }
+
+    session.targetIndex = targetIndex;
+    updatePreviewTransforms(session, targetIndex);
+  };
+
+  const persistProjectOrder = async (
+    nextProjects: AdminPortfolioProject[],
+    previousProjects: AdminPortfolioProject[],
+  ) => {
+    setSavingOrder(true);
+    setReorderError("");
+
+    try {
+      const response = await fetch(
+        "/admin/api/portfolio-project/reorder",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectIds: nextProjects.map(
+              (project) => project.id,
+            ),
+          }),
+        },
+      );
+
+      const result = (await response
+        .json()
+        .catch(() => null)) as
+        | {
+            ok?: boolean;
+            updatedCount?: number;
+            error?: string;
+          }
+        | null;
+
+      if (
+        !response.ok ||
+        !result?.ok ||
+        result.updatedCount !== nextProjects.length
+      ) {
+        throw new Error(
+          result?.error ||
+            "Не вдалося зберегти порядок робіт.",
+        );
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error(
+        "Failed to save portfolio project order:",
+        error,
+      );
+
+      setAllProjects(previousProjects);
+      setReorderError(
+        error instanceof Error
+          ? error.message
+          : "Не вдалося зберегти порядок робіт.",
+      );
+    } finally {
+      setSavingOrder(false);
+    }
+  };
+
+  const handleDragEnd = (
+    event: ReactPointerEvent<HTMLButtonElement>,
+  ) => {
+    const session = dragSessionRef.current;
+
+    if (
+      !session ||
+      session.pointerId !== event.pointerId
+    ) {
+      return;
+    }
+
+    if (
+      event.currentTarget.hasPointerCapture(
+        event.pointerId,
+      )
+    ) {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId,
+      );
+    }
+
+    const { sourceIndex, targetIndex } = session;
+
+    if (sourceIndex === targetIndex) {
+      resetDragVisuals();
+      return;
+    }
+
+    const visualRects = new Map<string, DOMRect>();
+    const transitionSnapshots = new Map<string, string>();
+
+    session.visibleIds.forEach((id) => {
+      const node = cardRefs.current.get(id);
+
+      if (!node) {
+        return;
+      }
+
+      visualRects.set(id, node.getBoundingClientRect());
+      transitionSnapshots.set(id, node.style.transition);
+
+      // Prevent the CSS transform transition from competing with
+      // the FLIP commit when React moves the cards in the DOM.
+      node.style.transition = "none";
+    });
+
+    const previousProjects = allProjects;
+
+    const nextProjects = moveItem(
+      previousProjects,
+      sourceIndex,
+      targetIndex,
+    ).map((project, index) => ({
+      ...project,
+      sortOrder: index,
+    }));
+
+    flushSync(() => {
+      setAllProjects(nextProjects);
+      resetDragVisuals();
+    });
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    session.visibleIds.forEach((id) => {
+      const before = visualRects.get(id);
+      const node = cardRefs.current.get(id);
+
+      if (!before || !node) {
+        return;
+      }
+
+      const restoreTransition = () => {
+        node.style.transition =
+          transitionSnapshots.get(id) ?? "";
+      };
+
+      if (reduceMotion) {
+        restoreTransition();
+        return;
+      }
+
+      const after = node.getBoundingClientRect();
+      const deltaX = before.left - after.left;
+      const deltaY = before.top - after.top;
+
+      if (
+        Math.abs(deltaX) < 0.5 &&
+        Math.abs(deltaY) < 0.5
+      ) {
+        restoreTransition();
+        return;
+      }
+
+      const animation = node.animate(
+        [
+          {
+            transform: `translate3d(${deltaX}px, ${deltaY}px, 0)`,
+          },
+          {
+            transform: "translate3d(0, 0, 0)",
+          },
+        ],
+        {
+          duration: 150,
+          easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        },
+      );
+
+      animation.finished
+        .catch(() => undefined)
+        .finally(restoreTransition);
+    });
+
+    void persistProjectOrder(
+      nextProjects,
+      previousProjects,
+    );
+  };
+
+  const handleDragCancel = (
+    event: ReactPointerEvent<HTMLButtonElement>,
+  ) => {
+    const session = dragSessionRef.current;
+
+    if (
+      !session ||
+      session.pointerId !== event.pointerId
+    ) {
+      return;
+    }
+
+    resetDragVisuals();
+  };
 
   const openDeleteConfirmation = (
     project: AdminPortfolioProject,
@@ -206,9 +655,7 @@ export function PortfolioBoard({
       </div>
 
       <section className={styles.panel}>
-        <header
-          className={styles.headingRow}
-        >
+        <header className={styles.headingRow}>
           <div>
             <h1>Портфоліо</h1>
             <p>Керуйте вашими роботами</p>
@@ -229,17 +676,13 @@ export function PortfolioBoard({
               <button
                 key={item}
                 type="button"
-                onClick={() =>
-                  setCategory(item)
-                }
+                onClick={() => setCategory(item)}
                 className={
                   category === item
                     ? styles.tabActive
                     : styles.tab
                 }
-                aria-pressed={
-                  category === item
-                }
+                aria-pressed={category === item}
               >
                 {item}
               </button>
@@ -251,35 +694,70 @@ export function PortfolioBoard({
             value={status}
             onChange={(event) =>
               setStatus(
-                event.target
-                  .value as typeof status,
+                event.target.value as typeof status,
               )
             }
             aria-label="Фільтр за статусом"
           >
-            <option value="all">
-              Усі статуси
-            </option>
-
+            <option value="all">Усі статуси</option>
             <option value="published">
               Опубліковано
             </option>
-
-            <option value="draft">
-              Чернетка
-            </option>
+            <option value="draft">Чернетка</option>
           </select>
         </div>
+
+        {reorderError ? (
+          <div
+            className={styles.deleteError}
+            role="alert"
+          >
+            {reorderError}
+          </div>
+        ) : null}
 
         <div className={styles.grid}>
           {projects.map((project) => {
             const actionsOpen =
               actionProjectId === project.id;
 
+            const isActive =
+              activeDragId === project.id;
+
+            const previewTransform =
+              previewTransforms[project.id];
+
+            const dragStyle: CSSProperties | undefined =
+              isActive
+                ? {
+                    transform: `translate3d(${activeDragOffset.x}px, ${activeDragOffset.y}px, 0)`,
+                    zIndex: 50,
+                  }
+                : previewTransform
+                  ? {
+                      transform: `translate3d(${previewTransform.x}px, ${previewTransform.y}px, 0)`,
+                    }
+                  : undefined;
+
             return (
               <article
-                className={styles.card}
+                className={`${styles.card} ${
+                  isActive ? styles.cardDragging : ""
+                }`}
                 key={project.id}
+                ref={(node) => {
+                  if (node) {
+                    cardRefs.current.set(
+                      project.id,
+                      node,
+                    );
+                  } else {
+                    cardRefs.current.delete(
+                      project.id,
+                    );
+                  }
+                }}
+                style={dragStyle}
               >
                 <Link
                   href={`/admin/portfolio/${project.id}/edit`}
@@ -316,6 +794,31 @@ export function PortfolioBoard({
                   </div>
                 </Link>
 
+                <button
+                  type="button"
+                  className={styles.dragHandle}
+                  aria-label={`Змінити позицію роботи: ${project.title}`}
+                  title={
+                    savingOrder
+                      ? "Зберігаємо порядок…"
+                      : reorderEnabled
+                        ? "Перетягнути роботу"
+                        : "Очистіть фільтри для зміни порядку"
+                  }
+                  disabled={!reorderEnabled}
+                  onPointerDown={(event) =>
+                    handleDragStart(
+                      event,
+                      project.id,
+                    )
+                  }
+                  onPointerMove={handleDragMove}
+                  onPointerUp={handleDragEnd}
+                  onPointerCancel={handleDragCancel}
+                >
+                  <DragHandleIcon />
+                </button>
+
                 <div className={styles.cardBody}>
                   <div className={styles.cardTitleRow}>
                     <Link
@@ -351,9 +854,13 @@ export function PortfolioBoard({
                           <button
                             type="button"
                             role="menuitem"
-                            className={styles.deleteMenuItem}
+                            className={
+                              styles.deleteMenuItem
+                            }
                             onClick={() =>
-                              openDeleteConfirmation(project)
+                              openDeleteConfirmation(
+                                project,
+                              )
                             }
                           >
                             Видалити роботу
@@ -386,8 +893,8 @@ export function PortfolioBoard({
           })}
         </div>
 
-        {projects.length === 0 && (
-          sourceProjects.length === 0 ? (
+        {projects.length === 0 &&
+          (allProjects.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyStateIcon}>
                 <ImageIcon />
@@ -396,7 +903,8 @@ export function PortfolioBoard({
               <strong>Поки немає робіт</strong>
 
               <p>
-                Додайте перший проєкт — після збереження він з’явиться тут.
+                Додайте перший проєкт — після
+                збереження він з’явиться тут.
               </p>
 
               <Link
@@ -409,11 +917,9 @@ export function PortfolioBoard({
             </div>
           ) : (
             <div className={styles.empty}>
-              За цими параметрами робіт не
-              знайдено.
+              За цими параметрами робіт не знайдено.
             </div>
-          )
-        )}
+          ))}
       </section>
 
       {deleteProject ? (
@@ -450,10 +956,7 @@ export function PortfolioBoard({
               id="delete-project-description"
               className={styles.deleteDescription}
             >
-              Роботу{" "}
-              <strong>
-                «{deleteProject.title}»
-              </strong>{" "}
+              Роботу <strong>«{deleteProject.title}»</strong>{" "}
               буде видалено разом із її фото та відео.
             </p>
 
@@ -466,8 +969,8 @@ export function PortfolioBoard({
             ) : null}
 
             <p className={styles.deletePermanent}>
-              Відновити видалену роботу через CMS
-              буде неможливо.
+              Відновити видалену роботу через CMS буде
+              неможливо.
             </p>
 
             {deleteError ? (
@@ -505,5 +1008,32 @@ export function PortfolioBoard({
         </div>
       ) : null}
     </div>
+  );
+}
+
+export function PortfolioBoard({
+  projects,
+}: PortfolioBoardProps) {
+  const stateKey = projects
+    .map((project) =>
+      [
+        project.id,
+        project.sortOrder,
+        project.title,
+        project.category,
+        project.year ?? "",
+        project.status,
+        project.coverImage ?? "",
+        project.photoCount,
+        project.videoCount,
+      ].join(":"),
+    )
+    .join("|");
+
+  return (
+    <PortfolioBoardState
+      key={stateKey}
+      projects={projects}
+    />
   );
 }

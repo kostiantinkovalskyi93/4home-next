@@ -13,6 +13,7 @@ export type AdminPortfolioProject = {
   category: AdminProjectCategory;
   year: number | null;
   status: AdminProjectStatus;
+  sortOrder: number;
   coverImage: string | null;
   photoCount: number;
   videoCount: number;
@@ -29,6 +30,7 @@ export type PortfolioProjectDatabaseRow = {
   status:
     | "published"
     | "draft";
+  sort_order: number;
 };
 
 export type PortfolioMediaDatabaseRow = {

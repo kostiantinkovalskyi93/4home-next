@@ -23,8 +23,12 @@ export default async function AdminPortfolioPage() {
       title,
       category,
       year,
-      status
+      status,
+      sort_order
     `)
+    .order("sort_order", {
+      ascending: true,
+    })
     .order("updated_at", {
       ascending: false,
     });
@@ -129,6 +133,7 @@ export default async function AdminPortfolioPage() {
         ),
         year: project.year,
         status: project.status,
+        sortOrder: project.sort_order,
         coverImage,
         photoCount: photos.length,
         videoCount: videos.length,

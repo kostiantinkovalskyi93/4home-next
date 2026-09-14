@@ -138,6 +138,37 @@ function isValidPhone(value: string) {
   return digits.length >= 10 && digits.length <= 15;
 }
 
+const PHONE_FOCUS_PREFIX = "+38";
+const PHONE_MAX_LENGTH = 13;
+
+function normalizePhoneInput(value: string) {
+  if (!value) {
+    return "";
+  }
+
+  if (value.startsWith("+")) {
+    const digits = value
+      .slice(1)
+      .replace(/\D/g, "");
+
+    return `+${digits}`.slice(
+      0,
+      PHONE_MAX_LENGTH,
+    );
+  }
+
+  const digits = value.replace(/\D/g, "");
+
+  if (!digits) {
+    return "";
+  }
+
+  return `${PHONE_FOCUS_PREFIX}${digits}`.slice(
+    0,
+    PHONE_MAX_LENGTH,
+  );
+}
+
 function formatFileSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
 }
@@ -482,6 +513,26 @@ export function LeadForm({ sourceContext = null }: LeadFormProps) {
     }
 
     setSubmitError(null);
+  };
+
+  const handlePhoneFocus = () => {
+    if (!form.phone) {
+      updateField(
+        "phone",
+        PHONE_FOCUS_PREFIX,
+      );
+    }
+  };
+
+  const handlePhoneChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    updateField(
+      "phone",
+      normalizePhoneInput(
+        event.target.value,
+      ),
+    );
   };
 
   const handleFiles = (
@@ -1088,8 +1139,8 @@ export function LeadForm({ sourceContext = null }: LeadFormProps) {
                   type="tel"
                   inputMode="tel"
                   autoComplete="tel"
-                  maxLength={30}
-                  placeholder="+380 99 300 22 45"
+                  maxLength={PHONE_MAX_LENGTH}
+                  placeholder="+380 XX XXX XX XX"
                   value={form.phone}
                   aria-invalid={Boolean(
                     phoneError,
@@ -1099,12 +1150,8 @@ export function LeadForm({ sourceContext = null }: LeadFormProps) {
                       ? "lead-phone-error"
                       : undefined
                   }
-                  onChange={(event) =>
-                    updateField(
-                      "phone",
-                      event.target.value,
-                    )
-                  }
+                  onFocus={handlePhoneFocus}
+                  onChange={handlePhoneChange}
                 />
 
                 {phoneError ? (

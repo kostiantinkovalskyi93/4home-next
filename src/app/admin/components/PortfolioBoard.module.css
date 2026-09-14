@@ -1082,3 +1082,75 @@
     transition: none;
   }
 }
+
+
+.dragHandle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 8;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 9px;
+  color: #5d554f;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(35, 27, 21, 0.1);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.dragHandle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.dragHandle:hover:not(:disabled) {
+  color: #805638;
+  background: #fff;
+}
+
+.dragHandle:active:not(:disabled) {
+  cursor: grabbing;
+}
+
+.dragHandle:focus-visible {
+  outline: 2px solid #9a6845;
+  outline-offset: 2px;
+}
+
+.dragHandle:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.cardDragging {
+  opacity: 0.96;
+  border-color: #c9b8aa;
+  box-shadow:
+    0 24px 54px rgba(38, 29, 22, 0.2),
+    0 8px 20px rgba(38, 29, 22, 0.12);
+  transition: none !important;
+  will-change: transform;
+}
+
+.card:not(.cardDragging) {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .dragHandle {
+    transition: none;
+  }
+}
+

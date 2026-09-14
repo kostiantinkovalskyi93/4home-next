@@ -54,6 +54,7 @@ type ProjectRow = {
   location: string | null;
   color: string | null;
   production_term: string | null;
+  sort_order: number;
 };
 
 type MediaRow = {
@@ -73,7 +74,7 @@ type MediaRow = {
 };
 
 const PROJECT_COLUMNS =
-  "id, slug, title, category, wardrobe_type, short_description, client_task, solution, materials, hardware, features, year, location, color, production_term";
+  "id, slug, title, category, wardrobe_type, short_description, client_task, solution, materials, hardware, features, year, location, color, production_term, sort_order";
 
 const MEDIA_COLUMNS =
   "id, project_id, media_type, web_path, card_path, video_poster_path, sort_order, is_cover, processing_status";
@@ -251,6 +252,9 @@ export async function getPublishedPortfolioProjects() {
     .from("portfolio_projects")
     .select(PROJECT_COLUMNS)
     .eq("status", "published")
+    .order("sort_order", {
+      ascending: true,
+    })
     .order("published_at", {
       ascending: false,
     });

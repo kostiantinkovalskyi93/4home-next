@@ -61,6 +61,19 @@ export function ProjectDetail({
           ...image,
         }));
 
+  const normalizedTitle = project.title.trim();
+  const titleLength = normalizedTitle.length;
+  const titleWordCount = normalizedTitle
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  const titleClassName =
+    titleLength >= 68 || titleWordCount >= 9
+      ? styles.titleLong
+      : titleLength >= 42 || titleWordCount >= 6
+        ? styles.titleMedium
+        : styles.titleShort;
+
   return (
     <main className={styles.page}>
       {preview && (
@@ -84,7 +97,7 @@ export function ProjectDetail({
           <div className={styles.heroGrid}>
             <div className={styles.copy}>
               <p className={styles.eyebrow}>РЕАЛІЗОВАНИЙ ПРОЄКТ</p>
-              <h1>{project.title}</h1>
+              <h1 className={titleClassName}>{project.title}</h1>
               {project.shortDescription && (
                 <p className={styles.lead}>{project.shortDescription}</p>
               )}

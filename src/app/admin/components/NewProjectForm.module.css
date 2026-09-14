@@ -225,6 +225,76 @@
   opacity: 0;
 }
 
+.slugField {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  border: 1px solid #ddd6cf;
+  border-radius: 8px;
+  background: #fff;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.slugField:focus-within {
+  border-color: #a77959;
+  box-shadow: 0 0 0 3px rgba(154, 104, 69, 0.09);
+}
+
+.slugPrefix {
+  flex: 0 0 auto;
+  padding-left: 12px;
+  color: #8a837c;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.slugField input {
+  height: 40px;
+  padding-left: 3px;
+  border: 0;
+  box-shadow: none !important;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+}
+
+.slugField input[readonly] {
+  color: #77716b;
+  cursor: default;
+}
+
+.slugMeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  color: #8b837c;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.slugMeta button {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: #805638;
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.slugMeta button:hover {
+  text-decoration: underline;
+}
+
+.slugMeta button:focus-visible {
+  outline: 2px solid #9a6845;
+  outline-offset: 3px;
+}
+
 /*
  * Після втрати фокусу:
  * - якщо поле залишилось порожнім — placeholder з'являється автоматично;
@@ -391,6 +461,48 @@
   cursor: pointer;
   text-align: center;
   background: #fbfaf8;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dropzone:hover:not(.dropzoneDisabled) {
+    border-color: #9f8d7e;
+    background: #f8f4f0;
+    box-shadow: 0 8px 24px rgba(55, 43, 33, 0.06);
+  }
+
+  .dropzone:hover:not(.dropzoneDisabled) .uploadIcon {
+    transform: translateY(-2px);
+    background: #272d2f;
+  }
+}
+
+.dropzone:focus-within:not(.dropzoneDisabled) {
+  border-color: #9f8d7e;
+  box-shadow: 0 0 0 3px rgba(159, 141, 126, 0.12);
+}
+
+.dropzoneDragging {
+  border-color: #8f7663;
+  background: #f5eee8;
+  box-shadow:
+    0 0 0 3px rgba(143, 118, 99, 0.12),
+    0 10px 28px rgba(55, 43, 33, 0.08);
+  transform: translateY(-1px);
+}
+
+.dropzoneDragging .uploadIcon {
+  transform: translateY(-2px) scale(1.04);
+  background: #272d2f;
+}
+
+.dropzoneDisabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .dropzone input {
@@ -409,6 +521,9 @@
   border-radius: 999px;
   color: #fff;
   background: #171b1c;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease;
 }
 
 .uploadIcon svg {
@@ -1348,3 +1463,16 @@
 
 /* N15.4.3 — automatic MOV/WebM processing */
 .videoProgress span{will-change:width;}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .dropzone,
+  .uploadIcon {
+    transition: none;
+  }
+
+  .dropzoneDragging,
+  .dropzoneDragging .uploadIcon {
+    transform: none;
+  }
+}

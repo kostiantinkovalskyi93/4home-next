@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChangeEvent,
+  DragEvent,
   useEffect,
   useMemo,
   useRef,
@@ -187,6 +188,43 @@ function isSupportedVideoFile(file: File) {
   );
 }
 
+function isSupportedPhotoFile(file: File) {
+  const extension = getFileExtension(file.name);
+
+  return (
+    file.type === "image/jpeg" ||
+    file.type === "image/png" ||
+    file.type === "image/webp" ||
+    extension === "jpg" ||
+    extension === "jpeg" ||
+    extension === "png" ||
+    extension === "webp"
+  );
+}
+
+function getPhotoUploadMetadata(file: File) {
+  const extension = getFileExtension(file.name);
+
+  if (file.type === "image/webp" || extension === "webp") {
+    return {
+      extension: "webp",
+      contentType: "image/webp",
+    } as const;
+  }
+
+  if (file.type === "image/png" || extension === "png") {
+    return {
+      extension: "png",
+      contentType: "image/png",
+    } as const;
+  }
+
+  return {
+    extension: "jpg",
+    contentType: "image/jpeg",
+  } as const;
+}
+
 
 function createEmptySpecification(
   prefix: "material" | "hardware",
@@ -250,7 +288,38 @@ function parseSpecifications(
     : fallback;
 }
 
-function createSlug(title: string) {
+const PORTFOLIO_SLUG_MAX_LENGTH = 56;
+
+const SLUG_STOP_WORDS = new Set([
+  "a",
+  "and",
+  "bez",
+  "do",
+  "dlya",
+  "for",
+  "i",
+  "iz",
+  "na",
+  "nad",
+  "of",
+  "pid",
+  "po",
+  "pry",
+  "ta",
+  "the",
+  "u",
+  "v",
+  "vid",
+  "z",
+  "za",
+  "zi",
+  "zhk",
+  "zhytlovyy",
+  "kompleks",
+  "mikrorayon",
+]);
+
+function transliterateUkrainian(value: string) {
   const transliteration: Record<string, string> = {
     а: "a",
     б: "b",
@@ -289,7 +358,7 @@ function createSlug(title: string) {
     "’": "",
   };
 
-  const normalized = title
+  return value
     .trim()
     .toLocaleLowerCase("uk")
     .split("")
@@ -298,18 +367,58 @@ function createSlug(title: string) {
         transliteration[character] ??
         character,
     )
-    .join("")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  const baseSlug =
-    normalized || "project";
-
-  return `${baseSlug}-${crypto
-    .randomUUID()
-    .slice(0, 8)}`;
+    .join("");
 }
 
+function sanitizeSlug(value: string) {
+  return transliterateUkrainian(value)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, PORTFOLIO_SLUG_MAX_LENGTH)
+    .replace(/-+$/g, "");
+}
+
+function createSemanticSlug(title: string) {
+  const normalized = sanitizeSlug(title);
+
+  if (!normalized) {
+    return "project";
+  }
+
+  const meaningfulWords = normalized
+    .split("-")
+    .filter(
+      (word) =>
+        word.length > 1 &&
+        !SLUG_STOP_WORDS.has(word),
+    );
+
+  const selectedWords: string[] = [];
+
+  for (const word of meaningfulWords) {
+    const next = [...selectedWords, word].join("-");
+
+    if (
+      next.length >
+      PORTFOLIO_SLUG_MAX_LENGTH
+    ) {
+      break;
+    }
+
+    selectedWords.push(word);
+
+    if (selectedWords.length === 5) {
+      break;
+    }
+  }
+
+  if (selectedWords.length === 0) {
+    return normalized;
+  }
+
+  return selectedWords.join("-");
+}
 
 function parseProjectYear(value: string) {
   const trimmed = value.trim();
@@ -404,12 +513,21 @@ export function NewProjectForm({
     );
 
   const [projectSlug, setProjectSlug] =
-    useState<string | null>(
-      initialProject?.slug ?? null,
+    useState(
+      initialProject?.slug ??
+        createSemanticSlug(title),
     );
+
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] =
+    useState(Boolean(initialProject));
 
   const [saveStatus, setSaveStatus] =
     useState<SaveStatus>("idle");
+
+  const [isDropzoneDragging, setIsDropzoneDragging] =
+    useState(false);
+
+  const dropzoneDragDepthRef = useRef(0);
 
   const [activeAction, setActiveAction] =
     useState<ActiveAction>("idle");
@@ -516,7 +634,7 @@ export function NewProjectForm({
 
   const accepted = useMemo(
     () =>
-      "image/jpeg,image/png,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov",
+      "image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,.jpg,.jpeg,.png,.webp,.mp4,.webm,.mov",
     [],
   );
 
@@ -672,10 +790,90 @@ export function NewProjectForm({
     }
   };
 
+  const resolveUniqueSlug = async (
+    requestedSlug: string,
+  ) => {
+    const baseSlug =
+      sanitizeSlug(requestedSlug) ||
+      createSemanticSlug(title);
+
+    for (let suffix = 1; suffix <= 50; suffix += 1) {
+      const suffixText =
+        suffix === 1 ? "" : `-${suffix}`;
+
+      const maxBaseLength =
+        PORTFOLIO_SLUG_MAX_LENGTH -
+        suffixText.length;
+
+      const candidate = `${baseSlug
+        .slice(0, maxBaseLength)
+        .replace(/-+$/g, "")}${suffixText}`;
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("portfolio_projects")
+        .select("id")
+        .eq("slug", candidate)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        return candidate;
+      }
+    }
+
+    throw new Error(
+      "Не вдалося сформувати унікальний URL. Змініть slug вручну.",
+    );
+  };
+
   const handleTitleChange = (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
-    setTitle(event.target.value);
+    const nextTitle = event.target.value;
+
+    setTitle(nextTitle);
+
+    if (
+      !isEditMode &&
+      !isSlugManuallyEdited
+    ) {
+      setProjectSlug(
+        createSemanticSlug(nextTitle),
+      );
+    }
+
+    markAsChanged();
+  };
+
+  const handleSlugChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (isEditMode) {
+      return;
+    }
+
+    setIsSlugManuallyEdited(true);
+    setProjectSlug(
+      sanitizeSlug(event.target.value),
+    );
+    markAsChanged();
+  };
+
+  const resetSuggestedSlug = () => {
+    if (isEditMode) {
+      return;
+    }
+
+    setIsSlugManuallyEdited(false);
+    setProjectSlug(
+      createSemanticSlug(title),
+    );
     markAsChanged();
   };
 
@@ -835,29 +1033,22 @@ export function NewProjectForm({
     void prepareLocalMedia(target);
   };
 
-  const handleFiles = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = Array.from(
-      event.target.files ?? [],
-    );
-
-    if (!files.length) return;
+  const addFiles = (files: File[]) => {
+    if (!files.length || saveStatus === "saving") {
+      return;
+    }
 
     const next: MediaItem[] = [];
     let remainingVideos = 2 - videoCount;
 
     for (const file of files) {
       const isVideo = isSupportedVideoFile(file);
-      const isPhoto =
-        file.type === "image/jpeg" ||
-        file.type === "image/png" ||
-        /\.(jpe?g|png)$/i.test(file.name);
+      const isPhoto = isSupportedPhotoFile(file);
 
       if (!isVideo && !isPhoto) {
         setSaveStatus("error");
         setSaveMessage(
-          `"${file.name}" не підтримується. Дозволено JPG, PNG, MP4, WebM та MOV.`,
+          `"${file.name}" не підтримується. Дозволено JPG, PNG, WebP, MP4, WebM та MOV.`,
         );
         continue;
       }
@@ -905,8 +1096,84 @@ export function NewProjectForm({
         }
       })();
     }
+  };
+
+  const handleFiles = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    addFiles(
+      Array.from(event.target.files ?? []),
+    );
 
     event.target.value = "";
+  };
+
+  const handleDropzoneDragEnter = (
+    event: DragEvent<HTMLLabelElement>,
+  ) => {
+    if (!event.dataTransfer.types.includes("Files")) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (saveStatus === "saving") {
+      return;
+    }
+
+    dropzoneDragDepthRef.current += 1;
+    setIsDropzoneDragging(true);
+  };
+
+  const handleDropzoneDragOver = (
+    event: DragEvent<HTMLLabelElement>,
+  ) => {
+    if (!event.dataTransfer.types.includes("Files")) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    event.dataTransfer.dropEffect =
+      saveStatus === "saving" ? "none" : "copy";
+  };
+
+  const handleDropzoneDragLeave = (
+    event: DragEvent<HTMLLabelElement>,
+  ) => {
+    if (!event.dataTransfer.types.includes("Files")) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    dropzoneDragDepthRef.current = Math.max(
+      0,
+      dropzoneDragDepthRef.current - 1,
+    );
+
+    if (dropzoneDragDepthRef.current === 0) {
+      setIsDropzoneDragging(false);
+    }
+  };
+
+  const handleDropzoneDrop = (
+    event: DragEvent<HTMLLabelElement>,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    dropzoneDragDepthRef.current = 0;
+    setIsDropzoneDragging(false);
+
+    if (saveStatus === "saving") {
+      return;
+    }
+
+    addFiles(Array.from(event.dataTransfer.files));
   };
 
   const removeMedia = async (id: string) => {
@@ -2116,8 +2383,10 @@ export function NewProjectForm({
         continue;
       }
 
-      const extension =
-        file.type === "image/png" ? "png" : "jpg";
+      const {
+        extension,
+        contentType,
+      } = getPhotoUploadMetadata(file);
 
       const originalPath =
         `${targetProjectId}/photos/${mediaId}.${extension}`;
@@ -2127,7 +2396,7 @@ export function NewProjectForm({
           .from("portfolio-originals")
           .upload(originalPath, file, {
             cacheControl: "3600",
-            contentType: file.type,
+            contentType,
             upsert: false,
           });
 
@@ -2630,8 +2899,10 @@ export function NewProjectForm({
 
       if (!projectId) {
         const slug =
-          projectSlug ??
-          createSlug(cleanTitle);
+          await resolveUniqueSlug(
+            projectSlug ||
+              createSemanticSlug(cleanTitle),
+          );
 
         const {
           data,
@@ -3119,6 +3390,40 @@ export function NewProjectForm({
               />
             </Field>
 
+            <Field label="URL роботи">
+              <div className={styles.slugField}>
+                <span className={styles.slugPrefix}>
+                  /portfolio/
+                </span>
+
+                <input
+                  value={projectSlug}
+                  onChange={handleSlugChange}
+                  readOnly={isEditMode}
+                  aria-readonly={isEditMode}
+                  placeholder="kuhnya-sklyani-sektsiyi"
+                />
+              </div>
+
+              <div className={styles.slugMeta}>
+                <span>
+                  {isEditMode
+                    ? "URL зафіксовано після створення роботи."
+                    : "Короткий URL генерується автоматично. За потреби його можна змінити до першого збереження."}
+                </span>
+
+                {!isEditMode &&
+                  isSlugManuallyEdited && (
+                    <button
+                      type="button"
+                      onClick={resetSuggestedSlug}
+                    >
+                      Авто
+                    </button>
+                  )}
+              </div>
+            </Field>
+
             <Field label="Категорія *">
               <div className={styles.segmented}>
                 <label>
@@ -3422,7 +3727,7 @@ export function NewProjectForm({
                 <h2>Фото та відео</h2>
 
                 <p>
-                  JPG / PNG автоматично
+                  JPG / PNG / WebP автоматично
                   підготуємо для web. MOV / WebM
                   автоматично перетворимо у web MP4.
                   Максимум 2 відео.
@@ -3461,7 +3766,21 @@ export function NewProjectForm({
               </div>
             </div>
 
-            <label className={styles.dropzone}>
+            <label
+              className={`${styles.dropzone} ${
+                isDropzoneDragging
+                  ? styles.dropzoneDragging
+                  : ""
+              } ${
+                saveStatus === "saving"
+                  ? styles.dropzoneDisabled
+                  : ""
+              }`}
+              onDragEnter={handleDropzoneDragEnter}
+              onDragOver={handleDropzoneDragOver}
+              onDragLeave={handleDropzoneDragLeave}
+              onDrop={handleDropzoneDrop}
+            >
               <input
                 type="file"
                 multiple
@@ -3485,7 +3804,7 @@ export function NewProjectForm({
               </span>
 
               <small>
-                JPG, PNG • MP4, WebM, MOV • до 150 MB • MOV → MP4 автоматично{" "}
+                JPG, PNG, WebP • MP4, WebM, MOV • до 150 MB • MOV → MP4 автоматично{" "}
                 {canAddVideo
                   ? "до 2 відео"
                   : "— ліміт відео використано"}
@@ -4061,7 +4380,7 @@ export function NewProjectForm({
                 </strong>
 
                 <p>
-                  Оригінальні JPG / PNG вже
+                  Оригінальні JPG / PNG / WebP вже
                   зберігаються у приватному
                   Supabase Storage. WebP та
                   обкладинку підключимо на
