@@ -6,7 +6,10 @@ import {
 } from "../../../../components/NewProjectForm";
 
 import { createClient } from "@/lib/supabase/server";
-
+import {
+  getBunnyVideoPlaybackUrl,
+  getBunnyVideoThumbnailUrl,
+} from "@/lib/bunny/delivery";
 type EditProjectPageProps = {
   params: Promise<{
     id: string;
@@ -20,6 +23,8 @@ type MediaRow = {
   web_path: string | null;
   card_path: string | null;
   video_poster_path: string | null;
+  storage_provider: string | null;
+  bunny_video_id: string | null;
   sort_order: number;
   is_cover: boolean;
   focal_x: number;
@@ -87,6 +92,8 @@ export default async function EditProjectPage({
         web_path,
         card_path,
         video_poster_path,
+        storage_provider,
+        bunny_video_id,
         sort_order,
         is_cover,
         focal_x,
@@ -114,19 +121,40 @@ export default async function EditProjectPage({
 
   for (const media of (mediaRows ?? []) as MediaRow[]) {
     let previewUrl: string | null = null;
+    let posterUrl: string | undefined;
 
     if (media.media_type === "video") {
-      if (
-        media.processing_status !== "ready" ||
-        !media.web_path
-      ) {
+      if (media.processing_status !== "ready") {
         continue;
       }
 
-      previewUrl = supabase.storage
-        .from("portfolio-videos")
-        .getPublicUrl(media.web_path)
-        .data.publicUrl;
+      if (
+        media.storage_provider === "bunny" &&
+        media.bunny_video_id
+      ) {
+        previewUrl = getBunnyVideoPlaybackUrl(
+          media.bunny_video_id,
+        );
+
+        posterUrl = getBunnyVideoThumbnailUrl(
+          media.bunny_video_id,
+        );
+      } else if (media.web_path) {
+        previewUrl = supabase.storage
+          .from("portfolio-videos")
+          .getPublicUrl(media.web_path)
+          .data.publicUrl;
+
+        if (media.video_poster_path) {
+          posterUrl = supabase.storage
+            .from("portfolio-video-posters")
+            .getPublicUrl(
+              media.video_poster_path,
+            ).data.publicUrl;
+        }
+      } else {
+        continue;
+      }
     } else if (
       media.processing_status === "ready" &&
       media.web_path
@@ -166,18 +194,11 @@ export default async function EditProjectPage({
         ? media.web_path
         : media.original_path;
 
-    const fileName =
-      sourcePath?.split("/").pop() ??
-      (media.media_type === "video"
-        ? "Відео"
-        : "Фото");
-
-    const posterUrl =
-      media.media_type === "video" && media.video_poster_path
-        ? supabase.storage
-            .from("portfolio-video-posters")
-            .getPublicUrl(media.video_poster_path).data.publicUrl
-        : undefined;
+  const fileName =
+    sourcePath?.split("/").pop() ??
+    (media.media_type === "video"
+      ? "Відео"
+      : "Фото");
 
     initialMedia.push({
       id: media.id,

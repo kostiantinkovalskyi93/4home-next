@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import type { ProjectDetailMedia } from "./ProjectDetail";
+import { PortfolioVideoPlayer } from "./PortfolioVideoPlayer";
 
 import styles from "./ProjectDetail.module.css";
 
@@ -89,7 +90,10 @@ export function ProjectDetailGallery({
     }
 
     const touch = event.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+    };
   }, []);
 
   const handleTouchEnd = useCallback(
@@ -97,18 +101,30 @@ export function ProjectDetailGallery({
       const start = touchStartRef.current;
       touchStartRef.current = null;
 
-      if (!start || event.changedTouches.length !== 1 || count < 2) return;
+      if (
+        !start ||
+        event.changedTouches.length !== 1 ||
+        count < 2
+      ) {
+        return;
+      }
 
       const touch = event.changedTouches[0];
       const deltaX = touch.clientX - start.x;
       const deltaY = touch.clientY - start.y;
 
-      if (Math.abs(deltaX) < 52 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.15) {
+      if (
+        Math.abs(deltaX) < 52 ||
+        Math.abs(deltaX) <= Math.abs(deltaY) * 1.15
+      ) {
         return;
       }
 
-      if (deltaX < 0) showNext();
-      else showPrevious();
+      if (deltaX < 0) {
+        showNext();
+      } else {
+        showPrevious();
+      }
     },
     [count, showNext, showPrevious],
   );
@@ -165,7 +181,9 @@ export function ProjectDetailGallery({
         lightboxRef.current?.querySelectorAll<HTMLElement>(
           'button:not([disabled]), video[controls], [href], [tabindex]:not([tabindex="-1"])',
         ) ?? [],
-      ).filter((element) => !element.hasAttribute("disabled"));
+      ).filter(
+        (element) => !element.hasAttribute("disabled"),
+      );
 
       if (!focusable.length) {
         event.preventDefault();
@@ -180,7 +198,10 @@ export function ProjectDetailGallery({
       if (event.shiftKey && current === first) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && current === last) {
+      } else if (
+        !event.shiftKey &&
+        current === last
+      ) {
         event.preventDefault();
         first.focus();
       }
@@ -194,12 +215,21 @@ export function ProjectDetailGallery({
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+
       requestAnimationFrame(() => {
         previouslyFocusedRef.current?.focus();
       });
     };
-  }, [closeLightbox, lightbox, showNext, showPrevious]);
+  }, [
+    closeLightbox,
+    lightbox,
+    showNext,
+    showPrevious,
+  ]);
 
   if (!count) {
     return (
@@ -220,15 +250,12 @@ export function ProjectDetailGallery({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          <video
+          <PortfolioVideoPlayer
             ref={mainVideoRef}
             className={styles.mainVideo}
             src={item.src}
             poster={item.posterSrc}
-            controls
-            playsInline
-            preload="metadata"
-            aria-label={item.alt}
+            ariaLabel={item.alt}
           />
 
           <button
@@ -240,7 +267,10 @@ export function ProjectDetailGallery({
             ↗
           </button>
 
-          <span className={styles.videoBadge}>ВІДЕО</span>
+          <span className={styles.videoBadge}>
+            ВІДЕО
+          </span>
+
           <span className={styles.counter}>
             {active + 1} / {count}
           </span>
@@ -262,7 +292,10 @@ export function ProjectDetailGallery({
             sizes="(max-width: 900px) 100vw, (max-width: 1444px) 68vw, 920px"
           />
 
-          <span className={styles.zoom} aria-hidden="true">
+          <span
+            className={styles.zoom}
+            aria-hidden="true"
+          >
             ↗
           </span>
 
@@ -283,14 +316,20 @@ export function ProjectDetailGallery({
               }}
               onClick={() => selectMedia(index)}
               className={`${styles.thumb} ${
-                index === active ? styles.thumbActive : ""
+                index === active
+                  ? styles.thumbActive
+                  : ""
               }`}
               aria-label={
                 mediaItem.type === "video"
                   ? `Відео ${index + 1}`
                   : `Фото ${index + 1}`
               }
-              aria-current={index === active ? "true" : undefined}
+              aria-current={
+                index === active
+                  ? "true"
+                  : undefined
+              }
             >
               {mediaItem.type === "video" ? (
                 <>
@@ -313,7 +352,11 @@ export function ProjectDetailGallery({
                       aria-hidden="true"
                     />
                   )}
-                  <span className={styles.thumbPlay} aria-hidden="true">
+
+                  <span
+                    className={styles.thumbPlay}
+                    aria-hidden="true"
+                  >
                     ▶
                   </span>
                 </>
@@ -356,22 +399,33 @@ export function ProjectDetailGallery({
           className={styles.lightbox}
           role="dialog"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeLightbox();
+            if (event.target === event.currentTarget) {
+              closeLightbox();
+            }
           }}
           aria-modal="true"
           aria-label={`Галерея проєкту ${title}`}
         >
           <div className={styles.lightboxTop}>
             <div>
-              <span className={styles.lightboxEyebrow}>
+              <span
+                className={styles.lightboxEyebrow}
+              >
                 4HOME / ПРОЄКТ
               </span>
+
               <strong>{title}</strong>
             </div>
 
-            <div className={styles.lightboxTopRight}>
+            <div
+              className={styles.lightboxTopRight}
+            >
               <span>
-                {String(active + 1).padStart(2, "0")} /{" "}
+                {String(active + 1).padStart(
+                  2,
+                  "0",
+                )}{" "}
+                /{" "}
                 {String(count).padStart(2, "0")}
               </span>
 
@@ -404,17 +458,16 @@ export function ProjectDetailGallery({
             )}
 
             {isVideo ? (
-              <div className={styles.lightVideoWrap}>
-                <video
+              <div
+                className={styles.lightVideoWrap}
+              >
+                <PortfolioVideoPlayer
                   ref={lightVideoRef}
                   className={styles.lightVideo}
                   src={item.src}
                   poster={item.posterSrc}
-                  controls
-                  playsInline
-                  preload="metadata"
                   autoPlay
-                  aria-label={item.alt}
+                  ariaLabel={item.alt}
                 />
               </div>
             ) : (
@@ -441,73 +494,96 @@ export function ProjectDetailGallery({
             )}
           </div>
 
-          <div className={styles.lightboxBottom}>
+          <div
+            className={styles.lightboxBottom}
+          >
             <div className={styles.lightThumbs}>
-              {media.map((mediaItem, index) => (
-                <button
-                  key={`light-${mediaItem.type}-${mediaItem.src}-${index}`}
-                  type="button"
-                  ref={(element) => {
-                    lightThumbRefs.current[index] = element;
-                  }}
-                  onClick={() => selectMedia(index)}
-                  className={`${styles.lightThumb} ${
-                    index === active ? styles.lightThumbActive : ""
-                  }`}
-                  aria-label={
-                    mediaItem.type === "video"
-                      ? `Показати відео ${index + 1}`
-                      : `Показати фото ${index + 1}`
-                  }
-                  aria-current={
-                    index === active
-                      ? "true"
-                      : undefined
-                  }
-                >
-                  {mediaItem.type === "video" ? (
-                    <>
-                      {mediaItem.posterSrc ? (
-                        <Image
-                          className={styles.thumbVideo}
-                          src={mediaItem.posterSrc}
-                          alt=""
-                          fill
-                          sizes="76px"
-                        />
-                      ) : (
-                        <video
-                          className={styles.thumbVideo}
-                          src={mediaItem.src}
-                          muted
-                          playsInline
-                          preload="none"
-                          tabIndex={-1}
+              {media.map(
+                (mediaItem, index) => (
+                  <button
+                    key={`light-${mediaItem.type}-${mediaItem.src}-${index}`}
+                    type="button"
+                    ref={(element) => {
+                      lightThumbRefs.current[
+                        index
+                      ] = element;
+                    }}
+                    onClick={() =>
+                      selectMedia(index)
+                    }
+                    className={`${styles.lightThumb} ${
+                      index === active
+                        ? styles.lightThumbActive
+                        : ""
+                    }`}
+                    aria-label={
+                      mediaItem.type === "video"
+                        ? `Показати відео ${index + 1}`
+                        : `Показати фото ${index + 1}`
+                    }
+                    aria-current={
+                      index === active
+                        ? "true"
+                        : undefined
+                    }
+                  >
+                    {mediaItem.type ===
+                    "video" ? (
+                      <>
+                        {mediaItem.posterSrc ? (
+                          <Image
+                            className={
+                              styles.thumbVideo
+                            }
+                            src={
+                              mediaItem.posterSrc
+                            }
+                            alt=""
+                            fill
+                            sizes="76px"
+                          />
+                        ) : (
+                          <video
+                            className={
+                              styles.thumbVideo
+                            }
+                            src={mediaItem.src}
+                            muted
+                            playsInline
+                            preload="none"
+                            tabIndex={-1}
+                            aria-hidden="true"
+                          />
+                        )}
+
+                        <span
+                          className={
+                            styles.thumbPlay
+                          }
                           aria-hidden="true"
-                        />
-                      )}
-                      <span
-                        className={styles.thumbPlay}
-                        aria-hidden="true"
-                      >
-                        ▶
-                      </span>
-                    </>
-                  ) : (
-                    <Image
-                      src={mediaItem.src}
-                      alt=""
-                      fill
-                      sizes="76px"
-                    />
-                  )}
-                </button>
-              ))}
+                        >
+                          ▶
+                        </span>
+                      </>
+                    ) : (
+                      <Image
+                        src={mediaItem.src}
+                        alt=""
+                        fill
+                        sizes="76px"
+                      />
+                    )}
+                  </button>
+                ),
+              )}
             </div>
 
             <div className={styles.lightMeta}>
               <strong>{title}</strong>
-              {description && <span>{description}</span>}
+
+              {description && (
+                <span>{description}</span>
+              )}
             </div>
           </div>
         </div>

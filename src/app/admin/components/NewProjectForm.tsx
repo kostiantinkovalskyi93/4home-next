@@ -17,10 +17,6 @@ import {
 import { Upload } from "tus-js-client";
 
 import { createClient } from "@/lib/supabase/client";
-import {
-  shouldTranscodeVideo,
-  transcodeVideoForWeb,
-} from "@/lib/video-transcode";
 import { createVideoPoster } from "@/lib/video-poster";
 
 import {
@@ -918,8 +914,8 @@ export function NewProjectForm({
               processingStatus: "processing",
               uploadProgress: 0,
               processingLabel:
-                item.type === "video" && shouldTranscodeVideo(file)
-                  ? "Оптимізація 0%"
+                item.type === "video"
+                  ? "Створення poster…"
                   : "Підготовка…",
             }
           : currentItem,
@@ -927,26 +923,7 @@ export function NewProjectForm({
     );
 
     try {
-      let preparedFile = file;
-
-      if (item.type === "video" && shouldTranscodeVideo(file)) {
-        preparedFile = await transcodeVideoForWeb(
-          file,
-          (progress) => {
-            setMedia((current) =>
-              current.map((currentItem) =>
-                currentItem.id === item.id
-                  ? {
-                      ...currentItem,
-                      uploadProgress: progress,
-                      processingLabel: `Оптимізація ${progress}%`,
-                    }
-                  : currentItem,
-              ),
-            );
-          },
-        );
-      } else if (item.type === "photo") {
+      if (item.type === "photo") {
         const bitmap = await createImageBitmap(file);
         bitmap.close();
       }
@@ -955,18 +932,7 @@ export function NewProjectForm({
       let posterUrl: string | undefined;
 
       if (item.type === "video") {
-        setMedia((current) =>
-          current.map((currentItem) =>
-            currentItem.id === item.id
-              ? {
-                  ...currentItem,
-                  processingLabel: "Створення poster…",
-                }
-              : currentItem,
-          ),
-        );
-
-        posterFile = await createVideoPoster(preparedFile);
+        posterFile = await createVideoPoster(file);
         posterUrl = URL.createObjectURL(posterFile);
       }
 
@@ -984,12 +950,12 @@ export function NewProjectForm({
 
           return {
             ...currentItem,
-            preparedFile,
+            preparedFile: file,
             posterFile,
             posterUrl,
             processingStatus: "ready",
             uploadProgress: 100,
-            processingLabel: "Готово до збереження",
+            processingLabel: "Готово до завантаження",
           };
         }),
       );
@@ -2541,49 +2507,6 @@ export function NewProjectForm({
       );
     }
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session?.access_token) {
-      throw new Error(
-        "Сесію адміністратора не знайдено. Увійдіть повторно.",
-      );
-    }
-
-    const { data: existingMedia, error: mediaError } =
-      await supabase
-        .from("portfolio_media")
-        .select("sort_order")
-        .eq("project_id", targetProjectId)
-        .order("sort_order", { ascending: false })
-        .limit(1);
-
-    if (mediaError) {
-      throw mediaError;
-    }
-
-    let nextSortOrder =
-      existingMedia?.[0]?.sort_order != null
-        ? existingMedia[0].sort_order + 1
-        : 0;
-
-    const supabaseUrl =
-      process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    if (!supabaseUrl) {
-      throw new Error(
-        "NEXT_PUBLIC_SUPABASE_URL не налаштовано.",
-      );
-    }
-
-    const projectRef =
-      new URL(supabaseUrl).hostname.split(".")[0];
-
-    const endpoint =
-      `https://${projectRef}.storage.supabase.co/storage/v1/upload/resumable`;
-
     for (const item of pendingVideos) {
       const file = item.file;
 
@@ -2591,219 +2514,249 @@ export function NewProjectForm({
         continue;
       }
 
-      const mediaId = crypto.randomUUID();
-
-      const uploadFile = item.preparedFile ?? file;
-
-      if (shouldTranscodeVideo(file) && !item.preparedFile) {
-        throw new Error(
-          `Відео "${item.name}" ще не підготовлене до збереження.`,
-        );
-      }
-
-      const extension = "mp4";
-      const contentType = "video/mp4";
-
-      const storagePath =
-        `${targetProjectId}/videos/${mediaId}.${extension}`;
-
       setMedia((current) =>
         current.map((currentItem) =>
           currentItem.id === item.id
             ? {
                 ...currentItem,
+                processingStatus: "processing",
                 uploadProgress: 0,
-                processingLabel:
-                  "Завантаження 0%",
+                processingLabel: "Завантаження в Bunny 0%",
               }
             : currentItem,
         ),
       );
 
-      await new Promise<void>((resolve, reject) => {
-        const upload = new Upload(uploadFile, {
-          endpoint,
-          retryDelays: [0, 1000, 3000, 5000],
+      const prepareResponse = await fetch(
+        "/admin/api/portfolio-media/create-bunny-video-upload",
+        {
+          method: "POST",
           headers: {
-            authorization:
-              `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
           },
-          uploadDataDuringCreation: true,
-          removeFingerprintOnSuccess: true,
-          metadata: {
-            bucketName: "portfolio-videos",
-            objectName: storagePath,
-            contentType,
-            cacheControl: "31536000",
-          },
-          chunkSize: 6 * 1024 * 1024,
-          onError(error) {
-            void upload
-              .abort(true)
-              .catch((abortError) => {
-                console.error(
-                  "Failed to terminate interrupted TUS upload:",
-                  abortError,
-                );
-              })
-              .finally(() => reject(error));
-          },
-          onProgress(bytesUploaded, bytesTotal) {
-            const progress =
-              bytesTotal > 0
-                ? Math.round(
-                    (bytesUploaded / bytesTotal) * 100,
-                  )
-                : 0;
+          body: JSON.stringify({
+            projectId: targetProjectId,
+            fileName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            fileSize: file.size,
+          }),
+        },
+      );
 
-            setMedia((current) =>
-              current.map((currentItem) =>
-                currentItem.id === item.id
-                  ? {
-                      ...currentItem,
-                      uploadProgress: progress,
-                      processingLabel:
-                        `Завантаження ${progress}%`,
-                    }
-                  : currentItem,
+      const prepareResult = (await prepareResponse
+        .json()
+        .catch(() => null)) as
+        | {
+            error?: string;
+            media?: {
+              id: string;
+              sortOrder: number;
+            };
+            upload?: {
+              endpoint: string;
+              libraryId: string;
+              videoId: string;
+              authorizationSignature: string;
+              authorizationExpire: number;
+            };
+          }
+        | null;
+
+      if (
+        !prepareResponse.ok ||
+        !prepareResult?.media?.id ||
+        !prepareResult.upload
+      ) {
+        throw new Error(
+          prepareResult?.error ??
+            `Не вдалося підготувати Bunny Stream для "${item.name}".`,
+        );
+      }
+
+      const mediaId = prepareResult.media.id;
+      const sortOrder = prepareResult.media.sortOrder;
+      const uploadAuthorization = prepareResult.upload;
+
+      const rollbackBunnyVideo = async () => {
+        const response = await fetch(
+          "/admin/api/portfolio-media/delete-video",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ mediaId }),
+          },
+        );
+
+        if (!response.ok) {
+          const result = (await response.json().catch(() => null)) as
+            | { error?: string }
+            | null;
+          throw new Error(
+            result?.error ?? "Не вдалося виконати rollback Bunny-відео.",
+          );
+        }
+      };
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const upload = new Upload(file, {
+            endpoint: uploadAuthorization.endpoint,
+            retryDelays: [0, 1000, 3000, 5000, 10000],
+            headers: {
+              AuthorizationSignature:
+                uploadAuthorization.authorizationSignature,
+              AuthorizationExpire: String(
+                uploadAuthorization.authorizationExpire,
               ),
-            );
-          },
-          onSuccess() {
-            resolve();
-          },
+              VideoId: uploadAuthorization.videoId,
+              LibraryId: uploadAuthorization.libraryId,
+            },
+            metadata: {
+              filetype: file.type || "application/octet-stream",
+              title: file.name,
+            },
+            removeFingerprintOnSuccess: true,
+            chunkSize: 8 * 1024 * 1024,
+            onError(error) {
+              reject(error);
+            },
+            onProgress(bytesUploaded, bytesTotal) {
+              const progress =
+                bytesTotal > 0
+                  ? Math.round((bytesUploaded / bytesTotal) * 100)
+                  : 0;
+
+              setMedia((current) =>
+                current.map((currentItem) =>
+                  currentItem.id === item.id
+                    ? {
+                        ...currentItem,
+                        uploadProgress: progress,
+                        processingLabel:
+                          `Завантаження в Bunny ${progress}%`,
+                      }
+                    : currentItem,
+                ),
+              );
+            },
+            onSuccess() {
+              resolve();
+            },
+          });
+
+          void upload.findPreviousUploads().then(
+            (previousUploads) => {
+              if (previousUploads.length > 0) {
+                upload.resumeFromPreviousUpload(previousUploads[0]);
+              }
+
+              upload.start();
+            },
+            reject,
+          );
         });
 
-        upload.findPreviousUploads().then(
-          (previousUploads) => {
-            if (previousUploads.length) {
-              upload.resumeFromPreviousUpload(
-                previousUploads[0],
-              );
-            }
+        const posterFile = item.posterFile;
+        let posterPath: string | null = null;
+        let posterPublicUrl: string | undefined;
 
-            upload.start();
-          },
-          reject,
-        );
-      });
+        if (posterFile) {
+          posterPath =
+            `${targetProjectId}/videos/${mediaId}-poster.webp`;
 
-      const posterFile = item.posterFile;
+          const { error: posterUploadError } =
+            await supabase.storage
+              .from("portfolio-video-posters")
+              .upload(posterPath, posterFile, {
+                cacheControl: "31536000",
+                contentType: "image/webp",
+                upsert: false,
+              });
 
-      if (!posterFile) {
-        await supabase.storage
-          .from("portfolio-videos")
-          .remove([storagePath]);
+          if (posterUploadError) {
+            throw posterUploadError;
+          }
 
-        throw new Error(
-          `Для відео "${item.name}" не підготовлено poster-зображення.`,
-        );
-      }
-
-      const posterPath =
-        `${targetProjectId}/videos/${mediaId}-poster.webp`;
-
-      const { error: posterUploadError } =
-        await supabase.storage
-          .from("portfolio-video-posters")
-          .upload(posterPath, posterFile, {
-            cacheControl: "31536000",
-            contentType: "image/webp",
-            upsert: false,
-          });
-
-      if (posterUploadError) {
-        await supabase.storage
-          .from("portfolio-videos")
-          .remove([storagePath]);
-
-        throw posterUploadError;
-      }
-
-      const { error: insertError } =
-        await supabase
-          .from("portfolio_media")
-          .insert({
-            id: mediaId,
-            project_id: targetProjectId,
-            media_type: "video",
-            sort_order: nextSortOrder,
-            original_path: null,
-            web_path: storagePath,
-            card_path: null,
-            video_poster_path: posterPath,
-            is_cover: false,
-            processing_status: "ready",
-          });
-
-      if (insertError) {
-        const cleanupResults = await Promise.all([
-          supabase.storage
-            .from("portfolio-videos")
-            .remove([storagePath]),
-          supabase.storage
+          posterPublicUrl = supabase.storage
             .from("portfolio-video-posters")
-            .remove([posterPath]),
-        ]);
-        const cleanupErrors = cleanupResults
-          .map((result) => result.error)
-          .filter(Boolean);
+            .getPublicUrl(posterPath).data.publicUrl;
+        }
 
-        if (cleanupErrors.length) {
-          console.error(
-            "Video DB insert failed and Storage cleanup also failed:",
-            cleanupErrors,
-          );
+        const completeResponse = await fetch(
+          "/admin/api/portfolio-media/complete-bunny-video-upload",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              mediaId,
+              posterPath,
+            }),
+          },
+        );
+
+        const completeResult = (await completeResponse
+          .json()
+          .catch(() => null)) as
+          | { error?: string }
+          | null;
+
+        if (!completeResponse.ok) {
           throw new Error(
-            `${insertError.message} Також не вдалося повністю очистити завантажені файли.`,
+            completeResult?.error ??
+              "Відео завантажено в Bunny, але не вдалося зафіксувати стан обробки.",
           );
         }
 
-        throw insertError;
+        URL.revokeObjectURL(item.url);
+        if (
+          item.posterUrl?.startsWith("blob:") &&
+          item.posterUrl !== posterPublicUrl
+        ) {
+          URL.revokeObjectURL(item.posterUrl);
+        }
+
+        setMedia((current) =>
+          current.map((currentItem) =>
+            currentItem.id === item.id
+              ? {
+                  id: mediaId,
+                  name: item.name,
+                  type: "video",
+                  url: posterPublicUrl ?? "",
+                  size: item.size,
+                  source: "stored",
+                  webPath: null,
+                  cardPath: null,
+                  posterPath,
+                  posterUrl: posterPublicUrl,
+                  sortOrder,
+                  isCover: false,
+                  processingStatus: "processing",
+                  focalX: 0.5,
+                  focalY: 0.5,
+                  cropZoom: 1,
+                  uploadProgress: 100,
+                  processingLabel: "Bunny кодує відео…",
+                }
+              : currentItem,
+          ),
+        );
+      } catch (error) {
+        try {
+          await rollbackBunnyVideo();
+        } catch (rollbackError) {
+          console.error(
+            "Bunny video upload failed and rollback also failed:",
+            rollbackError,
+          );
+        }
+
+        throw error;
       }
-
-      const publicUrl = supabase.storage
-        .from("portfolio-videos")
-        .getPublicUrl(storagePath)
-        .data.publicUrl;
-      const posterPublicUrl = supabase.storage
-        .from("portfolio-video-posters")
-        .getPublicUrl(posterPath)
-        .data.publicUrl;
-
-      URL.revokeObjectURL(item.url);
-      if (item.posterUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(item.posterUrl);
-      }
-
-      setMedia((current) =>
-        current.map((currentItem) =>
-          currentItem.id === item.id
-            ? {
-                id: mediaId,
-                name: item.name,
-                type: "video",
-                url: publicUrl,
-                size: item.size,
-                source: "stored",
-                webPath: storagePath,
-                cardPath: null,
-                posterPath,
-                posterUrl: posterPublicUrl,
-                sortOrder: nextSortOrder,
-                isCover: false,
-                processingStatus: "ready",
-                focalX: 0.5,
-                focalY: 0.5,
-                cropZoom: 1,
-                uploadProgress: 100,
-                processingLabel: undefined,
-              }
-            : currentItem,
-        ),
-      );
-
-      nextSortOrder += 1;
     }
   };
 

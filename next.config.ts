@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
         pathname:
           "/storage/v1/object/public/portfolio-video-posters/**",
       },
+      {
+        protocol: "https",
+        hostname: "vz-3950be91-be9.b-cdn.net",
+        pathname: "/**",
+      },
     ],
   },
 };

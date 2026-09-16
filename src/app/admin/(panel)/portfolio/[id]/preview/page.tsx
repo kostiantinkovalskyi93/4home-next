@@ -4,9 +4,23 @@ import {
   ProjectDetail,
   type ProjectDetailMedia,
 } from "@/components/portfolio/ProjectDetail";
+import {
+  getBunnyVideoPlaybackUrl,
+  getBunnyVideoThumbnailUrl,
+} from "@/lib/bunny/delivery";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string }> };
+
+type MediaRow = {
+  id: string;
+  media_type: "photo" | "video";
+  web_path: string | null;
+  video_poster_path: string | null;
+  storage_provider: string | null;
+  bunny_video_id: string | null;
+  sort_order: number;
+};
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +75,9 @@ export default async function Preview({ params }: Props) {
     error: mediaError,
   } = await supabase
     .from("portfolio_media")
-    .select("id,media_type,web_path,video_poster_path,sort_order")
+    .select(
+      "id,media_type,web_path,video_poster_path,storage_provider,bunny_video_id,sort_order",
+    )
     .eq("project_id", id)
     .eq("processing_status", "ready")
     .order("sort_order", { ascending: true });
@@ -77,37 +93,62 @@ export default async function Preview({ params }: Props) {
     );
   }
 
-  const media: ProjectDetailMedia[] = (mediaRows ?? [])
-    .filter(
-      (
-        item,
-      ): item is typeof item & {
-        media_type: "photo" | "video";
-        web_path: string;
-      } =>
-        (item.media_type === "photo" || item.media_type === "video") &&
-        Boolean(item.web_path),
-    )
-    .map((item, index) => ({
-      type: item.media_type,
+  const media: ProjectDetailMedia[] = [];
+
+  for (const item of (mediaRows ?? []) as MediaRow[]) {
+    const index = media.length;
+
+    if (item.media_type === "photo") {
+      if (!item.web_path) {
+        continue;
+      }
+
+      media.push({
+        type: "photo",
+        src: supabase.storage
+          .from("portfolio-public")
+          .getPublicUrl(item.web_path).data.publicUrl,
+        alt: `${project.title} — фото ${index + 1}`,
+      });
+
+      continue;
+    }
+
+    if (
+      item.storage_provider === "bunny" &&
+      item.bunny_video_id
+    ) {
+      media.push({
+        type: "video",
+        src: getBunnyVideoPlaybackUrl(
+          item.bunny_video_id,
+        ),
+        posterSrc: getBunnyVideoThumbnailUrl(
+          item.bunny_video_id,
+        ),
+        alt: `${project.title} — відео ${index + 1}`,
+      });
+
+      continue;
+    }
+
+    if (!item.web_path) {
+      continue;
+    }
+
+    media.push({
+      type: "video",
       src: supabase.storage
-        .from(
-          item.media_type === "video"
-            ? "portfolio-videos"
-            : "portfolio-public",
-        )
+        .from("portfolio-videos")
         .getPublicUrl(item.web_path).data.publicUrl,
-      posterSrc:
-        item.media_type === "video" && item.video_poster_path
-          ? supabase.storage
-              .from("portfolio-video-posters")
-              .getPublicUrl(item.video_poster_path).data.publicUrl
-          : undefined,
-      alt:
-        item.media_type === "video"
-          ? `${project.title} — відео ${index + 1}`
-          : `${project.title} — фото ${index + 1}`,
-    }));
+      posterSrc: item.video_poster_path
+        ? supabase.storage
+            .from("portfolio-video-posters")
+            .getPublicUrl(item.video_poster_path).data.publicUrl
+        : undefined,
+      alt: `${project.title} — відео ${index + 1}`,
+    });
+  }
 
   const images = media
     .filter((item) => item.type === "photo")
