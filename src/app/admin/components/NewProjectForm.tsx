@@ -616,6 +616,132 @@ export function NewProjectForm({
 
   const canAddVideo = videoCount < 2;
 
+  const storedBunnyVideosAwaitingReadyKey = useMemo(
+    () =>
+      media
+        .filter(
+          (item) =>
+            item.type === "video" &&
+            item.source === "stored" &&
+            (item.processingStatus === "pending" ||
+              item.processingStatus === "processing"),
+        )
+        .map((item) => item.id)
+        .sort()
+        .join(","),
+    [media],
+  );
+
+  useEffect(() => {
+    const awaitingMediaIds = storedBunnyVideosAwaitingReadyKey
+      .split(",")
+      .filter(Boolean);
+
+    if (awaitingMediaIds.length === 0) {
+      return;
+    }
+
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const pollBunnyStatuses = async () => {
+      const results = await Promise.allSettled(
+        awaitingMediaIds.map(async (mediaId) => {
+          const response = await fetch(
+            `/admin/api/portfolio-media/bunny-video-status?mediaId=${encodeURIComponent(mediaId)}`,
+            {
+              method: "GET",
+              cache: "no-store",
+            },
+          );
+
+          const result = (await response.json().catch(() => null)) as
+            | {
+                error?: string;
+                media?: {
+                  processingStatus?:
+                    | "pending"
+                    | "processing"
+                    | "ready"
+                    | "failed";
+                  encodeProgress?: number | null;
+                };
+              }
+            | null;
+
+          if (!response.ok) {
+            throw new Error(
+              result?.error ??
+                "Не вдалося перевірити стан Bunny-відео.",
+            );
+          }
+
+          return {
+            id: mediaId,
+            processingStatus:
+              result?.media?.processingStatus ?? "processing",
+            encodeProgress: result?.media?.encodeProgress ?? null,
+          };
+        }),
+      );
+
+      if (cancelled) {
+        return;
+      }
+
+      let hasAwaitingVideo = false;
+
+      setMedia((current) =>
+        current.map((item) => {
+          const result = results.find(
+            (entry) =>
+              entry.status === "fulfilled" &&
+              entry.value.id === item.id,
+          );
+
+          if (!result || result.status !== "fulfilled") {
+            if (awaitingMediaIds.includes(item.id)) {
+              hasAwaitingVideo = true;
+            }
+
+            return item;
+          }
+
+          const nextStatus = result.value.processingStatus;
+
+          if (nextStatus === "pending" || nextStatus === "processing") {
+            hasAwaitingVideo = true;
+          }
+
+          return {
+            ...item,
+            processingStatus: nextStatus,
+            processingLabel:
+              nextStatus === "ready"
+                ? "Готово"
+                : result.value.encodeProgress != null
+                  ? `Bunny кодує відео… ${result.value.encodeProgress}%`
+                  : "Bunny кодує відео…",
+          };
+        }),
+      );
+
+      if (hasAwaitingVideo && !cancelled) {
+        timeoutId = setTimeout(pollBunnyStatuses, 3000);
+      }
+    };
+
+    void pollBunnyStatuses();
+
+    return () => {
+      cancelled = true;
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [storedBunnyVideosAwaitingReadyKey]);
+
   const isMediaProcessing = media.some(
     (item) =>
       item.source === "local" &&
@@ -3918,7 +4044,12 @@ export function NewProjectForm({
                         {item.type === "video" &&
                           item.source === "stored" && (
                             <span className={styles.readyState}>
-                              ✓ Готово
+                              {item.processingStatus === "ready"
+                                ? "✓ Готово"
+                                : item.processingStatus === "failed"
+                                  ? "Помилка обробки"
+                                  : item.processingLabel ??
+                                    "Bunny кодує відео…"}
                             </span>
                           )}
                       </div>

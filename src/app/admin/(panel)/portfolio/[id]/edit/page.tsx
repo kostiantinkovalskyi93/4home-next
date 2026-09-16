@@ -124,10 +124,6 @@ export default async function EditProjectPage({
     let posterUrl: string | undefined;
 
     if (media.media_type === "video") {
-      if (media.processing_status !== "ready") {
-        continue;
-      }
-
       if (
         media.storage_provider === "bunny" &&
         media.bunny_video_id

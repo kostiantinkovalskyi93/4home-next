@@ -1,3 +1,7 @@
+import {
+  getBunnyVideoPlaybackUrl,
+  getBunnyVideoThumbnailUrl,
+} from "@/lib/bunny/delivery";
 import { createPublicClient } from "@/lib/supabase/public";
 
 export type PublicPortfolioCategory =
@@ -64,6 +68,8 @@ type MediaRow = {
   web_path: string | null;
   card_path: string | null;
   video_poster_path: string | null;
+  storage_provider: string | null;
+  bunny_video_id: string | null;
   sort_order: number;
   is_cover: boolean;
   processing_status:
@@ -77,7 +83,7 @@ const PROJECT_COLUMNS =
   "id, slug, title, category, wardrobe_type, short_description, client_task, solution, materials, hardware, features, year, location, color, production_term, sort_order";
 
 const MEDIA_COLUMNS =
-  "id, project_id, media_type, web_path, card_path, video_poster_path, sort_order, is_cover, processing_status";
+  "id, project_id, media_type, web_path, card_path, video_poster_path, storage_provider, bunny_video_id, sort_order, is_cover, processing_status";
 
 function mapCategory(
   project: ProjectRow,
@@ -131,12 +137,27 @@ function buildPublicProject(
     path: string,
   ) => string,
 ): PublicPortfolioProject | null {
-  const projectMedia = mediaRows.filter(
-    (item) =>
-      item.project_id === project.id &&
-      item.processing_status === "ready" &&
-      Boolean(item.web_path),
-  );
+  const projectMedia = mediaRows.filter((item) => {
+    if (
+      item.project_id !== project.id ||
+      item.processing_status !== "ready"
+    ) {
+      return false;
+    }
+
+    if (item.media_type === "photo") {
+      return Boolean(item.web_path);
+    }
+
+    if (
+      item.storage_provider === "bunny" &&
+      item.bunny_video_id
+    ) {
+      return true;
+    }
+
+    return Boolean(item.web_path);
+  });
 
   const photos = projectMedia.filter(
     (item) => item.media_type === "photo",
@@ -192,29 +213,70 @@ function buildPublicProject(
     }));
 
   const mixedMedia: PublicPortfolioMedia[] =
-    orderedMedia.map((item, index) => ({
-      type: item.media_type,
-      src: getPublicUrl(
-        item.media_type === "video"
-          ? "portfolio-videos"
-          : "portfolio-public",
-        item.web_path!,
-      ),
-      posterSrc:
-        item.media_type === "video" &&
-        item.video_poster_path
-          ? getPublicUrl(
-              "portfolio-video-posters",
-              item.video_poster_path,
-            )
-          : undefined,
-      alt:
+    orderedMedia.flatMap<PublicPortfolioMedia>((item, index) => {
+      const alt =
         item.media_type === "video"
           ? `${project.title} — відео ${index + 1}`
           : index === 0
             ? `${project.title} — 4HOME`
-            : `${project.title} — фото ${index + 1}`,
-    }));
+            : `${project.title} — фото ${index + 1}`;
+
+      if (item.media_type === "photo") {
+        if (!item.web_path) {
+          return [];
+        }
+
+        return [
+          {
+            type: "photo" as const,
+            src: getPublicUrl(
+              "portfolio-public",
+              item.web_path,
+            ),
+            alt,
+          },
+        ];
+      }
+
+      if (
+        item.storage_provider === "bunny" &&
+        item.bunny_video_id
+      ) {
+        return [
+          {
+            type: "video" as const,
+            src: getBunnyVideoPlaybackUrl(
+              item.bunny_video_id,
+            ),
+            posterSrc: getBunnyVideoThumbnailUrl(
+              item.bunny_video_id,
+            ),
+            alt,
+          },
+        ];
+      }
+
+      if (!item.web_path) {
+        return [];
+      }
+
+      return [
+        {
+          type: "video" as const,
+          src: getPublicUrl(
+            "portfolio-videos",
+            item.web_path,
+          ),
+          posterSrc: item.video_poster_path
+            ? getPublicUrl(
+                "portfolio-video-posters",
+                item.video_poster_path,
+              )
+            : undefined,
+          alt,
+        },
+      ];
+    });
 
   return {
     id: project.id,
