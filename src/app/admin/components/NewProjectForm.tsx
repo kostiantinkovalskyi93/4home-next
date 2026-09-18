@@ -18,6 +18,10 @@ import { Upload } from "tus-js-client";
 
 import { createClient } from "@/lib/supabase/client";
 import { createVideoPoster } from "@/lib/video-poster";
+import {
+  shouldTranscodeVideo,
+  transcodeVideoForWeb,
+} from "@/lib/video-transcode";
 
 import {
   ArrowLeftIcon,
@@ -689,7 +693,16 @@ export function NewProjectForm({
         return;
       }
 
-      let hasAwaitingVideo = false;
+      const hasAwaitingVideo = results.some((entry) => {
+        if (entry.status !== "fulfilled") {
+          return true;
+        }
+
+        return (
+          entry.value.processingStatus === "pending" ||
+          entry.value.processingStatus === "processing"
+        );
+      });
 
       setMedia((current) =>
         current.map((item) => {
@@ -700,22 +713,18 @@ export function NewProjectForm({
           );
 
           if (!result || result.status !== "fulfilled") {
-            if (awaitingMediaIds.includes(item.id)) {
-              hasAwaitingVideo = true;
-            }
-
             return item;
           }
 
           const nextStatus = result.value.processingStatus;
 
-          if (nextStatus === "pending" || nextStatus === "processing") {
-            hasAwaitingVideo = true;
-          }
-
           return {
             ...item,
             processingStatus: nextStatus,
+            uploadProgress:
+              nextStatus === "ready"
+                ? 100
+                : result.value.encodeProgress ?? item.uploadProgress,
             processingLabel:
               nextStatus === "ready"
                 ? "Готово"
@@ -731,10 +740,32 @@ export function NewProjectForm({
       }
     };
 
+    const pollNow = () => {
+      if (cancelled) return;
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+
+      void pollBunnyStatuses();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        pollNow();
+      }
+    };
+
+    window.addEventListener("focus", pollNow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     void pollBunnyStatuses();
 
     return () => {
       cancelled = true;
+      window.removeEventListener("focus", pollNow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
 
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -1054,11 +1085,56 @@ export function NewProjectForm({
         bitmap.close();
       }
 
+      let preparedFile = file;
       let posterFile: File | undefined;
       let posterUrl: string | undefined;
 
       if (item.type === "video") {
-        posterFile = await createVideoPoster(file);
+        if (shouldTranscodeVideo(file)) {
+          setMedia((current) =>
+            current.map((currentItem) =>
+              currentItem.id === item.id
+                ? {
+                    ...currentItem,
+                    uploadProgress: 1,
+                    processingLabel: "Оптимізація відео… 1%",
+                  }
+                : currentItem,
+            ),
+          );
+
+          preparedFile = await transcodeVideoForWeb(
+            file,
+            (progress) => {
+              setMedia((current) =>
+                current.map((currentItem) =>
+                  currentItem.id === item.id
+                    ? {
+                        ...currentItem,
+                        uploadProgress: progress,
+                        processingLabel:
+                          `Оптимізація відео… ${progress}%`,
+                      }
+                    : currentItem,
+                ),
+              );
+            },
+          );
+        }
+
+        setMedia((current) =>
+          current.map((currentItem) =>
+            currentItem.id === item.id
+              ? {
+                  ...currentItem,
+                  uploadProgress: 100,
+                  processingLabel: "Створення poster…",
+                }
+              : currentItem,
+          ),
+        );
+
+        posterFile = await createVideoPoster(preparedFile);
         posterUrl = URL.createObjectURL(posterFile);
       }
 
@@ -1076,7 +1152,7 @@ export function NewProjectForm({
 
           return {
             ...currentItem,
-            preparedFile: file,
+            preparedFile,
             posterFile,
             posterUrl,
             processingStatus: "ready",
@@ -2634,7 +2710,7 @@ export function NewProjectForm({
     }
 
     for (const item of pendingVideos) {
-      const file = item.file;
+      const file = item.preparedFile ?? item.file;
 
       if (!file) {
         continue;
