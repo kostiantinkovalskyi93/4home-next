@@ -5,8 +5,11 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
+import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 
 import styles from "./page.module.css";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Кухні на замовлення у Києві",
@@ -104,28 +107,9 @@ const planningItems = [
   },
 ];
 
-const projects = [
-  {
-    number: "01",
-    image:
-      "/images/portfolio/kitchen-luxury/luxury_kitchen_1.webp",
-    alt: "Кухня на замовлення 4HOME",
-    className: "large",
-  },
-  {
-    number: "02",
-    image: "/images/kitchens/kitchen-02.webp",
-    alt: "Світла кухня на замовлення 4HOME",
-    className: "small",
-  },
-  {
-    number: "03",
-    image:
-      "/images/portfolio/kitchen-white/big_white_kitchen_2.webp",
-    alt: "Сучасна кухня на замовлення 4HOME",
-    className: "wide",
-  },
-];
+
+const projectLayouts = ["large", "small", "wide"] as const;
+
 
 const processSteps = [
   {
@@ -166,7 +150,24 @@ const processSteps = [
   },
 ];
 
-export default function KitchensPage() {
+export default async function KitchensPage() {
+  const portfolioProjects = await getPublishedPortfolioProjects();
+  const kitchenProjects = portfolioProjects
+    .filter((project) => project.category === "Кухні")
+    .slice(-3)
+    .reverse();
+  const projects = kitchenProjects.map((project, index) => ({
+    number: String(index + 1).padStart(2, "0"),
+    image: project.coverImage,
+    alt: `${project.title} — 4HOME`,
+    className: projectLayouts[index] ?? "small",
+    href: `/portfolio/${project.slug}`,
+  }));
+  const heroProject = kitchenProjects[0];
+  if (!heroProject) {
+    throw new Error("Немає опублікованих робіт для цієї категорії.");
+  }
+
   return (
     <>
       <script
@@ -251,7 +252,7 @@ export default function KitchensPage() {
               >
                 <div className={styles.heroImageFrame}>
                   <Image
-                    src="/images/portfolio/kitchen-luxury/luxury_kitchen_7.webp"
+                    src={heroProject.coverImage}
                     alt="Кухня на замовлення у Києві"
                     fill
                     priority
@@ -510,7 +511,7 @@ export default function KitchensPage() {
                   }
                 >
                   <Link
-                    href="/portfolio"
+                    href={project.href}
                     className={`${styles.projectCard} ${
                       project.className === "large"
                         ? styles.projectLarge

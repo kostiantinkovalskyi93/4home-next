@@ -9,7 +9,10 @@ import {
   useState,
 } from "react";
 
-import type { PortfolioImage } from "@/data/portfolioProjects";
+type PortfolioImage = {
+  src: string;
+  alt: string;
+};
 
 import styles from "./ProjectGallery.module.css";
 

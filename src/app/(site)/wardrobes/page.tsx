@@ -4,9 +4,12 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
+import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 import styles from "./page.module.css";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Шафи на замовлення у Києві",
@@ -54,7 +57,7 @@ const serviceJsonLd = {
   ],
 };
 
-const types = [
+const wardrobeTypes = [
   {
     id: "hinged",
     number: "01",
@@ -65,8 +68,6 @@ const types = [
       "Індивідуальні шафи для спальні, передпокою, дитячої, гардеробної та інших приміщень. Проєктуємо конструкцію під точні розміри, нішу або стіну, враховуючи двері, розетки та особливості приміщення.",
     detail:
       "Продумуємо внутрішнє наповнення, кількість секцій, полиці та шухляди, а фасади й фурнітуру підбираємо відповідно до інтер’єру.",
-    image: "/images/portfolio/hinged-02.webp",
-    alt: "Розпашна шафа на замовлення",
   },
   {
     id: "sliding",
@@ -78,8 +79,6 @@ const types = [
       "Рішення для приміщень, де важливо ефективно використати доступний простір і зберегти зручний доступ до речей. Розсувна система не потребує додаткового місця для відкривання дверей.",
     detail:
       "Проєктуємо внутрішні секції під конкретні потреби, підбираємо систему дверей, дзеркала, матеріали та оформлення фасадів як частину інтер’єру.",
-    image: "/images/portfolio/sliding-01.webp",
-    alt: "Шафа-купе на замовлення",
   },
 ];
 
@@ -141,36 +140,9 @@ const planningItems = [
   },
 ];
 
-const projects = [
-  {
-    number: "01",
-    image: "/images/portfolio/hinged-01.webp",
-    alt: "Розпашна шафа у світлому інтер'єрі",
-    layout: "tall",
-    position: "center",
-  },
-  {
-    number: "02",
-    image: "/images/home/portfolio/hall-furniture.webp",
-    alt: "Шафа для передпокою на замовлення",
-    layout: "wide",
-    position: "center",
-  },
-  {
-    number: "03",
-    image: "/images/portfolio/sliding-02.webp",
-    alt: "Шафа-купе з дзеркальними фасадами",
-    layout: "narrow",
-    position: "center",
-  },
-  {
-    number: "04",
-    image: "/images/portfolio/sliding-02.webp",
-    alt: "Шафа-купе на замовлення у кімнаті",
-    layout: "detail",
-    position: "72% center",
-  },
-];
+
+const projectLayouts = ["tall", "wide", "narrow", "detail"] as const;
+
 
 const processSteps = [
   {
@@ -211,7 +183,44 @@ const processSteps = [
   },
 ];
 
-export default function WardrobesPage() {
+export default async function WardrobesPage() {
+  const portfolioProjects = await getPublishedPortfolioProjects();
+  const wardrobeProjects = portfolioProjects
+    .filter(
+      (project) =>
+        project.category === "Розпашні шафи" ||
+        project.category === "Шафи-купе",
+    )
+    .slice(-4)
+    .reverse();
+  const projects = wardrobeProjects.map((project, index) => ({
+    number: String(index + 1).padStart(2, "0"),
+    image: project.coverImage,
+    alt: `${project.title} — 4HOME`,
+    layout: projectLayouts[index] ?? "narrow",
+    position: "center",
+    href: `/portfolio/${project.slug}`,
+  }));
+  const heroProject = wardrobeProjects[0];
+  const hingedProject = [...portfolioProjects]
+    .reverse()
+    .find((project) => project.category === "Розпашні шафи");
+  const slidingProject = [...portfolioProjects]
+    .reverse()
+    .find((project) => project.category === "Шафи-купе");
+  const types = wardrobeTypes.map((item) => {
+    const project = item.id === "hinged" ? hingedProject : slidingProject;
+
+    return {
+      ...item,
+      image: project?.coverImage ?? heroProject?.coverImage ?? "",
+      alt: project ? `${project.title} — 4HOME` : item.title,
+    };
+  });
+  if (!heroProject) {
+    throw new Error("Немає опублікованих робіт для цієї категорії.");
+  }
+
   return (
     <>
       <script
@@ -307,7 +316,7 @@ export default function WardrobesPage() {
 
               <div className={styles.heroImageFrame}>
                 <Image
-                  src="/images/portfolio/hinged-02.webp"
+                  src={heroProject.coverImage}
                   alt="Шафа на замовлення у Києві"
                   fill
                   priority
@@ -673,7 +682,7 @@ export default function WardrobesPage() {
                 }
               >
                 <Link
-                  href="/portfolio"
+                  href={project.href}
                   className={`${styles.projectCard} ${
                     project.layout === "tall"
                       ? styles.projectTall

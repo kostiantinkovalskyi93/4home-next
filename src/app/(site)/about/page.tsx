@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
+import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 
 import styles from "./page.module.css";
 
@@ -74,23 +75,23 @@ const journey = [
   },
 ] as const;
 
-const projects = [
+const projectDefinitions = [
   {
-    image: "/images/portfolio/kitchen-luxury/luxury_kitchen_1.webp",
+    category: "Кухні",
     alt: "Кухня на замовлення 4HOME",
     label: "Кухні",
     href: "/kitchens",
     className: styles.projectLarge,
   },
   {
-    image: "/images/portfolio/hinged-02.webp",
+    category: "Розпашні шафи",
     alt: "Розпашна шафа на замовлення 4HOME",
     label: "Шафи",
     href: "/wardrobes",
     className: styles.projectTall,
   },
   {
-    image: "/images/portfolio/media-console/media_console_4.webp",
+    category: "Інші меблі",
     alt: "Інші меблі на замовлення 4HOME",
     label: "Інші меблі",
     href: "/furniture",
@@ -98,7 +99,32 @@ const projects = [
   },
 ] as const;
 
-export default function AboutPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AboutPage() {
+  let portfolioProjects: Awaited<
+    ReturnType<typeof getPublishedPortfolioProjects>
+  > = [];
+
+  try {
+    portfolioProjects = await getPublishedPortfolioProjects();
+  } catch (error) {
+    console.error("Failed to load about-page portfolio projects:", error);
+  }
+
+  const heroProject =
+    [...portfolioProjects].reverse().find((project) => project.category === "Кухні") ??
+    portfolioProjects[portfolioProjects.length - 1];
+  const projects = projectDefinitions.flatMap((definition) => {
+    const project = [...portfolioProjects].reverse().find(
+      (item) => item.category === definition.category,
+    );
+
+    return project
+      ? [{ ...definition, image: project.coverImage, slug: project.slug }]
+      : [];
+  });
+
   return (
     <main>
       <section className={styles.hero}>
@@ -150,14 +176,16 @@ export default function AboutPage() {
 
           <div className={styles.heroVisual}>
             <div className={styles.heroImageFrame}>
-              <Image
-                src="/images/portfolio/kitchen-luxury/luxury_kitchen_7.webp"
-                alt="Індивідуальні меблі 4HOME"
-                fill
-                priority
-                sizes="(max-width: 800px) 100vw, (max-width: 1328px) 48vw, 610px"
-                className={styles.heroImage}
-              />
+              {heroProject ? (
+                <Image
+                  src={heroProject.coverImage}
+                  alt={`${heroProject.title} — 4HOME`}
+                  fill
+                  priority
+                  sizes="(max-width: 800px) 100vw, (max-width: 1328px) 48vw, 610px"
+                  className={styles.heroImage}
+                />
+              ) : null}
 
               <div className={styles.heroImageShade} />
 

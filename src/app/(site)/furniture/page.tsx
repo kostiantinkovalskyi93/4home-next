@@ -4,9 +4,12 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { CONTACTS } from "@/data/contacts";
+import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 import styles from "./page.module.css";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Інші меблі на замовлення у Києві",
@@ -62,8 +65,6 @@ const furnitureTypes = [
     title: "Тумби та консолі",
     description:
       "Компактні меблі для спальні, передпокою, вітальні та інших приміщень.",
-    image: "/images/portfolio/furniture-01.webp",
-    alt: "Тумба або консоль на замовлення 4HOME",
     layout: "feature",
   },
   {
@@ -72,8 +73,6 @@ const furnitureTypes = [
     title: "ТВ-зони",
     description:
       "Тумби та меблеві композиції під телевізор, техніку й системи зберігання.",
-    image: "/images/portfolio/media-console/media_console_4.webp",
-    alt: "ТВ-зона на замовлення 4HOME",
     layout: "wide",
   },
   {
@@ -82,8 +81,6 @@ const furnitureTypes = [
     title: "Меблі для передпокою",
     description:
       "Рішення для зберігання взуття, верхнього одягу та повсякденних речей.",
-    image: "/images/home/portfolio/hall-furniture.webp",
-    alt: "Меблі для передпокою на замовлення 4HOME",
     layout: "portrait",
   },
   {
@@ -92,8 +89,6 @@ const furnitureTypes = [
     title: "Індивідуальні рішення",
     description:
       "Інші корпусні меблі за вашими розмірами, якщо стандартні варіанти не підходять.",
-    image: "/images/furniture/furniture-03.webp",
-    alt: "Індивідуальні корпусні меблі на замовлення 4HOME",
     layout: "detail",
   },
 ];
@@ -156,32 +151,9 @@ const planningItems = [
   },
 ];
 
-const projects = [
-  {
-    number: "01",
-    image: "/images/portfolio/furniture-01.webp",
-    alt: "Консоль на замовлення 4HOME",
-    layout: "tall",
-  },
-  {
-    number: "02",
-    image: "/images/portfolio/media-console/media_console_4.webp",
-    alt: "ТВ-тумба на замовлення 4HOME",
-    layout: "wide",
-  },
-  {
-    number: "03",
-    image: "/images/furniture/furniture-03.webp",
-    alt: "Тумба на замовлення 4HOME",
-    layout: "compact",
-  },
-  {
-    number: "04",
-    image: "/images/home/portfolio/hall-furniture.webp",
-    alt: "Меблі для передпокою на замовлення 4HOME",
-    layout: "large",
-  },
-];
+
+const projectLayouts = ["tall", "wide", "compact", "large"] as const;
+
 
 const processSteps = [
   {
@@ -216,7 +188,33 @@ const processSteps = [
   },
 ];
 
-export default function FurniturePage() {
+export default async function FurniturePage() {
+  const portfolioProjects = await getPublishedPortfolioProjects();
+  const furnitureProjects = portfolioProjects
+    .filter((project) => project.category === "Інші меблі")
+    .slice(-4)
+    .reverse();
+  const projects = furnitureProjects.map((project, index) => ({
+    number: String(index + 1).padStart(2, "0"),
+    image: project.coverImage,
+    alt: `${project.title} — 4HOME`,
+    layout: projectLayouts[index] ?? "large",
+    href: `/portfolio/${project.slug}`,
+  }));
+  const heroProject = furnitureProjects[0];
+  const furnitureTypeCards = furnitureTypes.map((item, index) => {
+    const project = furnitureProjects[index] ?? heroProject;
+
+    return {
+      ...item,
+      image: project?.coverImage ?? "",
+      alt: project ? `${project.title} — 4HOME` : item.title,
+    };
+  });
+  if (!heroProject) {
+    throw new Error("Немає опублікованих робіт для цієї категорії.");
+  }
+
   return (
     <>
       <script
@@ -284,7 +282,7 @@ export default function FurniturePage() {
             >
               <div className={styles.heroImageFrame}>
                 <Image
-                  src="/images/portfolio/media-console/media_console_4.webp"
+                  src={heroProject.coverImage}
                   alt="Індивідуальні корпусні меблі на замовлення"
                   fill
                   priority
@@ -379,7 +377,7 @@ export default function FurniturePage() {
           </div>
 
           <div className={styles.collectionGrid}>
-            {furnitureTypes.map((item, index) => (
+            {furnitureTypeCards.map((item, index) => (
               <Reveal key={item.number} delay={index * 45}>
                 <article
                   className={`${styles.collectionItem} ${
@@ -553,7 +551,7 @@ export default function FurniturePage() {
             {projects.map((project, index) => (
               <Reveal key={project.number} delay={index * 45}>
                 <Link
-                  href="/portfolio"
+                  href={project.href}
                   className={`${styles.projectCard} ${
                     project.layout === "tall"
                       ? styles.projectTall

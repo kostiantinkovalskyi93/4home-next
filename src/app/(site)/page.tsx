@@ -68,16 +68,16 @@ const advantages = [
   },
 ];
 
-const categories = [
+const categoryDefinitions = [
   {
     number: "01",
     title: "Кухні",
     description:
       "Кухні за індивідуальними розмірами з урахуванням планування, техніки та ваших щоденних сценаріїв.",
     href: "/kitchens",
-    image: "/images/portfolio/kitchen-luxury/luxury_kitchen_7.webp",
     alt: "Кухня на замовлення",
     layout: "primary",
+    portfolioCategory: "Кухні",
   },
   {
     number: "02",
@@ -85,9 +85,9 @@ const categories = [
     description:
       "Шафи для спальні, передпокою, дитячої та інших приміщень.",
     href: "/wardrobes#hinged",
-    image: "/images/home/categories/hinged-wardrobes.webp",
     alt: "Розпашна шафа на замовлення",
     layout: "secondary",
+    portfolioCategory: "Розпашні шафи",
   },
   {
     number: "03",
@@ -95,9 +95,9 @@ const categories = [
     description:
       "Вбудовані та окремостоячі рішення для ефективного використання простору.",
     href: "/wardrobes#sliding",
-    image: "/images/home/categories/sliding-wardrobes.webp",
     alt: "Шафа-купе на замовлення",
     layout: "tertiary",
+    portfolioCategory: "Шафи-купе",
   },
   {
     number: "04",
@@ -105,11 +105,11 @@ const categories = [
     description:
       "Тумби, столи, консолі та інші корпусні меблі, створені під ваш простір.",
     href: "/furniture",
-    image: "/images/portfolio/media-console/media_console_2.webp",
     alt: "Корпусні меблі на замовлення",
     layout: "minor",
+    portfolioCategory: "Інші меблі",
   },
-];
+] as const;
 
 const processSteps = [
   {
@@ -293,23 +293,31 @@ const faqJsonLd = {
 };
 
 export default async function Home() {
-  let homePortfolioProjects:
-    Awaited<
-      ReturnType<
-        typeof getPublishedPortfolioProjects
-      >
-    > = [];
+  let portfolioProjects: Awaited<
+    ReturnType<typeof getPublishedPortfolioProjects>
+  > = [];
 
   try {
-    homePortfolioProjects = (
-      await getPublishedPortfolioProjects()
-    ).slice(0, 3);
+    portfolioProjects = await getPublishedPortfolioProjects();
   } catch (error) {
     console.error(
       "Failed to load homepage portfolio projects:",
       error,
     );
   }
+
+  const homePortfolioProjects = portfolioProjects.slice(0, 3);
+  const heroProject =
+    [...portfolioProjects].reverse().find((project) => project.category === "Кухні") ??
+    portfolioProjects[portfolioProjects.length - 1];
+  const categories = categoryDefinitions.map((category) => ({
+    ...category,
+    image:
+      [...portfolioProjects].reverse().find(
+        (project) => project.category === category.portfolioCategory,
+      )?.coverImage ?? heroProject?.coverImage ?? null,
+  }));
+
   return (
     <>
       <script
@@ -378,15 +386,17 @@ export default async function Home() {
 
             <div className={styles.heroVisual}>
               <div className={styles.imageFrame}>
-                <Image
-                  src="/images/portfolio/kitchen-luxury/luxury_kitchen_7.webp"
-                  alt="Кухня на замовлення 4HOME"
-                  fill
-                  priority
-                  fetchPriority="high"
-                  sizes="(max-width: 900px) 100vw, (max-width: 1328px) 55vw, 670px"
-                  className={styles.heroImage}
-                />
+                {heroProject ? (
+                  <Image
+                    src={heroProject.coverImage}
+                    alt={`${heroProject.title} — 4HOME`}
+                    fill
+                    priority
+                    fetchPriority="high"
+                    sizes="(max-width: 900px) 100vw, (max-width: 1328px) 55vw, 670px"
+                    className={styles.heroImage}
+                  />
+                ) : null}
               </div>
             </div>
           </div>
@@ -460,18 +470,20 @@ export default async function Home() {
                 >
                   <Link href={category.href} className={styles.categoryLink}>
                     <div className={styles.categoryImageWrapper}>
-                      <Image
-                        src={category.image}
-                        alt={category.alt}
-                        fill
-                        sizes={
-                          category.layout === "primary" ||
-                          category.layout === "tertiary"
-                            ? "(max-width: 760px) 100vw, (max-width: 1328px) 58vw, 737px"
-                            : "(max-width: 760px) 100vw, (max-width: 1328px) 42vw, 519px"
-                        }
-                        className={styles.categoryImage}
-                      />
+                      {category.image ? (
+                        <Image
+                          src={category.image}
+                          alt={category.alt}
+                          fill
+                          sizes={
+                            category.layout === "primary" ||
+                            category.layout === "tertiary"
+                              ? "(max-width: 760px) 100vw, (max-width: 1328px) 58vw, 737px"
+                              : "(max-width: 760px) 100vw, (max-width: 1328px) 42vw, 519px"
+                          }
+                          className={styles.categoryImage}
+                        />
+                      ) : null}
 
                       <div className={styles.categoryShade} />
 
