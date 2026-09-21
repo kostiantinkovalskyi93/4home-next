@@ -1,0 +1,20 @@
+.phonePair {
+  display: inline-grid;
+  grid-template-columns: repeat(2, max-content);
+  align-items: center;
+  justify-content: center;
+  gap: 10px 18px;
+  max-width: 100%;
+}
+
+.phonePair > a {
+  min-width: 0;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .phonePair {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+}

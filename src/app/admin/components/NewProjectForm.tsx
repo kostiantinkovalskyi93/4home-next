@@ -3851,6 +3851,7 @@ export function NewProjectForm({
                 value={year}
                 onChange={handleYearChange}
               >
+                <option value="">Не вказано</option>
                 <option value="2026">
                   2026
                 </option>

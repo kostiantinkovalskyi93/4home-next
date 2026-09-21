@@ -15,6 +15,7 @@ import {
   MailIcon,
   TelegramIcon,
 } from "@/components/ui/ContactIcons";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./Header.module.css";
@@ -217,12 +218,11 @@ export function Header() {
               Розрахувати вартість
             </Link>
 
-            <a
-              href={CONTACTS.primaryPhone.href}
-              className={styles.phone}
-            >
-              {CONTACTS.primaryPhone.display}
-            </a>
+            <PhonePair
+              primary={CONTACTS.primaryPhone}
+              secondary={CONTACTS.secondaryPhone}
+              linkClassName={styles.phone}
+            />
           </div>
 
           <button

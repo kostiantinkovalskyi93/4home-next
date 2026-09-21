@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
@@ -529,10 +530,11 @@ export default function MaterialsPage() {
                     <span>Обговорити проєкт</span>
                     <span aria-hidden="true">→</span>
                   </Link>
-
-                  <a href={CONTACTS.phone.href} className={styles.phoneLinkDark}>
-                    {CONTACTS.phone.display}
-                  </a>
+                  <PhonePair
+                    primary={CONTACTS.primaryPhone}
+                    secondary={CONTACTS.secondaryPhone}
+                    linkClassName={styles.phoneLinkDark}
+                  />
                 </div>
               </div>
             </Reveal>

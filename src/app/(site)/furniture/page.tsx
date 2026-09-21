@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -668,13 +669,11 @@ export default async function FurniturePage() {
                     <span>Обговорити проєкт</span>
                     <span aria-hidden="true">→</span>
                   </Link>
-
-                  <a
-                    href={CONTACTS.phone.href}
-                    className={styles.phoneLink}
-                  >
-                    {CONTACTS.phone.display}
-                  </a>
+                  <PhonePair
+                    primary={CONTACTS.primaryPhone}
+                    secondary={CONTACTS.secondaryPhone}
+                    linkClassName={styles.phoneLink}
+                  />
                 </div>
               </div>
             </Reveal>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./page.module.css";
@@ -142,9 +143,11 @@ export default function ProcessPage() {
                   <span aria-hidden="true">→</span>
                 </Link>
 
-                <a href={CONTACTS.phone.href} className={styles.phoneLink}>
-                  {CONTACTS.phone.display}
-                </a>
+                <PhonePair
+                  primary={CONTACTS.primaryPhone}
+                  secondary={CONTACTS.secondaryPhone}
+                  linkClassName={styles.phoneLink}
+                />
               </div>
             </div>
           </div>
@@ -375,9 +378,11 @@ export default function ProcessPage() {
                     <span aria-hidden="true">→</span>
                   </Link>
 
-                  <a href={CONTACTS.phone.href} className={styles.ctaPhone}>
-                    {CONTACTS.phone.display}
-                  </a>
+                  <PhonePair
+                  primary={CONTACTS.primaryPhone}
+                  secondary={CONTACTS.secondaryPhone}
+                  linkClassName={styles.ctaPhone}
+                />
                 </div>
               </div>
             </Reveal>

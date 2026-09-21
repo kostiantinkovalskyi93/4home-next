@@ -16,6 +16,7 @@ import {
   MailIcon,
   TelegramIcon,
 } from "@/components/ui/ContactIcons";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./LeadForm.module.css";
@@ -990,39 +991,27 @@ export function LeadForm({ sourceContext = null }: LeadFormProps) {
               className={styles.contactCard}
             >
               <div>
-                <span
-                  className={
-                    styles.contactLabel
-                  }
-                >
-                  Ваш контакт
-                </span>
+                <span className={styles.contactLabel}>Ваші контакти</span>
 
-                <strong
-                  className={
-                    styles.contactName
-                  }
-                >
-                  {
-                    CONTACTS.primaryPhone
-                      .name
-                  }
-                </strong>
+                <div className={styles.contactPeople}>
+                  <div className={styles.contactPerson}>
+                    <strong className={styles.contactName}>
+                      {CONTACTS.primaryPhone.name}
+                    </strong>
+                    <a href={CONTACTS.primaryPhone.href} className={styles.contactPhone}>
+                      {CONTACTS.primaryPhone.display}
+                    </a>
+                  </div>
 
-                <a
-                  href={
-                    CONTACTS.primaryPhone
-                      .href
-                  }
-                  className={
-                    styles.contactPhone
-                  }
-                >
-                  {
-                    CONTACTS.primaryPhone
-                      .display
-                  }
-                </a>
+                  <div className={styles.contactPerson}>
+                    <strong className={styles.contactName}>
+                      {CONTACTS.secondaryPhone.name}
+                    </strong>
+                    <a href={CONTACTS.secondaryPhone.href} className={styles.contactPhone}>
+                      {CONTACTS.secondaryPhone.display}
+                    </a>
+                  </div>
+                </div>
               </div>
 
               <div
@@ -1463,17 +1452,10 @@ export function LeadForm({ sourceContext = null }: LeadFormProps) {
                     {submitError.message}
                   </span>
 
-                  <a
-                    href={
-                      CONTACTS
-                        .primaryPhone.href
-                    }
-                  >
-                    {
-                      CONTACTS
-                        .primaryPhone.display
-                    }
-                  </a>
+                  <PhonePair
+                    primary={CONTACTS.primaryPhone}
+                    secondary={CONTACTS.secondaryPhone}
+                  />
                 </div>
               )}
 

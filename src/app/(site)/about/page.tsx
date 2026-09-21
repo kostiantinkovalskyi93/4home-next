@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 
@@ -432,13 +433,11 @@ export default async function AboutPage() {
                   <span>Обговорити проєкт</span>
                   <span aria-hidden="true">→</span>
                 </Link>
-
-                <a
-                  href={CONTACTS.primaryPhone.href}
-                  className={styles.phoneLink}
-                >
-                  {CONTACTS.primaryPhone.display}
-                </a>
+                  <PhonePair
+                    primary={CONTACTS.primaryPhone}
+                    secondary={CONTACTS.secondaryPhone}
+                    linkClassName={styles.phoneLink}
+                  />
               </div>
             </Reveal>
           </div>

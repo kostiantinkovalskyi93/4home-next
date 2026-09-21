@@ -91,10 +91,8 @@
 }
 
 .contactCard {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
+  display: grid;
+  gap: 18px;
   padding-top: 32px;
   border-top: 1px solid rgba(29, 27, 25, 0.12);
 }
@@ -107,6 +105,16 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.contactPeople {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 28px;
+}
+
+.contactPerson {
+  min-width: 0;
 }
 
 .contactName {
@@ -122,6 +130,7 @@
   color: var(--color-text);
   font-size: 18px;
   font-weight: 600;
+  white-space: nowrap;
   transition: color 160ms ease;
 }
 
@@ -131,6 +140,7 @@
 
 .channels {
   display: flex;
+  justify-self: end;
   gap: 8px;
 }
 
@@ -712,12 +722,12 @@
   }
 
   .contactCard {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: start;
   }
 
   .channels {
     width: 100%;
+    justify-self: stretch;
   }
 
   .channel {
@@ -745,5 +755,11 @@
 @media (max-width: 420px) {
   .turnstile {
     transform-origin: left top;
+  }
+}
+@media (max-width: 440px) {
+  .contactPeople {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 }

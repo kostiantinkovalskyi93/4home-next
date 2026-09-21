@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 import {
@@ -236,13 +237,11 @@ export default async function PortfolioPage() {
                     <span>Розрахувати вартість</span>
                     <span aria-hidden="true">→</span>
                   </Link>
-
-                  <a
-                    href={CONTACTS.primaryPhone.href}
-                    className={styles.phoneLink}
-                  >
-                    {CONTACTS.primaryPhone.display}
-                  </a>
+                  <PhonePair
+                    primary={CONTACTS.primaryPhone}
+                    secondary={CONTACTS.secondaryPhone}
+                    linkClassName={styles.phoneLink}
+                  />
                 </div>
               </div>
             </Reveal>

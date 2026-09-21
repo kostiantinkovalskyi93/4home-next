@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FaqAccordion } from "@/components/home/FaqAccordion";
+import { PhonePair } from "@/components/common/PhonePair";
 import { CONTACTS } from "@/data/contacts";
 import { getPublishedPortfolioProjects } from "@/lib/portfolio-db";
 import {
@@ -837,15 +838,15 @@ export default async function Home() {
             </div>
 
             <div className={styles.finalContacts}>
-              <a
-                href={CONTACTS.phone.href}
-                className={styles.finalContactItem}
-              >
-                <span className={styles.finalContactLabel}>Телефон</span>
-                <span className={styles.finalContactValue}>
-                  {CONTACTS.phone.display}
-                </span>
-              </a>
+              <div className={styles.finalContactItem}>
+                <span className={styles.finalContactLabel}>Телефони</span>
+                <PhonePair
+                  primary={CONTACTS.primaryPhone}
+                  secondary={CONTACTS.secondaryPhone}
+                  linkClassName={styles.finalContactValue}
+                  className={styles.finalPhonePair}
+                />
+              </div>
 
               <a
                 href={CONTACTS.email.href}
