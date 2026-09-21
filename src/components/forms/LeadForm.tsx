@@ -864,7 +864,7 @@ export function LeadForm({ sourceContext = null }: LeadFormProps) {
                 </>
               ) : (
                 <>
-                  Сергій зв&apos;яжеться з вами для уточнення деталей проєкту.
+                  Менеджер зв&apos;яжеться з вами для уточнення деталей проєкту.
                 </>
               )}
             </p>
