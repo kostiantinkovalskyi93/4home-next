@@ -605,6 +605,10 @@
   gap: 16px;
 }
 
+.materialsLink {
+  color: #c89b78;
+}
+
 .portfolioGrid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
