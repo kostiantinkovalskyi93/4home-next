@@ -48,7 +48,9 @@ export async function GET() {
     );
   }
 
-const since = new Date();
+const until = new Date();
+
+const since = new Date(until);
 since.setUTCDate(since.getUTCDate() - 7);
 
 const params = new URLSearchParams({
@@ -56,6 +58,7 @@ const params = new URLSearchParams({
   projectId,
   by: "requestPath",
   since: since.toISOString(),
+  until: until.toISOString(),
 });
 
   const response = await fetch(
