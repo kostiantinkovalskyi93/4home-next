@@ -48,10 +48,14 @@ export async function GET() {
     );
   }
 
+const since = new Date();
+since.setUTCDate(since.getUTCDate() - 7);
+
 const params = new URLSearchParams({
   teamId,
   projectId,
   by: "requestPath",
+  since: since.toISOString(),
 });
 
   const response = await fetch(
