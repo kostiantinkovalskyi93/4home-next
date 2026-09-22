@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 
 import styles from "./page.module.css";
@@ -12,7 +12,7 @@ export default function AdminLoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -30,6 +30,11 @@ export default function AdminLoginPage() {
       return;
     }
 
+    if (!captchaToken) {
+      setErrorMessage("Підтвердьте, що ви не робот.");
+      return;
+    }
+
     setErrorMessage("");
     setIsSubmitting(true);
 
@@ -40,10 +45,12 @@ export default function AdminLoginPage() {
         data: { user },
         error: signInError,
       } = await supabase.auth.signInWithPassword({
-        email: normalizedEmail,
-        password,
-      });
-
+      email: normalizedEmail,
+      password,
+      options: {
+        captchaToken,
+      },
+    });
       if (signInError || !user) {
         setErrorMessage("Невірний email або пароль.");
         return;
@@ -148,7 +155,31 @@ export default function AdminLoginPage() {
               required
             />
           </label>
+          <div className={styles.turnstile}>
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_ADMIN_TURNSTILE_SITE_KEY ?? ""}
+              onSuccess={(token) => {
+                setCaptchaToken(token);
 
+                if (errorMessage) {
+                  setErrorMessage("");
+                }
+              }}
+              onExpire={() => {
+                setCaptchaToken(null);
+              }}
+              onError={() => {
+                setCaptchaToken(null);
+                setErrorMessage(
+                  "Не вдалося пройти перевірку безпеки. Оновіть сторінку та спробуйте ще раз.",
+                );
+              }}
+              options={{
+                theme: "dark",
+                size: "flexible",
+              }}
+            />
+          </div>
           {errorMessage ? (
             <div
               className={styles.error}
