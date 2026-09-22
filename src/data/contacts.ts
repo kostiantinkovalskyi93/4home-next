@@ -32,6 +32,6 @@ export const CONTACTS = {
   telegram: {
     label: "Telegram",
     display: "+380 99 300 22 45",
-    href: "https://web.telegram.org/k/#7093434704",
+    href: "https://t.me/+380993002245",
   },
 } as const;
