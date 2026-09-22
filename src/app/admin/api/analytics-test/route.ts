@@ -51,7 +51,7 @@ export async function GET() {
 const params = new URLSearchParams({
   teamId,
   projectId,
-  by: "path",
+  by: "requestPath",
 });
 
   const response = await fetch(
