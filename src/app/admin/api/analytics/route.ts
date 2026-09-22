@@ -52,8 +52,40 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({
-    ok: true,
-    configured: true,
-  });
+  const params = new URLSearchParams({
+  teamId,
+  projectId,
+});
+
+const response = await fetch(
+  `https://api.vercel.com/v1/query/web-analytics/visits/count?${params.toString()}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  },
+);
+
+const data: unknown = await response.json().catch(() => null);
+
+if (!response.ok) {
+  console.error(
+    "Vercel Web Analytics API request failed:",
+    response.status,
+    data,
+  );
+
+  return NextResponse.json(
+    {
+      error: "Не вдалося отримати дані аналітики.",
+    },
+    { status: 502 },
+  );
+}
+
+return NextResponse.json({
+  ok: true,
+  analytics: data,
+});
 }
