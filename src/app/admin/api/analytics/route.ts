@@ -109,6 +109,49 @@ function createAggregateParams(
     by,
   });
 }
+type LeadStatus = "new" | "in_progress" | "done";
+
+type LeadAnalyticsRow = {
+  status: LeadStatus;
+};
+
+async function fetchLeadAnalytics(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  since: string,
+  until: string,
+) {
+  const { data, error } = await supabase
+    .from("leads")
+    .select("status")
+    .gte("created_at", since)
+    .lte("created_at", until);
+
+  if (error) {
+    console.error(
+      "Failed to load lead analytics:",
+      error,
+    );
+
+    throw new Error(
+      "Failed to load lead analytics.",
+    );
+  }
+
+  const leads = (data ?? []) as LeadAnalyticsRow[];
+
+  return {
+    total: leads.length,
+    new: leads.filter(
+      (lead) => lead.status === "new",
+    ).length,
+    inProgress: leads.filter(
+      (lead) => lead.status === "in_progress",
+    ).length,
+    done: leads.filter(
+      (lead) => lead.status === "done",
+    ).length,
+  };
+}
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -178,16 +221,17 @@ export async function GET(request: Request) {
   );
 
   try {
-    const [
-      totals,
-      timeline,
-      pages,
-      referrers,
-      countries,
-      devices,
-      browsers,
-      operatingSystems,
-    ] = await Promise.all([
+      const [
+        totals,
+        timeline,
+        pages,
+        referrers,
+        countries,
+        devices,
+        browsers,
+        operatingSystems,
+        leads,
+      ] = await Promise.all([
       fetchVercelAnalytics(
         "visits/count",
         token,
@@ -277,6 +321,11 @@ export async function GET(request: Request) {
           "osName",
         ),
       ),
+      fetchLeadAnalytics(
+        supabase,
+        since,
+        until,
+),
     ]);
 
     return NextResponse.json({
@@ -296,6 +345,7 @@ export async function GET(request: Request) {
         devices,
         browsers,
         operatingSystems,
+        leads,
       },
     });
   } catch (error) {
