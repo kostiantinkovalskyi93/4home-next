@@ -2,7 +2,115 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET() {
+const VERCEL_ANALYTICS_URL =
+  "https://api.vercel.com/v1/query/web-analytics";
+
+const PERIODS = {
+  today: 1,
+  "7d": 7,
+  "30d": 30,
+} as const;
+
+type Period = keyof typeof PERIODS;
+
+type AnalyticsDimension =
+  | "day"
+  | "requestPath"
+  | "referrerHostname"
+  | "country"
+  | "deviceType"
+  | "browserName"
+  | "osName";
+
+function isPeriod(value: string | null): value is Period {
+  return value !== null && value in PERIODS;
+}
+
+function getDateRange(period: Period) {
+  const until = new Date();
+
+  const since = new Date(until);
+
+  if (period === "today") {
+    since.setUTCHours(0, 0, 0, 0);
+  } else {
+    since.setUTCDate(
+      since.getUTCDate() - PERIODS[period],
+    );
+  }
+
+  return {
+    since: since.toISOString(),
+    until: until.toISOString(),
+  };
+}
+
+async function fetchVercelAnalytics(
+  path: string,
+  token: string,
+  params: URLSearchParams,
+) {
+  const response = await fetch(
+    `${VERCEL_ANALYTICS_URL}/${path}?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    },
+  );
+
+  const data: unknown = await response
+    .json()
+    .catch(() => null);
+
+  if (!response.ok) {
+    console.error(
+      "Vercel Web Analytics API request failed:",
+      path,
+      response.status,
+      data,
+    );
+
+    throw new Error(
+      `Vercel Analytics request failed: ${response.status}`,
+    );
+  }
+
+  return data;
+}
+
+function createBaseParams(
+  teamId: string,
+  projectId: string,
+  since: string,
+  until: string,
+) {
+  return new URLSearchParams({
+    teamId,
+    projectId,
+    since,
+    until,
+  });
+}
+
+function createAggregateParams(
+  teamId: string,
+  projectId: string,
+  since: string,
+  until: string,
+  by: AnalyticsDimension,
+) {
+  return new URLSearchParams({
+    teamId,
+    projectId,
+    since,
+    until,
+    by,
+  });
+}
+
+export async function GET(request: Request) {
   const supabase = await createClient();
 
   const {
@@ -52,40 +160,156 @@ export async function GET() {
     );
   }
 
-  const params = new URLSearchParams({
-  teamId,
-  projectId,
-});
+  const url = new URL(request.url);
+  const requestedPeriod =
+    url.searchParams.get("period");
 
-const response = await fetch(
-  `https://api.vercel.com/v1/query/web-analytics/visits/count?${params.toString()}`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  },
-);
+  const period: Period = isPeriod(requestedPeriod)
+    ? requestedPeriod
+    : "7d";
 
-const data: unknown = await response.json().catch(() => null);
+  const { since, until } = getDateRange(period);
 
-if (!response.ok) {
-  console.error(
-    "Vercel Web Analytics API request failed:",
-    response.status,
-    data,
+  const baseParams = createBaseParams(
+    teamId,
+    projectId,
+    since,
+    until,
   );
 
-  return NextResponse.json(
-    {
-      error: "Не вдалося отримати дані аналітики.",
-    },
-    { status: 502 },
-  );
-}
+  try {
+    const [
+      totals,
+      timeline,
+      pages,
+      referrers,
+      countries,
+      devices,
+      browsers,
+      operatingSystems,
+    ] = await Promise.all([
+      fetchVercelAnalytics(
+        "visits/count",
+        token,
+        baseParams,
+      ),
 
-return NextResponse.json({
-  ok: true,
-  analytics: data,
-});
+      fetchVercelAnalytics(
+        "visits/aggregate",
+        token,
+        createAggregateParams(
+          teamId,
+          projectId,
+          since,
+          until,
+          "day",
+        ),
+      ),
+
+      fetchVercelAnalytics(
+        "visits/aggregate",
+        token,
+        createAggregateParams(
+          teamId,
+          projectId,
+          since,
+          until,
+          "requestPath",
+        ),
+      ),
+
+      fetchVercelAnalytics(
+        "visits/aggregate",
+        token,
+        createAggregateParams(
+          teamId,
+          projectId,
+          since,
+          until,
+          "referrerHostname",
+        ),
+      ),
+
+      fetchVercelAnalytics(
+        "visits/aggregate",
+        token,
+        createAggregateParams(
+          teamId,
+          projectId,
+          since,
+          until,
+          "country",
+        ),
+      ),
+
+      fetchVercelAnalytics(
+        "visits/aggregate",
+        token,
+        createAggregateParams(
+          teamId,
+          projectId,
+          since,
+          until,
+          "deviceType",
+        ),
+      ),
+
+      fetchVercelAnalytics(
+        "visits/aggregate",
+        token,
+        createAggregateParams(
+          teamId,
+          projectId,
+          since,
+          until,
+          "browserName",
+        ),
+      ),
+
+      fetchVercelAnalytics(
+        "visits/aggregate",
+        token,
+        createAggregateParams(
+          teamId,
+          projectId,
+          since,
+          until,
+          "osName",
+        ),
+      ),
+    ]);
+
+    return NextResponse.json({
+      ok: true,
+      period,
+      range: {
+        since,
+        until,
+      },
+      updatedAt: new Date().toISOString(),
+      analytics: {
+        totals,
+        timeline,
+        pages,
+        referrers,
+        countries,
+        devices,
+        browsers,
+        operatingSystems,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "Failed to load CMS analytics:",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Не вдалося отримати дані аналітики.",
+      },
+      { status: 502 },
+    );
+  }
 }
