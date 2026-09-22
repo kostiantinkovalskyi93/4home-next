@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-
+import { Analytics } from "@vercel/analytics/next";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -73,7 +73,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk">
-      <body className={manrope.variable}>{children}</body>
+      <body className={manrope.variable}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
