@@ -48,10 +48,11 @@ export async function GET() {
     );
   }
 
-  const params = new URLSearchParams({
-    teamId,
-    projectId,
-  });
+const params = new URLSearchParams({
+  teamId,
+  projectId,
+  by: "path",
+});
 
   const response = await fetch(
     `https://api.vercel.com/v1/query/web-analytics/visits/aggregate?${params.toString()}`,
