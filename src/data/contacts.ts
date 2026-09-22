@@ -31,7 +31,7 @@ export const CONTACTS = {
 
   telegram: {
     label: "Telegram",
-    display: "@besteraffilate",
-    href: "https://t.me/besteraffilate",
+    display: "+380 99 300 22 45",
+    href: "https://web.telegram.org/k/#7093434704",
   },
 } as const;
