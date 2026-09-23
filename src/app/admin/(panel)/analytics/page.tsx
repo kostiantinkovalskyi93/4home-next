@@ -160,18 +160,19 @@ function projectLabel(
 }
 
 function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period }) {
-  const width = 760;
-  const height = 220;
-  const paddingLeft = 34;
-  const paddingRight = 18;
-  const paddingTop = 12;
-  const paddingBottom = 10;
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const width = 1000;
+  const height = 300;
+  const paddingLeft = 58;
+  const paddingRight = 26;
+  const paddingTop = 24;
+  const paddingBottom = 42;
   const plotWidth = width - paddingLeft - paddingRight;
   const plotHeight = height - paddingTop - paddingBottom;
   const maxValue = Math.max(1, ...rows.flatMap((row) => [row.visitors, row.pageviews]));
-  const niceMax = Math.max(5, Math.ceil((maxValue * 1.15) / 5) * 5);
-  const yTicks = Array.from({ length: 5 }, (_, index) => {
-    const ratio = index / 4;
+  const niceMax = Math.max(5, Math.ceil((maxValue * 1.2) / 5) * 5);
+  const yTicks = Array.from({ length: 6 }, (_, index) => {
+    const ratio = index / 5;
     return {
       y: paddingTop + ratio * plotHeight,
       value: Math.round(niceMax * (1 - ratio)),
@@ -184,14 +185,12 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
   };
 
   const pointY = (value: number) => paddingTop + plotHeight - (value / niceMax) * plotHeight;
-
-  const buildPoints = (values: number[]) => values
-    .map((value, index) => `${pointX(index)},${pointY(value)}`)
-    .join(" ");
-
+  const buildPoints = (values: number[]) => values.map((value, index) => `${pointX(index)},${pointY(value)}`).join(" ");
   const visitorPoints = buildPoints(rows.map((row) => row.visitors));
   const pageviewPoints = buildPoints(rows.map((row) => row.pageviews));
-  const labelStep = rows.length <= 8 ? 1 : Math.ceil((rows.length - 1) / 6);
+  const labelStep = rows.length <= 14 ? 1 : Math.ceil((rows.length - 1) / 6);
+  const activeRow = activeIndex === null ? null : rows[activeIndex];
+  const activeX = activeIndex === null ? 0 : pointX(activeIndex);
 
   if (rows.length === 0) {
     return <div className={styles.emptyState}>За цей період ще немає даних відвідуваності.</div>;
@@ -211,62 +210,84 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
             role="img"
             aria-label="Графік відвідувачів та переглядів"
           >
+            <defs>
+              <linearGradient id="analyticsViewsFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#272421" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#272421" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="analyticsVisitorsFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#c45f1e" stopOpacity="0.14" />
+                <stop offset="100%" stopColor="#c45f1e" stopOpacity="0" />
+              </linearGradient>
+            </defs>
             {yTicks.map((tick) => (
-              <line
-                key={tick.y}
-                x1={paddingLeft}
-                y1={tick.y}
-                x2={width - paddingRight}
-                y2={tick.y}
-                className={styles.gridLine}
-              />
+              <line key={`y-${tick.y}`} x1={paddingLeft} y1={tick.y} x2={width - paddingRight} y2={tick.y} className={styles.gridLine} />
             ))}
+            {rows.map((row, index) => {
+              const show = index === 0 || index === rows.length - 1 || index % labelStep === 0;
+              return show ? <line key={`x-${row.timestamp}`} x1={pointX(index)} y1={paddingTop} x2={pointX(index)} y2={height - paddingBottom} className={styles.verticalGridLine} /> : null;
+            })}
+            {rows.length > 1 ? (
+              <>
+                <polygon points={`${pageviewPoints} ${pointX(rows.length - 1)},${height - paddingBottom} ${pointX(0)},${height - paddingBottom}`} className={styles.viewsArea} />
+                <polygon points={`${visitorPoints} ${pointX(rows.length - 1)},${height - paddingBottom} ${pointX(0)},${height - paddingBottom}`} className={styles.visitorsArea} />
+              </>
+            ) : null}
             <polyline points={pageviewPoints} className={styles.viewsLine} />
             <polyline points={visitorPoints} className={styles.visitorsLine} />
+            {activeIndex !== null ? <line x1={activeX} y1={paddingTop} x2={activeX} y2={height - paddingBottom} className={styles.activeGuide} /> : null}
             {rows.map((row, index) => {
               const x = pointX(index);
-              const visitorY = pointY(row.visitors);
-              const pageviewY = pointY(row.pageviews);
-
               return (
                 <g key={row.timestamp}>
-                  <circle cx={x} cy={pageviewY} r="3.5" className={styles.viewsPoint}>
-                    <title>{`${formatChartDate(row.timestamp, period)}: ${row.pageviews} переглядів`}</title>
-                  </circle>
-                  <circle cx={x} cy={visitorY} r="3.5" className={styles.visitorsPoint}>
-                    <title>{`${formatChartDate(row.timestamp, period)}: ${row.visitors} відвідувачів`}</title>
-                  </circle>
+                  <circle cx={x} cy={pointY(row.pageviews)} r="4" className={styles.viewsPoint} />
+                  <circle cx={x} cy={pointY(row.visitors)} r="4" className={styles.visitorsPoint} />
+                  <rect
+                    x={Math.max(paddingLeft, x - Math.max(12, plotWidth / Math.max(rows.length - 1, 1) / 2))}
+                    y={paddingTop}
+                    width={Math.min(Math.max(24, plotWidth / Math.max(rows.length - 1, 1)), width - paddingRight - Math.max(paddingLeft, x - Math.max(12, plotWidth / Math.max(rows.length - 1, 1) / 2)))}
+                    height={plotHeight}
+                    className={styles.chartHitArea}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                    onFocus={() => setActiveIndex(index)}
+                    onBlur={() => setActiveIndex(null)}
+                    tabIndex={0}
+                    aria-label={`${formatChartDate(row.timestamp, period)}: ${row.pageviews} переглядів, ${row.visitors} відвідувачів`}
+                  />
                 </g>
               );
             })}
           </svg>
           <div className={styles.chartYAxis} aria-hidden="true">
-            {yTicks.map((tick) => (
-              <span key={tick.y} style={{ top: `${(tick.y / height) * 100}%` }}>{tick.value}</span>
-            ))}
+            {yTicks.map((tick) => <span key={tick.y} style={{ top: `${(tick.y / height) * 100}%` }}>{tick.value}</span>)}
           </div>
+          {activeRow ? (
+            <div
+              className={`${styles.chartTooltip} ${activeX > width * 0.72 ? styles.chartTooltipLeft : ""}`}
+              style={{ left: `${(activeX / width) * 100}%` }}
+            >
+              <strong>{formatChartDate(activeRow.timestamp, period)}</strong>
+              <span><i className={styles.tooltipViews} />Перегляди <b>{formatNumber(activeRow.pageviews)}</b></span>
+              <span><i className={styles.tooltipVisitors} />Відвідувачі <b>{formatNumber(activeRow.visitors)}</b></span>
+            </div>
+          ) : null}
         </div>
         <div className={styles.chartLabels} aria-hidden="true">
           {rows.map((row, index) => {
             const show = index === 0 || index === rows.length - 1 || index % labelStep === 0;
             const position = (pointX(index) / width) * 100;
-            const edgeClass = index === 0
-              ? styles.chartLabelFirst
-              : index === rows.length - 1
-                ? styles.chartLabelLast
-                : styles.chartLabelMiddle;
-
             return (
-              <span
-                className={`${show ? styles.chartLabelVisible : styles.chartLabelHidden} ${edgeClass}`}
-                key={row.timestamp}
-                style={{ left: `${position}%` }}
-              >
+              <span className={show ? styles.chartLabelVisible : styles.chartLabelHidden} key={row.timestamp} style={{ left: `${position}%` }}>
                 {show ? formatChartDate(row.timestamp, period) : ""}
               </span>
             );
           })}
         </div>
+      </div>
+      <div className={styles.chartNote}>
+        <span className={styles.chartNoteIcon}>i</span>
+        <p>На графіку показані щоденні дані. Загальна кількість відвідувачів за період може бути меншою за суму щоденних значень, оскільки один відвідувач може заходити на сайт у кілька днів.</p>
       </div>
     </div>
   );
@@ -535,12 +556,12 @@ export default function AdminAnalyticsPage() {
               </section>
 
               <section className={styles.sectionCard}>
-                <div className={styles.sectionHeading}><div><span className={styles.sectionEyebrow}>СЕРЕДОВИЩЕ</span><h2>Браузери</h2></div></div>
+                <div className={styles.sectionHeading}><div><span className={styles.sectionEyebrow}>ТЕХНОЛОГІЇ</span><h2>Браузери</h2></div></div>
                 <BreakdownList rows={browsers} empty="Даних про браузери поки немає." />
               </section>
 
               <section className={styles.sectionCard}>
-                <div className={styles.sectionHeading}><div><span className={styles.sectionEyebrow}>СЕРЕДОВИЩЕ</span><h2>Операційні системи</h2></div></div>
+                <div className={styles.sectionHeading}><div><span className={styles.sectionEyebrow}>ТЕХНОЛОГІЇ</span><h2>Операційні системи</h2></div></div>
                 <BreakdownList rows={operatingSystems} empty="Даних про операційні системи поки немає." />
               </section>
             </div>
