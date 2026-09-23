@@ -352,3 +352,34 @@
   .chartNoteIcon { flex-basis: 20px; width: 20px; height: 20px; font-size: 11px; }
   .chartTooltip { top: 2px; min-width: 144px; }
 }
+
+/* Stage 3.5 — mobile chart polish only */
+@media (max-width: 560px) {
+  .chartYAxis span {
+    left: -4px;
+    width: 24px;
+    padding-right: 3px;
+    background: #fff;
+    text-align: right;
+  }
+
+  .chartNote {
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px 11px;
+    border-radius: 12px;
+  }
+
+  .chartNoteIcon {
+    flex-basis: 18px;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    font-size: 10px;
+  }
+
+  .chartNote p {
+    font-size: 9px;
+    line-height: 1.38;
+  }
+}
