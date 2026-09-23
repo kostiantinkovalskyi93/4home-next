@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./page.module.css";
 
@@ -271,8 +271,11 @@ export default function AdminAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   const loadAnalytics = useCallback(async (selectedPeriod: Period, background = false) => {
+    const requestId = ++requestIdRef.current;
+
     if (background) setRefreshing(true);
     else setLoading(true);
 
@@ -289,12 +292,18 @@ export default function AdminAnalyticsPage() {
         throw new Error(message);
       }
 
-      setData(payload as AnalyticsResponse);
+      if (requestId === requestIdRef.current) {
+        setData(payload as AnalyticsResponse);
+      }
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Не вдалося завантажити аналітику.");
+      if (requestId === requestIdRef.current) {
+        setError(loadError instanceof Error ? loadError.message : "Не вдалося завантажити аналітику.");
+      }
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, []);
 
@@ -308,7 +317,8 @@ export default function AdminAnalyticsPage() {
     };
   }, [loadAnalytics, period]);
 
-  const analytics = data?.analytics;
+  const currentData = data?.period === period ? data : null;
+  const analytics = currentData?.analytics;
   const totals = analytics?.totals.data;
   const visitors = totals?.visitors ?? 0;
   const pageviews = totals?.pageviews ?? 0;
@@ -383,7 +393,7 @@ export default function AdminAnalyticsPage() {
         </div>
       </header>
 
-      {error && !data ? (
+      {error && !currentData ? (
         <div className={styles.stateCard} role="alert">
           <strong>Не вдалося завантажити аналітику.</strong>
           <p>{error}</p>
@@ -392,12 +402,12 @@ export default function AdminAnalyticsPage() {
       ) : (
         <>
           <div className={styles.statusRow} aria-live="polite">
-            <span>{data ? `Оновлено о ${formatUpdatedAt(data.updatedAt)}` : "Завантаження даних…"}</span>
+            <span>{currentData ? `Оновлено о ${formatUpdatedAt(currentData.updatedAt)}` : "Завантаження даних…"}</span>
             {refreshing ? <span>Отримуємо свіжі дані…</span> : null}
           </div>
 
           <div className={styles.metricsGrid}>
-            {loading && !data ? Array.from({ length: 4 }).map((_, index) => <div className={styles.metricSkeleton} key={index} />) : (
+            {loading && !currentData ? Array.from({ length: 4 }).map((_, index) => <div className={styles.metricSkeleton} key={index} />) : (
               <>
                 <article className={styles.metricCard}><span className={styles.metricLabel}>Відвідувачі</span><strong>{formatNumber(visitors)}</strong><span className={styles.metricHint}>Унікальні відвідувачі</span></article>
                 <article className={styles.metricCard}><span className={styles.metricLabel}>Перегляди</span><strong>{formatNumber(pageviews)}</strong><span className={styles.metricHint}>Перегляди сторінок</span></article>
@@ -407,7 +417,7 @@ export default function AdminAnalyticsPage() {
             )}
           </div>
 
-          {!loading && data ? (
+          {!loading && currentData ? (
             <div className={styles.dashboard}>
               <section className={`${styles.sectionCard} ${styles.chartCard}`}>
                 <div className={styles.sectionHeading}><div><span className={styles.sectionEyebrow}>ДИНАМІКА</span><h2>Відвідуваність</h2></div><span className={styles.sectionMeta}>{formatNumber(pageviews)} переглядів</span></div>
@@ -415,11 +425,11 @@ export default function AdminAnalyticsPage() {
               </section>
 
               <section className={styles.sectionCard}>
-                <div className={styles.sectionHeading}><div><span className={styles.sectionEyebrow}>ЗАЯВКИ</span><h2>Стан звернень</h2></div><strong className={styles.sectionTotal}>{formatNumber(data.analytics.leads.total)}</strong></div>
+                <div className={styles.sectionHeading}><div><span className={styles.sectionEyebrow}>ЗАЯВКИ</span><h2>Стан звернень</h2></div><strong className={styles.sectionTotal}>{formatNumber(currentData.analytics.leads.total)}</strong></div>
                 <div className={styles.leadStats}>
-                  <div><span>Нові</span><strong>{formatNumber(data.analytics.leads.new)}</strong></div>
-                  <div><span>В роботі</span><strong>{formatNumber(data.analytics.leads.inProgress)}</strong></div>
-                  <div><span>Опрацьовані</span><strong>{formatNumber(data.analytics.leads.done)}</strong></div>
+                  <div><span>Нові</span><strong>{formatNumber(currentData.analytics.leads.new)}</strong></div>
+                  <div><span>В роботі</span><strong>{formatNumber(currentData.analytics.leads.inProgress)}</strong></div>
+                  <div><span>Опрацьовані</span><strong>{formatNumber(currentData.analytics.leads.done)}</strong></div>
                 </div>
               </section>
 
@@ -460,7 +470,7 @@ export default function AdminAnalyticsPage() {
             </div>
           ) : null}
 
-          {error && data ? <div className={styles.inlineError} role="status">Дані залишилися на екрані, але останнє автоматичне оновлення не вдалося.</div> : null}
+          {error && currentData ? <div className={styles.inlineError} role="status">Дані залишилися на екрані, але останнє автоматичне оновлення не вдалося.</div> : null}
         </>
       )}
     </section>
