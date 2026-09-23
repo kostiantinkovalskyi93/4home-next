@@ -231,6 +231,7 @@ export async function GET(request: Request) {
         browsers,
         operatingSystems,
         leads,
+        portfolioProjectsResult,
       ] = await Promise.all([
       fetchVercelAnalytics(
         "visits/count",
@@ -325,8 +326,33 @@ export async function GET(request: Request) {
         supabase,
         since,
         until,
-),
+      ),
+      supabase
+        .from("portfolio_projects")
+        .select("slug, title")
+        .eq("status", "published"),
     ]);
+
+    if (portfolioProjectsResult.error) {
+      console.error(
+        "Failed to load portfolio project titles for analytics:",
+        portfolioProjectsResult.error,
+      );
+
+      throw new Error(
+        "Failed to load portfolio project titles for analytics.",
+      );
+    }
+
+    const projectTitles = Object.fromEntries(
+      (portfolioProjectsResult.data ?? [])
+        .filter(
+          (project): project is { slug: string; title: string } =>
+            typeof project.slug === "string" &&
+            typeof project.title === "string",
+        )
+        .map((project) => [project.slug, project.title]),
+    );
 
 const totalVisitors =
   typeof totals === "object" &&
@@ -368,6 +394,7 @@ const conversion =
         operatingSystems,
         leads,
         conversion,
+        projectTitles,
       },
     });
   } catch (error) {

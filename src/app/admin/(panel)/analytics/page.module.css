@@ -173,7 +173,10 @@
 .visitorsLine, .viewsLine { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .visitorsLine { stroke: #b6683b; }
 .viewsLine { stroke: #272421; }
+.visitorsPoint { fill: #fff; stroke: #b6683b; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.viewsPoint { fill: #fff; stroke: #272421; stroke-width: 2; vector-effect: non-scaling-stroke; }
 .chartLabels { display: flex; justify-content: space-between; gap: 8px; margin-top: 9px; color: #a18f82; font-size: 10px; }
+.chartLabels span { min-width: 0; white-space: nowrap; }
 
 .leadStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .leadStats div { padding: 17px; border-radius: 12px; background: #f8f4f0; }
@@ -219,7 +222,7 @@
   .pageHeader p { font-size: 15px; }
   .headerActions { align-items: stretch; }
   .periods { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); }
-  .periodButton { padding: 0 8px; }
+  .periodButton { min-height: 44px; padding: 0 8px; }
   .refreshButton { padding: 0 14px; }
   .metricsGrid { gap: 10px; }
   .metricCard, .metricSkeleton { min-height: 142px; }
@@ -234,7 +237,7 @@
 @media (max-width: 560px) {
   .panel { padding-inline: 14px; }
   .headerActions { flex-direction: column; }
-  .refreshButton { width: 100%; }
+  .refreshButton { width: 100%; min-height: 46px; }
   .metricsGrid { grid-template-columns: 1fr 1fr; }
   .metricCard, .metricSkeleton { min-height: 128px; }
   .metricCard { padding: 18px 15px; }

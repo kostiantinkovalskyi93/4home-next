@@ -65,6 +65,7 @@ type AnalyticsResponse = {
       done: number;
     };
     conversion: number;
+    projectTitles: Record<string, string>;
   };
 };
 
@@ -140,8 +141,16 @@ function pageLabel(path: string) {
   return path;
 }
 
-function projectLabel(path: string) {
+function projectLabel(
+  path: string,
+  projectTitles: Record<string, string>,
+) {
   const slug = path.replace(/^\/portfolio\//, "");
+  const projectTitle = projectTitles[slug];
+
+  if (projectTitle) {
+    return projectTitle;
+  }
 
   return slug
     .split("-")
@@ -192,6 +201,24 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
           <line x1="0" y1={height} x2={width} y2={height} className={styles.gridLine} />
           <polyline points={pageviewPoints} className={styles.viewsLine} />
           <polyline points={visitorPoints} className={styles.visitorsLine} />
+          {rows.map((row, index) => {
+            const x = rows.length === 1
+              ? width / 2
+              : (index / (rows.length - 1)) * width;
+            const visitorY = height - (row.visitors / max) * height;
+            const pageviewY = height - (row.pageviews / max) * height;
+
+            return (
+              <g key={row.timestamp}>
+                <circle cx={x} cy={pageviewY} r="3.5" className={styles.viewsPoint}>
+                  <title>{`${formatChartDate(row.timestamp, period)}: ${row.pageviews} переглядів`}</title>
+                </circle>
+                <circle cx={x} cy={visitorY} r="3.5" className={styles.visitorsPoint}>
+                  <title>{`${formatChartDate(row.timestamp, period)}: ${row.visitors} відвідувачів`}</title>
+                </circle>
+              </g>
+            );
+          })}
         </svg>
       </div>
       <div className={styles.chartLabels}>
@@ -325,16 +352,23 @@ export default function AdminAnalyticsPage() {
   const leads = analytics?.leads.total ?? 0;
   const conversion = analytics?.conversion ?? 0;
 
-  const pages = useMemo(() => (analytics?.pages.data ?? []).map((row) => ({
-    key: row.requestPath,
-    title: pageLabel(row.requestPath),
-    visitors: row.visitors,
-    pageviews: row.pageviews,
-  })), [analytics]);
+  const pages = useMemo(() => (analytics?.pages.data ?? [])
+    .filter((row) => !row.requestPath.startsWith("/admin"))
+    .map((row) => ({
+      key: row.requestPath,
+      title: pageLabel(row.requestPath),
+      visitors: row.visitors,
+      pageviews: row.pageviews,
+    })), [analytics]);
 
   const projects = useMemo(() => (analytics?.pages.data ?? [])
     .filter((row) => row.requestPath.startsWith("/portfolio/"))
-    .map((row) => ({ key: row.requestPath, title: projectLabel(row.requestPath), visitors: row.visitors, pageviews: row.pageviews })), [analytics]);
+    .map((row) => ({
+      key: row.requestPath,
+      title: projectLabel(row.requestPath, analytics?.projectTitles ?? {}),
+      visitors: row.visitors,
+      pageviews: row.pageviews,
+    })), [analytics]);
 
   const referrers = useMemo(() => (analytics?.referrers.data ?? []).map((row) => ({
     key: row.referrerHostname || "direct",
