@@ -161,32 +161,33 @@ function projectLabel(
 
 function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period }) {
   const width = 760;
-  const height = 210;
-  const paddingX = 18;
-  const paddingY = 8;
-  const plotWidth = width - paddingX * 2;
-  const plotHeight = height - paddingY * 2;
-  const max = Math.max(1, ...rows.flatMap((row) => [row.visitors, row.pageviews]));
+  const height = 220;
+  const paddingLeft = 34;
+  const paddingRight = 18;
+  const paddingTop = 12;
+  const paddingBottom = 10;
+  const plotWidth = width - paddingLeft - paddingRight;
+  const plotHeight = height - paddingTop - paddingBottom;
+  const maxValue = Math.max(1, ...rows.flatMap((row) => [row.visitors, row.pageviews]));
+  const niceMax = Math.max(5, Math.ceil((maxValue * 1.15) / 5) * 5);
+  const yTicks = Array.from({ length: 5 }, (_, index) => {
+    const ratio = index / 4;
+    return {
+      y: paddingTop + ratio * plotHeight,
+      value: Math.round(niceMax * (1 - ratio)),
+    };
+  });
 
   const pointX = (index: number) => {
-    if (rows.length <= 1) return width / 2;
-    return paddingX + (index / (rows.length - 1)) * plotWidth;
+    if (rows.length <= 1) return paddingLeft + plotWidth / 2;
+    return paddingLeft + (index / (rows.length - 1)) * plotWidth;
   };
 
-  const pointY = (value: number) => paddingY + plotHeight - (value / max) * plotHeight;
+  const pointY = (value: number) => paddingTop + plotHeight - (value / niceMax) * plotHeight;
 
-  const buildPoints = (values: number[]) => {
-    if (values.length === 0) return "";
-
-    if (values.length === 1) {
-      const y = pointY(values[0]);
-      return `${width / 2},${y}`;
-    }
-
-    return values
-      .map((value, index) => `${pointX(index)},${pointY(value)}`)
-      .join(" ");
-  };
+  const buildPoints = (values: number[]) => values
+    .map((value, index) => `${pointX(index)},${pointY(value)}`)
+    .join(" ");
 
   const visitorPoints = buildPoints(rows.map((row) => row.visitors));
   const pageviewPoints = buildPoints(rows.map((row) => row.pageviews));
@@ -210,9 +211,16 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
             role="img"
             aria-label="Графік відвідувачів та переглядів"
           >
-            <line x1={paddingX} y1={paddingY} x2={width - paddingX} y2={paddingY} className={styles.gridLine} />
-            <line x1={paddingX} y1={height / 2} x2={width - paddingX} y2={height / 2} className={styles.gridLine} />
-            <line x1={paddingX} y1={height - paddingY} x2={width - paddingX} y2={height - paddingY} className={styles.gridLine} />
+            {yTicks.map((tick) => (
+              <line
+                key={tick.y}
+                x1={paddingLeft}
+                y1={tick.y}
+                x2={width - paddingRight}
+                y2={tick.y}
+                className={styles.gridLine}
+              />
+            ))}
             <polyline points={pageviewPoints} className={styles.viewsLine} />
             <polyline points={visitorPoints} className={styles.visitorsLine} />
             {rows.map((row, index) => {
@@ -232,15 +240,27 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
               );
             })}
           </svg>
+          <div className={styles.chartYAxis} aria-hidden="true">
+            {yTicks.map((tick) => (
+              <span key={tick.y} style={{ top: `${(tick.y / height) * 100}%` }}>{tick.value}</span>
+            ))}
+          </div>
         </div>
         <div className={styles.chartLabels} aria-hidden="true">
           {rows.map((row, index) => {
             const show = index === 0 || index === rows.length - 1 || index % labelStep === 0;
+            const position = (pointX(index) / width) * 100;
+            const edgeClass = index === 0
+              ? styles.chartLabelFirst
+              : index === rows.length - 1
+                ? styles.chartLabelLast
+                : styles.chartLabelMiddle;
 
             return (
               <span
-                className={show ? styles.chartLabelVisible : styles.chartLabelHidden}
+                className={`${show ? styles.chartLabelVisible : styles.chartLabelHidden} ${edgeClass}`}
                 key={row.timestamp}
+                style={{ left: `${position}%` }}
               >
                 {show ? formatChartDate(row.timestamp, period) : ""}
               </span>
