@@ -20,6 +20,16 @@ export function GridIcon(props: IconProps) {
 export function InboxIcon(props: IconProps) {
   return <svg {...base} {...props}><path d="M4 4h16v16H4z"/><path d="M4 14h4l2 3h4l2-3h4"/></svg>;
 }
+export function AnalyticsIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 20V10" />
+      <path d="M10 20V4" />
+      <path d="M16 20v-7" />
+      <path d="M22 20H2" />
+    </svg>
+  );
+}
 export function LogoutIcon(props: IconProps) {
   return <svg {...base} {...props}><path d="M10 5H5v14h5"/><path d="M13 8l4 4-4 4"/><path d="M17 12H9"/></svg>;
 }

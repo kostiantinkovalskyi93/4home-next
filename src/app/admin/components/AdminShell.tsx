@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
+  AnalyticsIcon,
   GridIcon,
   InboxIcon,
   LogoutIcon,
@@ -22,6 +23,11 @@ const navigation = [
     label: "Заявки",
     href: "/admin/leads",
     icon: InboxIcon,
+  },
+  {
+    label: "Аналітика",
+    href: "/admin/analytics",
+    icon: AnalyticsIcon,
   },
 ];
 

@@ -338,7 +338,7 @@
     inset: auto 0 0 0;
     z-index: 50;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     padding: 8px 12px max(8px, env(safe-area-inset-bottom));
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.64);
