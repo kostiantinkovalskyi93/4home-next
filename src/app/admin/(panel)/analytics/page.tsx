@@ -159,30 +159,36 @@ function projectLabel(
     .join(" ");
 }
 
-function buildPoints(values: number[], width: number, height: number, max: number) {
-  if (values.length === 0) return "";
-
-  if (values.length === 1) {
-    const y = height - (values[0] / max) * height;
-    return `0,${y} ${width},${y}`;
-  }
-
-  return values
-    .map((value, index) => {
-      const x = (index / (values.length - 1)) * width;
-      const y = height - (value / max) * height;
-      return `${x},${y}`;
-    })
-    .join(" ");
-}
-
 function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period }) {
   const width = 760;
   const height = 210;
+  const paddingX = 10;
+  const plotWidth = width - paddingX * 2;
   const max = Math.max(1, ...rows.flatMap((row) => [row.visitors, row.pageviews]));
-  const visitorPoints = buildPoints(rows.map((row) => row.visitors), width, height, max);
-  const pageviewPoints = buildPoints(rows.map((row) => row.pageviews), width, height, max);
-  const labels = rows.length <= 8 ? rows : rows.filter((_, index) => index % Math.ceil(rows.length / 6) === 0 || index === rows.length - 1);
+
+  const pointX = (index: number) => {
+    if (rows.length <= 1) return width / 2;
+    return paddingX + (index / (rows.length - 1)) * plotWidth;
+  };
+
+  const pointY = (value: number) => height - (value / max) * height;
+
+  const buildPoints = (values: number[]) => {
+    if (values.length === 0) return "";
+
+    if (values.length === 1) {
+      const y = pointY(values[0]);
+      return `${width / 2},${y}`;
+    }
+
+    return values
+      .map((value, index) => `${pointX(index)},${pointY(value)}`)
+      .join(" ");
+  };
+
+  const visitorPoints = buildPoints(rows.map((row) => row.visitors));
+  const pageviewPoints = buildPoints(rows.map((row) => row.pageviews));
+  const labelStep = rows.length <= 8 ? 1 : Math.ceil((rows.length - 1) / 6);
 
   if (rows.length === 0) {
     return <div className={styles.emptyState}>За цей період ще немає даних відвідуваності.</div>;
@@ -194,37 +200,46 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
         <span><i className={styles.legendVisitors} />Відвідувачі</span>
         <span><i className={styles.legendViews} />Перегляди</span>
       </div>
-      <div className={styles.chartCanvas}>
-        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Графік відвідувачів та переглядів">
-          <line x1="0" y1="0" x2={width} y2="0" className={styles.gridLine} />
-          <line x1="0" y1={height / 2} x2={width} y2={height / 2} className={styles.gridLine} />
-          <line x1="0" y1={height} x2={width} y2={height} className={styles.gridLine} />
-          <polyline points={pageviewPoints} className={styles.viewsLine} />
-          <polyline points={visitorPoints} className={styles.visitorsLine} />
+      <div className={styles.chartPlot}>
+        <div className={styles.chartCanvas}>
+          <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Графік відвідувачів та переглядів">
+            <line x1={paddingX} y1="0" x2={width - paddingX} y2="0" className={styles.gridLine} />
+            <line x1={paddingX} y1={height / 2} x2={width - paddingX} y2={height / 2} className={styles.gridLine} />
+            <line x1={paddingX} y1={height} x2={width - paddingX} y2={height} className={styles.gridLine} />
+            <polyline points={pageviewPoints} className={styles.viewsLine} />
+            <polyline points={visitorPoints} className={styles.visitorsLine} />
+            {rows.map((row, index) => {
+              const x = pointX(index);
+              const visitorY = pointY(row.visitors);
+              const pageviewY = pointY(row.pageviews);
+
+              return (
+                <g key={row.timestamp}>
+                  <circle cx={x} cy={pageviewY} r="3.5" className={styles.viewsPoint}>
+                    <title>{`${formatChartDate(row.timestamp, period)}: ${row.pageviews} переглядів`}</title>
+                  </circle>
+                  <circle cx={x} cy={visitorY} r="3.5" className={styles.visitorsPoint}>
+                    <title>{`${formatChartDate(row.timestamp, period)}: ${row.visitors} відвідувачів`}</title>
+                  </circle>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+        <div className={styles.chartLabels} aria-hidden="true">
           {rows.map((row, index) => {
-            const x = rows.length === 1
-              ? width / 2
-              : (index / (rows.length - 1)) * width;
-            const visitorY = height - (row.visitors / max) * height;
-            const pageviewY = height - (row.pageviews / max) * height;
+            const show = index === 0 || index === rows.length - 1 || index % labelStep === 0;
 
             return (
-              <g key={row.timestamp}>
-                <circle cx={x} cy={pageviewY} r="3.5" className={styles.viewsPoint}>
-                  <title>{`${formatChartDate(row.timestamp, period)}: ${row.pageviews} переглядів`}</title>
-                </circle>
-                <circle cx={x} cy={visitorY} r="3.5" className={styles.visitorsPoint}>
-                  <title>{`${formatChartDate(row.timestamp, period)}: ${row.visitors} відвідувачів`}</title>
-                </circle>
-              </g>
+              <span
+                className={show ? styles.chartLabelVisible : styles.chartLabelHidden}
+                key={row.timestamp}
+              >
+                {show ? formatChartDate(row.timestamp, period) : ""}
+              </span>
             );
           })}
-        </svg>
-      </div>
-      <div className={styles.chartLabels}>
-        {labels.map((row) => (
-          <span key={row.timestamp}>{formatChartDate(row.timestamp, period)}</span>
-        ))}
+        </div>
       </div>
     </div>
   );

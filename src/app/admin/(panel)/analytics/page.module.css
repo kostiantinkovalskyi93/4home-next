@@ -167,16 +167,21 @@
 .chartLegend i { width: 18px; height: 3px; border-radius: 99px; }
 .legendVisitors { background: #b6683b; }
 .legendViews { background: #272421; }
+.chartPlot { min-width: 0; overflow: hidden; }
 .chartCanvas { width: 100%; overflow: hidden; }
-.chartCanvas svg { display: block; width: 100%; height: 230px; overflow: visible; }
+.chartCanvas svg { display: block; width: 100%; height: 230px; overflow: hidden; }
 .gridLine { stroke: #eee6df; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .visitorsLine, .viewsLine { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .visitorsLine { stroke: #b6683b; }
 .viewsLine { stroke: #272421; }
 .visitorsPoint { fill: #fff; stroke: #b6683b; stroke-width: 2; vector-effect: non-scaling-stroke; }
 .viewsPoint { fill: #fff; stroke: #272421; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.chartLabels { display: flex; justify-content: space-between; gap: 8px; margin-top: 9px; color: #a18f82; font-size: 10px; }
-.chartLabels span { min-width: 0; white-space: nowrap; }
+.chartLabels { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: start; margin: 9px 10px 0; color: #a18f82; font-size: 10px; }
+.chartLabels span { min-width: 0; white-space: nowrap; text-align: center; }
+.chartLabels span:first-child { text-align: left; }
+.chartLabels span:last-child { text-align: right; }
+.chartLabelVisible { visibility: visible; }
+.chartLabelHidden { visibility: hidden; }
 
 .leadStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .leadStats div { padding: 17px; border-radius: 12px; background: #f8f4f0; }
