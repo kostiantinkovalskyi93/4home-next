@@ -176,10 +176,8 @@
 .viewsLine { stroke: #272421; }
 .visitorsPoint { fill: #fff; stroke: #b6683b; stroke-width: 2; vector-effect: non-scaling-stroke; }
 .viewsPoint { fill: #fff; stroke: #272421; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.chartLabels { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: start; margin: 9px 10px 0; color: #a18f82; font-size: 10px; }
-.chartLabels span { min-width: 0; white-space: nowrap; text-align: center; }
-.chartLabels span:first-child { text-align: left; }
-.chartLabels span:last-child { text-align: right; }
+.chartLabels { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: start; margin-top: 9px; padding-inline: 2.37%; color: #a18f82; font-size: 10px; }
+.chartLabels span { min-width: 0; white-space: nowrap; text-align: center; transform: translateX(0); }
 .chartLabelVisible { visibility: visible; }
 .chartLabelHidden { visibility: hidden; }
 

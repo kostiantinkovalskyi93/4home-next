@@ -162,8 +162,10 @@ function projectLabel(
 function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period }) {
   const width = 760;
   const height = 210;
-  const paddingX = 10;
+  const paddingX = 18;
+  const paddingY = 8;
   const plotWidth = width - paddingX * 2;
+  const plotHeight = height - paddingY * 2;
   const max = Math.max(1, ...rows.flatMap((row) => [row.visitors, row.pageviews]));
 
   const pointX = (index: number) => {
@@ -171,7 +173,7 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
     return paddingX + (index / (rows.length - 1)) * plotWidth;
   };
 
-  const pointY = (value: number) => height - (value / max) * height;
+  const pointY = (value: number) => paddingY + plotHeight - (value / max) * plotHeight;
 
   const buildPoints = (values: number[]) => {
     if (values.length === 0) return "";
@@ -202,10 +204,15 @@ function TrafficChart({ rows, period }: { rows: TimelineRow[]; period: Period })
       </div>
       <div className={styles.chartPlot}>
         <div className={styles.chartCanvas}>
-          <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Графік відвідувачів та переглядів">
-            <line x1={paddingX} y1="0" x2={width - paddingX} y2="0" className={styles.gridLine} />
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            preserveAspectRatio="none"
+            role="img"
+            aria-label="Графік відвідувачів та переглядів"
+          >
+            <line x1={paddingX} y1={paddingY} x2={width - paddingX} y2={paddingY} className={styles.gridLine} />
             <line x1={paddingX} y1={height / 2} x2={width - paddingX} y2={height / 2} className={styles.gridLine} />
-            <line x1={paddingX} y1={height} x2={width - paddingX} y2={height} className={styles.gridLine} />
+            <line x1={paddingX} y1={height - paddingY} x2={width - paddingX} y2={height - paddingY} className={styles.gridLine} />
             <polyline points={pageviewPoints} className={styles.viewsLine} />
             <polyline points={visitorPoints} className={styles.visitorsLine} />
             {rows.map((row, index) => {
