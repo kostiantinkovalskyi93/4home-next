@@ -328,6 +328,27 @@ export async function GET(request: Request) {
 ),
     ]);
 
+const totalVisitors =
+  typeof totals === "object" &&
+  totals !== null &&
+  "data" in totals &&
+  typeof totals.data === "object" &&
+  totals.data !== null &&
+  "visitors" in totals.data &&
+  typeof totals.data.visitors === "number"
+    ? totals.data.visitors
+    : 0;
+
+const conversion =
+  totalVisitors > 0
+    ? Number(
+        (
+          (leads.total / totalVisitors) *
+          100
+        ).toFixed(1),
+      )
+    : 0;
+
     return NextResponse.json({
       ok: true,
       period,
@@ -346,6 +367,7 @@ export async function GET(request: Request) {
         browsers,
         operatingSystems,
         leads,
+        conversion,
       },
     });
   } catch (error) {
