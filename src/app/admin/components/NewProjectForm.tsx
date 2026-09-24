@@ -3227,46 +3227,8 @@ export function NewProjectForm({
     setSaveMessage("");
 
     try {
-      /*
-       * Recheck publication readiness against stored Supabase data.
-       * Browser state may be stale after another tab/session changes media.
-       */
-      const {
-        data: storedPhotos,
-        error: mediaReadinessError,
-      } = await supabase
-        .from("portfolio_media")
-        .select(
-          "id,is_cover,processing_status",
-        )
-        .eq("project_id", projectId)
-        .eq("media_type", "photo");
-
-      if (mediaReadinessError) {
-        throw mediaReadinessError;
-      }
-
-      const readyPhotos = (storedPhotos ?? []).filter(
-        (item) =>
-          item.processing_status === "ready",
-      );
-
-      const readyCover = readyPhotos.find(
-        (item) => item.is_cover,
-      );
-
-      if (!readyPhotos.length) {
-        throw new Error(
-          "Для публікації потрібне хоча б одне готове фото.",
-        );
-      }
-
-      if (!readyCover) {
-        throw new Error(
-          "Для публікації виберіть готове фото як обкладинку.",
-        );
-      }
-
+      // Save the current form fields first. The publication state itself
+      // is changed only by the protected server route + database RPC below.
       const { error } = await supabase
         .from("portfolio_projects")
         .update({
@@ -3294,14 +3256,38 @@ export function NewProjectForm({
             color.trim() || null,
           production_term:
             productionTerm.trim() || null,
-          status: "published",
-          published_at:
-            new Date().toISOString(),
         })
         .eq("id", projectId);
 
       if (error) {
         throw error;
+      }
+
+      const publishResponse = await fetch(
+        "/admin/api/portfolio-project/status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectId,
+            action: "publish",
+          }),
+        },
+      );
+
+      const publishResult = (await publishResponse
+        .json()
+        .catch(() => null)) as
+        | { error?: string }
+        | null;
+
+      if (!publishResponse.ok) {
+        throw new Error(
+          publishResult?.error ??
+            "Не вдалося опублікувати роботу.",
+        );
       }
 
       setSavedFormSignature(
@@ -3356,16 +3342,31 @@ export function NewProjectForm({
     setSaveMessage("");
 
     try {
-      const { error } = await supabase
-        .from("portfolio_projects")
-        .update({
-          status: "draft",
-          published_at: null,
-        })
-        .eq("id", projectId);
+      const response = await fetch(
+        "/admin/api/portfolio-project/status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectId,
+            action: "unpublish",
+          }),
+        },
+      );
 
-      if (error) {
-        throw error;
+      const result = (await response
+        .json()
+        .catch(() => null)) as
+        | { error?: string }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(
+          result?.error ??
+            "Не вдалося зняти роботу з публікації.",
+        );
       }
 
       setProjectStatus("draft");
