@@ -2335,6 +2335,10 @@ export function NewProjectForm({
   const setCoverPhoto = async (mediaId: string) => {
     if (!projectId || saveStatus === "saving") return;
 
+    const previousCover = media.find(
+      (item) => item.type === "photo" && item.source === "stored" && item.isCover,
+    );
+
     setSaveStatus("saving");
     setSaveMessage("");
 
@@ -2353,31 +2357,30 @@ export function NewProjectForm({
         await processStoredPhoto(mediaId);
       }
 
-      const response = await fetch(
-        "/admin/api/portfolio-project/cover",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            projectId,
-            mediaId,
-          }),
-        },
-      );
+      if (previousCover && previousCover.id !== mediaId) {
+        const { error } = await supabase
+          .from("portfolio_media")
+          .update({ is_cover: false })
+          .eq("id", previousCover.id)
+          .eq("project_id", projectId);
+        if (error) throw error;
+      }
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as
-        | { error?: string }
-        | null;
+      const { error } = await supabase
+        .from("portfolio_media")
+        .update({ is_cover: true })
+        .eq("id", mediaId)
+        .eq("project_id", projectId);
 
-      if (!response.ok) {
-        throw new Error(
-          result?.error ??
-            "Не вдалося змінити обкладинку.",
-        );
+      if (error) {
+        if (previousCover) {
+          await supabase
+            .from("portfolio_media")
+            .update({ is_cover: true })
+            .eq("id", previousCover.id)
+            .eq("project_id", projectId);
+        }
+        throw error;
       }
 
       setMedia((current) =>
@@ -2416,8 +2419,10 @@ export function NewProjectForm({
     setSaveStatus("saving");
     setSaveMessage("Створюємо poster для відео…");
 
+    const previousPosterPath = target.posterPath ?? null;
+    const posterVersion = Date.now();
     const posterPath =
-      `${projectId}/videos/${target.id}-poster.webp`;
+      `${projectId}/videos/${target.id}-poster-${posterVersion}.webp`;
 
     try {
       const response = await fetch(target.url);
@@ -2445,7 +2450,7 @@ export function NewProjectForm({
           .upload(posterPath, posterFile, {
             cacheControl: "31536000",
             contentType: "image/webp",
-            upsert: true,
+            upsert: false,
           });
 
       if (uploadError) throw uploadError;
@@ -2462,6 +2467,23 @@ export function NewProjectForm({
           .from("portfolio-video-posters")
           .remove([posterPath]);
         throw updateError;
+      }
+
+      if (
+        previousPosterPath &&
+        previousPosterPath !== posterPath
+      ) {
+        const { error: oldPosterCleanupError } =
+          await supabase.storage
+            .from("portfolio-video-posters")
+            .remove([previousPosterPath]);
+
+        if (oldPosterCleanupError) {
+          console.error(
+            "New video poster saved, but old poster cleanup failed:",
+            oldPosterCleanupError,
+          );
+        }
       }
 
       const posterUrl = supabase.storage
@@ -3208,8 +3230,46 @@ export function NewProjectForm({
     setSaveMessage("");
 
     try {
-      // Save the current form fields first. The publication state itself
-      // is changed only by the protected server route + database RPC below.
+      /*
+       * Recheck publication readiness against stored Supabase data.
+       * Browser state may be stale after another tab/session changes media.
+       */
+      const {
+        data: storedPhotos,
+        error: mediaReadinessError,
+      } = await supabase
+        .from("portfolio_media")
+        .select(
+          "id,is_cover,processing_status",
+        )
+        .eq("project_id", projectId)
+        .eq("media_type", "photo");
+
+      if (mediaReadinessError) {
+        throw mediaReadinessError;
+      }
+
+      const readyPhotos = (storedPhotos ?? []).filter(
+        (item) =>
+          item.processing_status === "ready",
+      );
+
+      const readyCover = readyPhotos.find(
+        (item) => item.is_cover,
+      );
+
+      if (!readyPhotos.length) {
+        throw new Error(
+          "Для публікації потрібне хоча б одне готове фото.",
+        );
+      }
+
+      if (!readyCover) {
+        throw new Error(
+          "Для публікації виберіть готове фото як обкладинку.",
+        );
+      }
+
       const { error } = await supabase
         .from("portfolio_projects")
         .update({
@@ -3237,38 +3297,14 @@ export function NewProjectForm({
             color.trim() || null,
           production_term:
             productionTerm.trim() || null,
+          status: "published",
+          published_at:
+            new Date().toISOString(),
         })
         .eq("id", projectId);
 
       if (error) {
         throw error;
-      }
-
-      const publishResponse = await fetch(
-        "/admin/api/portfolio-project/status",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            projectId,
-            action: "publish",
-          }),
-        },
-      );
-
-      const publishResult = (await publishResponse
-        .json()
-        .catch(() => null)) as
-        | { error?: string }
-        | null;
-
-      if (!publishResponse.ok) {
-        throw new Error(
-          publishResult?.error ??
-            "Не вдалося опублікувати роботу.",
-        );
       }
 
       setSavedFormSignature(
@@ -3323,31 +3359,16 @@ export function NewProjectForm({
     setSaveMessage("");
 
     try {
-      const response = await fetch(
-        "/admin/api/portfolio-project/status",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            projectId,
-            action: "unpublish",
-          }),
-        },
-      );
+      const { error } = await supabase
+        .from("portfolio_projects")
+        .update({
+          status: "draft",
+          published_at: null,
+        })
+        .eq("id", projectId);
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as
-        | { error?: string }
-        | null;
-
-      if (!response.ok) {
-        throw new Error(
-          result?.error ??
-            "Не вдалося зняти роботу з публікації.",
-        );
+      if (error) {
+        throw error;
       }
 
       setProjectStatus("draft");

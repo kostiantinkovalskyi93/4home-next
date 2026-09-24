@@ -264,6 +264,8 @@ export async function POST(request: Request) {
   const cardPath =
     `${media.project_id}/card/${mediaId}-${cardVersion}.webp`;
 
+  let newCardUploaded = false;
+
   try {
     const { data: original, error: downloadError } =
       await supabase.storage
@@ -359,6 +361,8 @@ export async function POST(request: Request) {
       throw cardUploadError;
     }
 
+    newCardUploaded = true;
+
     const { error: updateError } = await supabase
       .from("portfolio_media")
       .update({
@@ -420,6 +424,20 @@ export async function POST(request: Request) {
       "Failed to process portfolio photo:",
       error,
     );
+
+    if (newCardUploaded) {
+      const { error: cardRollbackError } =
+        await supabase.storage
+          .from("portfolio-public")
+          .remove([cardPath]);
+
+      if (cardRollbackError) {
+        console.error(
+          "Failed to roll back newly uploaded portfolio card:",
+          cardRollbackError,
+        );
+      }
+    }
 
     await supabase
       .from("portfolio_media")
