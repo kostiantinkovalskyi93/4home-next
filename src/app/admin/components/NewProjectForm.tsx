@@ -2335,10 +2335,6 @@ export function NewProjectForm({
   const setCoverPhoto = async (mediaId: string) => {
     if (!projectId || saveStatus === "saving") return;
 
-    const previousCover = media.find(
-      (item) => item.type === "photo" && item.source === "stored" && item.isCover,
-    );
-
     setSaveStatus("saving");
     setSaveMessage("");
 
@@ -2357,30 +2353,31 @@ export function NewProjectForm({
         await processStoredPhoto(mediaId);
       }
 
-      if (previousCover && previousCover.id !== mediaId) {
-        const { error } = await supabase
-          .from("portfolio_media")
-          .update({ is_cover: false })
-          .eq("id", previousCover.id)
-          .eq("project_id", projectId);
-        if (error) throw error;
-      }
+      const response = await fetch(
+        "/admin/api/portfolio-project/cover",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectId,
+            mediaId,
+          }),
+        },
+      );
 
-      const { error } = await supabase
-        .from("portfolio_media")
-        .update({ is_cover: true })
-        .eq("id", mediaId)
-        .eq("project_id", projectId);
+      const result = (await response
+        .json()
+        .catch(() => null)) as
+        | { error?: string }
+        | null;
 
-      if (error) {
-        if (previousCover) {
-          await supabase
-            .from("portfolio_media")
-            .update({ is_cover: true })
-            .eq("id", previousCover.id)
-            .eq("project_id", projectId);
-        }
-        throw error;
+      if (!response.ok) {
+        throw new Error(
+          result?.error ??
+            "Не вдалося змінити обкладинку.",
+        );
       }
 
       setMedia((current) =>
