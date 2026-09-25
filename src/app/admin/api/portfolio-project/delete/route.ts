@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+import {
+  BunnyStreamError,
+  deleteBunnyStreamVideo,
+} from "@/lib/bunny/stream.server";
 import { createClient } from "@/lib/supabase/server";
 
 const UUID_PATTERN =
@@ -11,6 +15,12 @@ type DeleteProjectResult = {
   public_paths: string[] | null;
   video_paths: string[] | null;
   video_poster_paths: string[] | null;
+};
+
+type ProjectVideoProviderRow = {
+  id: string;
+  storage_provider: string | null;
+  bunny_video_id: string | null;
 };
 
 async function removeStoragePaths(
@@ -82,9 +92,101 @@ export async function POST(request: Request) {
     );
   }
 
+  /*
+   * Preserve every Bunny reference until Bunny confirms deletion.
+   *
+   * A retry is safe:
+   * - Bunny 404 means the remote asset is already gone.
+   * - any other Bunny failure stops before the database delete.
+   * - the delete RPC compares the Bunny IDs seen here with the IDs
+   *   still attached to the project under a project-row lock.
+   *   If media changed concurrently, the database delete is aborted.
+   */
+  const { data: providerData, error: providerError } =
+    await supabase
+      .from("portfolio_media")
+      .select("id, storage_provider, bunny_video_id")
+      .eq("project_id", projectId)
+      .eq("media_type", "video");
+
+  if (providerError) {
+    console.error(
+      "Failed to load project video providers before delete:",
+      providerError,
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Не вдалося перевірити відео роботи перед видаленням.",
+      },
+      { status: 500 },
+    );
+  }
+
+  const providerRows =
+    (providerData ?? []) as ProjectVideoProviderRow[];
+
+  const bunnyRows = providerRows.filter(
+    (row) => row.storage_provider === "bunny",
+  );
+
+  const invalidBunnyRow = bunnyRows.find(
+    (row) => !row.bunny_video_id,
+  );
+
+  if (invalidBunnyRow) {
+    console.error(
+      "Bunny video row is missing bunny_video_id:",
+      invalidBunnyRow.id,
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Робота має відео з некоректними даними Bunny Stream. Видалення зупинено.",
+      },
+      { status: 409 },
+    );
+  }
+
+  const expectedBunnyVideoIds = bunnyRows
+    .map((row) => row.bunny_video_id as string)
+    .sort();
+
+  for (const bunnyVideoId of expectedBunnyVideoIds) {
+    try {
+      await deleteBunnyStreamVideo(bunnyVideoId);
+    } catch (error) {
+      if (
+        error instanceof BunnyStreamError &&
+        error.status === 404
+      ) {
+        continue;
+      }
+
+      console.error(
+        "Failed to remove Bunny Stream video before project delete:",
+        error,
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Bunny Stream не підтвердив видалення всіх відео. Роботу та записи в базі залишено без змін.",
+        },
+        { status: 502 },
+      );
+    }
+  }
+
   const { data, error } = await supabase.rpc(
     "delete_portfolio_project",
-    { p_project_id: projectId },
+    {
+      p_project_id: projectId,
+      p_expected_bunny_video_ids:
+        expectedBunnyVideoIds,
+    },
   );
 
   if (error) {
@@ -93,8 +195,32 @@ export async function POST(request: Request) {
       error,
     );
 
+    const message =
+      typeof error.message === "string"
+        ? error.message
+        : "";
+
+    if (
+      message.includes(
+        "portfolio_media_changed_during_delete",
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Медіа роботи змінилися під час видалення. Дані в базі залишено; повторіть спробу.",
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
-      { error: "Не вдалося видалити роботу." },
+      {
+        error:
+          expectedBunnyVideoIds.length > 0
+            ? "Відео Bunny Stream видалено, але не вдалося видалити роботу з бази. Повторіть спробу."
+            : "Не вдалося видалити роботу.",
+      },
       { status: 500 },
     );
   }
