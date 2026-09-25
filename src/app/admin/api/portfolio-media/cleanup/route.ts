@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+import {
+  BunnyStreamError,
+  deleteBunnyStreamVideo,
+} from "@/lib/bunny/stream.server";
 import { createClient } from "@/lib/supabase/server";
 
 type DeletePhotoResult = {
@@ -19,6 +23,8 @@ type DeleteVideoResult = {
 type IncompleteMediaRow = {
   id: string;
   media_type: "photo" | "video";
+  storage_provider: string | null;
+  bunny_video_id: string | null;
 };
 
 export async function POST(request: Request) {
@@ -71,7 +77,7 @@ export async function POST(request: Request) {
   const { data: rows, error: rowsError } =
     await supabase
       .from("portfolio_media")
-      .select("id, media_type")
+      .select("id, media_type, storage_provider, bunny_video_id")
       .eq("project_id", body.projectId)
       .in("processing_status", [
         "pending",
@@ -96,6 +102,44 @@ export async function POST(request: Request) {
 
   for (const row of (rows ?? []) as IncompleteMediaRow[]) {
     if (row.media_type === "video") {
+      // Bunny assets must be removed before their database row.
+      // Keeping the DB reference until remote cleanup succeeds makes a
+      // failed cleanup observable and safely retryable. Bunny 404 means
+      // the desired remote state has already been reached.
+      if (row.storage_provider === "bunny") {
+        if (!row.bunny_video_id) {
+          console.error(
+            `Incomplete Bunny video ${row.id} is missing bunny_video_id.`,
+          );
+          cleanupWarnings.push(
+            `Відео ${row.id} має некоректні дані Bunny Stream і не було видалене.`,
+          );
+          continue;
+        }
+
+        try {
+          await deleteBunnyStreamVideo(
+            row.bunny_video_id,
+          );
+        } catch (error) {
+          if (
+            !(
+              error instanceof BunnyStreamError &&
+              error.status === 404
+            )
+          ) {
+            console.error(
+              `Failed to clean Bunny video ${row.id}:`,
+              error,
+            );
+            cleanupWarnings.push(
+              `Bunny Stream не підтвердив видалення відео ${row.id}; запис у базі залишено для повторної спроби.`,
+            );
+            continue;
+          }
+        }
+      }
+
       const { data, error } = await supabase.rpc(
         "delete_portfolio_video",
         {
