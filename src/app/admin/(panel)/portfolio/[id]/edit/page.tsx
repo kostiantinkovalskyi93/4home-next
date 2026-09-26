@@ -148,8 +148,6 @@ export default async function EditProjectPage({
               media.video_poster_path,
             ).data.publicUrl;
         }
-      } else {
-        continue;
       }
     } else if (
       media.processing_status === "ready" &&
@@ -175,14 +173,9 @@ export default async function EditProjectPage({
           `Failed to create signed URL for media ${media.id}:`,
           signedError,
         );
-        continue;
+      } else {
+        previewUrl = signedData.signedUrl;
       }
-
-      previewUrl = signedData.signedUrl;
-    }
-
-    if (!previewUrl) {
-      continue;
     }
 
     const sourcePath =
@@ -200,7 +193,7 @@ export default async function EditProjectPage({
       id: media.id,
       name: fileName,
       type: media.media_type,
-      url: previewUrl,
+      url: previewUrl ?? "",
       originalPath:
         media.original_path ?? undefined,
       webPath: media.web_path,

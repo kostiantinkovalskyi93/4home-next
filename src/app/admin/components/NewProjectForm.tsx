@@ -4033,8 +4033,21 @@ export function NewProjectForm({
                           styles.preview
                         }
                       >
-                        {item.type ===
-                        "photo" ? (
+                        {!item.url &&
+                        !item.posterUrl ? (
+                          <div
+                            className={
+                              styles.previewUnavailable
+                            }
+                          >
+                            <span>Прев’ю недоступне</span>
+                            <small>
+                              Медіа збережене в базі.
+                              Скористайтеся діями нижче.
+                            </small>
+                          </div>
+                        ) : item.type ===
+                          "photo" ? (
                           item.source === "local" ? (
                             <Image
                               src={item.url}
@@ -4209,6 +4222,7 @@ export function NewProjectForm({
 
                       {item.type === "video" &&
                         item.source === "stored" &&
+                        Boolean(item.url) &&
                         !item.posterUrl && (
                           <button
                             type="button"
