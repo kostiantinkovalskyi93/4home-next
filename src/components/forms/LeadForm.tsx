@@ -64,6 +64,7 @@ export type LeadSourceContext = {
 
 type LeadFormProps = {
   sourceContext?: LeadSourceContext | null;
+  headingLevel?: "h1" | "h2";
 };
 
 type FilePreview = {
@@ -267,7 +268,12 @@ function getSubmitError({
   };
 }
 
-export function LeadForm({ sourceContext = null }: LeadFormProps) {
+export function LeadForm({
+  sourceContext = null,
+  headingLevel = "h2",
+}: LeadFormProps) {
+  const Heading = headingLevel;
+
   const [form, setForm] = useState<FormState>(() =>
     createInitialFormState(sourceContext),
   );
@@ -914,11 +920,11 @@ export function LeadForm({ sourceContext = null }: LeadFormProps) {
                 Індивідуальний прорахунок
               </p>
 
-              <h2 className={styles.title}>
+              <Heading className={styles.title}>
                 Розрахувати
                 <br />
                 вартість меблів
-              </h2>
+              </Heading>
 
               <p
                 className={styles.description}

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function ContactsPage() {
   return (
     <main>
-      <LeadForm />
+      <LeadForm headingLevel="h1" />
     </main>
   );
 }
