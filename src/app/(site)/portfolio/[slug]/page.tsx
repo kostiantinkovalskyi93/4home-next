@@ -42,7 +42,7 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${project.title} — портфоліо`;
+  const title = project.title;
   const socialTitle =
     `${project.title} — портфоліо ${SITE_NAME}`;
   const description = getProjectDescription(
