@@ -1825,6 +1825,21 @@
     margin-top: 48px;
   }
 
+  .advantageCard,
+  .advantageCard:first-child {
+    min-height: 220px;
+
+    padding: 22px 24px 24px;
+  }
+
+  .advantageContent {
+    padding-top: 28px;
+  }
+
+  .advantageDescription {
+    margin-top: 14px;
+  }
+
   .materialCard,
   .materialCard:first-child {
     min-height: auto;
@@ -1851,8 +1866,8 @@
 
   .processTimeline {
     grid-template-columns: 1fr;
-
     margin-top: 48px;
+    row-gap: 20px;
   }
 
   .processTimeline::before {
@@ -2025,6 +2040,18 @@
     margin-top: 20px;
 
     font-size: 19px;
+  }
+
+  .finalPhonePair {
+    width: max-content;
+    max-width: 100%;
+
+    justify-content: start;
+    justify-items: start;
+  }
+
+  .finalPhonePair > a {
+    text-align: left;
   }
 
   .categoryLink:hover .categoryImage,

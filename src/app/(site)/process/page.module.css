@@ -1,14 +1,6 @@
-/* ========================================
-   PAGE
-======================================== */
-
 .pageContainer {
   width: min(calc(100% - 48px), var(--container));
 }
-
-/* ========================================
-   HERO
-======================================== */
 
 .hero {
   min-height: min(820px, calc(86svh - 76px));
@@ -211,10 +203,6 @@
   background: var(--color-border);
 }
 
-/* ========================================
-   COMMON
-======================================== */
-
 .sectionTitle,
 .darkTitle,
 .ctaTitle {
@@ -241,10 +229,6 @@
 .darkTitle span {
   color: rgba(255, 255, 255, 0.4);
 }
-
-/* ========================================
-   INTRO
-======================================== */
 
 .intro {
   padding-block: 108px;
@@ -277,10 +261,6 @@
 .introContent p + p {
   margin-top: 16px;
 }
-
-/* ========================================
-   TIMELINE
-======================================== */
 
 .timeline {
   padding-block: 112px;
@@ -432,10 +412,6 @@
   text-transform: uppercase;
 }
 
-/* ========================================
-   APPROVAL
-======================================== */
-
 .approval {
   padding-block: 112px;
 
@@ -531,10 +507,6 @@
 
   transform: rotate(45deg);
 }
-
-/* ========================================
-   START
-======================================== */
 
 .start {
   padding-block: 112px;
@@ -647,10 +619,6 @@
   color: var(--color-text-muted);
 }
 
-/* ========================================
-   CTA
-======================================== */
-
 .cta {
   padding-block: 112px;
 
@@ -748,10 +716,6 @@
   color: #ffffff;
 }
 
-/* ========================================
-   FOCUS
-======================================== */
-
 .primaryButton:focus-visible,
 .phoneLink:focus-visible,
 .ctaButton:focus-visible,
@@ -760,19 +724,11 @@
   outline-offset: 4px;
 }
 
-/* ========================================
-   DESKTOP POLISH
-======================================== */
-
 @media (min-width: 1051px) {
   .heroGrid {
     padding-block: 56px;
   }
 }
-
-/* ========================================
-   TABLET
-======================================== */
 
 @media (max-width: 1050px) {
   .hero {
@@ -851,16 +807,10 @@
   }
 }
 
-/* ========================================
-   MOBILE
-======================================== */
-
 @media (max-width: 650px) {
   .pageContainer {
     width: min(calc(100% - 40px), var(--container));
   }
-
-  /* HERO */
 
   .heroInner {
     padding-top: 28px;
@@ -921,30 +871,28 @@
     display: none;
   }
 
-  /* RHYTHM */
-
   .intro {
-    padding-block: 44px;
+    padding-block: 38px;
   }
 
   .timeline {
-    padding-block: 48px;
+    padding-block: 40px;
   }
 
   .approval {
-    padding-block: 50px;
+    padding-block: 42px;
   }
 
   .start {
-    padding-block: 48px;
+    padding-block: 40px;
   }
 
   .statement {
-    padding-block: 54px;
+    padding-block: 44px;
   }
 
   .cta {
-    padding-block: 50px;
+    padding-block: 42px;
   }
 
   .sectionTitle,
@@ -952,8 +900,6 @@
   .ctaTitle {
     font-size: clamp(42px, 11.5vw, 56px);
   }
-
-  /* INTRO */
 
   .introGrid {
     gap: 20px;
@@ -972,8 +918,6 @@
     margin-top: 13px;
   }
 
-  /* TIMELINE */
-
   .timelineHeader {
     flex-direction: column;
     align-items: flex-start;
@@ -988,17 +932,19 @@
   }
 
   .timelineList::before {
-    left: 16px;
+    left: 34px;
   }
 
   .timelineItem {
-    grid-template-columns: 34px 1fr;
+    grid-template-columns: 44px 1fr;
 
-    gap: 10px 14px;
+    align-items: start;
+
+    gap: 7px 14px;
 
     min-height: 0;
 
-    padding-block: 17px;
+    padding-block: 12px;
   }
 
   .timelineNumber {
@@ -1019,7 +965,7 @@
 
   .timelineDot {
     position: absolute;
-    left: -21px;
+    left: -24px;
 
     width: 6px;
     height: 6px;
@@ -1052,8 +998,6 @@
 
     text-align: left;
   }
-
-  /* APPROVAL */
 
   .approvalHeader {
     gap: 20px;
@@ -1178,10 +1122,6 @@
   }
 }
 
-/* ========================================
-   VERY SMALL MOBILE
-======================================== */
-
 @media (max-width: 390px) {
   .pageContainer {
     width: min(calc(100% - 36px), var(--container));
@@ -1204,10 +1144,6 @@
     font-size: 45px;
   }
 }
-
-/* ========================================
-   REDUCED MOTION
-======================================== */
 
 @media (prefers-reduced-motion: reduce) {
   .primaryButton,
