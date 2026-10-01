@@ -210,19 +210,25 @@ function PortfolioBoardState({
     });
   }, [allProjects, query, category, status]);
 
-  const portfolioCounters = [
-    { label: "Усі роботи", count: counts.total },
-    { label: "Кухні", count: counts.kitchens },
-    {
-      label: "Розпашні шафи",
-      count: counts.hingedWardrobes,
-    },
-    {
-      label: "Шафи-купе",
-      count: counts.slidingWardrobes,
-    },
-    { label: "Інші меблі", count: counts.furniture },
-  ];
+  const activePortfolioCounter =
+    category === "Кухні"
+      ? { label: "Кухні", count: counts.kitchens }
+      : category === "Шафи"
+        ? {
+            label: "Шафи",
+            count:
+              counts.hingedWardrobes +
+              counts.slidingWardrobes,
+          }
+        : category === "Інші меблі"
+          ? {
+              label: "Інші меблі",
+              count: counts.furniture,
+            }
+          : {
+              label: "Усі роботи",
+              count: counts.total,
+            };
 
   const reorderEnabled =
     !savingOrder &&
@@ -696,22 +702,20 @@ function PortfolioBoardState({
 
         <div
           className={styles.portfolioCounters}
-          aria-label="Кількість робіт у портфоліо"
+          aria-label="Кількість робіт у вибраній категорії"
         >
-          {portfolioCounters.map((item) => (
-            <div
-              className={styles.portfolioCounter}
-              key={item.label}
-            >
-              <span className={styles.counterLabel}>
-                {item.label}
-              </span>
+          <div className={styles.portfolioCounter}>
+            <span className={styles.counterLabel}>
+              {activePortfolioCounter.label}
+            </span>
 
-              <span className={styles.counterCount}>
-                {String(item.count).padStart(2, "0")}
-              </span>
-            </div>
-          ))}
+            <span className={styles.counterCount}>
+              {String(activePortfolioCounter.count).padStart(
+                2,
+                "0",
+              )}
+            </span>
+          </div>
         </div>
 
         <div className={styles.controls}>

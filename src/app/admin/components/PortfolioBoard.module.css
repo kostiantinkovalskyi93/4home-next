@@ -236,14 +236,11 @@
 }
 
 .portfolioCounters {
-  display: grid;
+  display: flex;
   width: 100%;
   min-width: 0;
 
-  grid-template-columns:
-    repeat(auto-fit, minmax(150px, 1fr));
-
-  gap: 18px 28px;
+  align-items: center;
 
   margin-top: 30px;
   padding-bottom: 20px;
@@ -706,11 +703,6 @@
   }
 
   .portfolioCounters {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-    gap: 16px 18px;
-
     margin-top: 24px;
     padding-bottom: 18px;
   }
@@ -756,13 +748,8 @@
 }
 
 @media (max-width: 580px) {
-  .portfolioCounters {
-    gap: 14px 12px;
-  }
-
   .portfolioCounter {
-    align-items: center;
-    justify-content: space-between;
+    align-items: baseline;
     gap: 8px;
   }
 
