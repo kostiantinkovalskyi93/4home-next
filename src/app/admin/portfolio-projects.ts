@@ -26,6 +26,7 @@ export type PortfolioProjectDatabaseRow = {
     | "kitchen"
     | "wardrobe"
     | "furniture";
+  wardrobe_type: "hinged" | "sliding" | null;
   year: number | null;
   status:
     | "published"

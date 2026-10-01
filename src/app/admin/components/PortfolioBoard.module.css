@@ -235,6 +235,53 @@
   width: 18px;
 }
 
+.portfolioCounters {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(150px, 1fr));
+
+  gap: 18px 28px;
+
+  margin-top: 30px;
+  padding-bottom: 20px;
+
+  border-bottom: 1px solid #e4ddd6;
+}
+
+.portfolioCounter {
+  display: flex;
+  min-width: 0;
+
+  align-items: baseline;
+  gap: 14px;
+}
+
+.counterLabel {
+  min-width: 0;
+
+  color: #77716b;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.counterCount {
+  flex: 0 0 auto;
+
+  color: #9a6845;
+
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
 .controls {
   display: flex;
   min-width: 0;
@@ -658,6 +705,24 @@
     border-radius: 14px;
   }
 
+  .portfolioCounters {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 16px 18px;
+
+    margin-top: 24px;
+    padding-bottom: 18px;
+  }
+
+  .portfolioCounter {
+    gap: 10px;
+  }
+
+  .counterCount {
+    font-size: 28px;
+  }
+
   .headingRow {
     align-items: center;
   }
@@ -691,6 +756,25 @@
 }
 
 @media (max-width: 580px) {
+  .portfolioCounters {
+    gap: 14px 12px;
+  }
+
+  .portfolioCounter {
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .counterLabel {
+    font-size: 9px;
+    letter-spacing: 0.11em;
+  }
+
+  .counterCount {
+    font-size: 26px;
+  }
+
   .grid {
     grid-template-columns: 1fr;
   }

@@ -29,8 +29,17 @@ import styles from "./PortfolioBoard.module.css";
 
 type CategoryFilter = "Усі" | AdminProjectCategory;
 
+type PortfolioCounts = {
+  total: number;
+  kitchens: number;
+  hingedWardrobes: number;
+  slidingWardrobes: number;
+  furniture: number;
+};
+
 type PortfolioBoardProps = {
   projects: AdminPortfolioProject[];
+  counts: PortfolioCounts;
 };
 
 type Point = {
@@ -125,6 +134,7 @@ function DragHandleIcon() {
 
 function PortfolioBoardState({
   projects: sourceProjects,
+  counts,
 }: PortfolioBoardProps) {
   const router = useRouter();
 
@@ -199,6 +209,20 @@ function PortfolioBoardState({
       );
     });
   }, [allProjects, query, category, status]);
+
+  const portfolioCounters = [
+    { label: "Усі роботи", count: counts.total },
+    { label: "Кухні", count: counts.kitchens },
+    {
+      label: "Розпашні шафи",
+      count: counts.hingedWardrobes,
+    },
+    {
+      label: "Шафи-купе",
+      count: counts.slidingWardrobes,
+    },
+    { label: "Інші меблі", count: counts.furniture },
+  ];
 
   const reorderEnabled =
     !savingOrder &&
@@ -670,6 +694,26 @@ function PortfolioBoardState({
           </Link>
         </header>
 
+        <div
+          className={styles.portfolioCounters}
+          aria-label="Кількість робіт у портфоліо"
+        >
+          {portfolioCounters.map((item) => (
+            <div
+              className={styles.portfolioCounter}
+              key={item.label}
+            >
+              <span className={styles.counterLabel}>
+                {item.label}
+              </span>
+
+              <span className={styles.counterCount}>
+                {String(item.count).padStart(2, "0")}
+              </span>
+            </div>
+          ))}
+        </div>
+
         <div className={styles.controls}>
           <div className={styles.tabs}>
             {categoryFilters.map((item) => (
@@ -1013,6 +1057,7 @@ function PortfolioBoardState({
 
 export function PortfolioBoard({
   projects,
+  counts,
 }: PortfolioBoardProps) {
   const stateKey = projects
     .map((project) =>
@@ -1034,6 +1079,7 @@ export function PortfolioBoard({
     <PortfolioBoardState
       key={stateKey}
       projects={projects}
+      counts={counts}
     />
   );
 }

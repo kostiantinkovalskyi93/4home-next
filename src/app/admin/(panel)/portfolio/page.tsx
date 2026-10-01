@@ -22,6 +22,7 @@ export default async function AdminPortfolioPage() {
       id,
       title,
       category,
+      wardrobe_type,
       year,
       status,
       sort_order
@@ -46,6 +47,26 @@ export default async function AdminPortfolioPage() {
 
   const projectsData =
     (projectRows ?? []) as PortfolioProjectDatabaseRow[];
+
+  const portfolioCounts = {
+    total: projectsData.length,
+    kitchens: projectsData.filter(
+      (project) => project.category === "kitchen",
+    ).length,
+    hingedWardrobes: projectsData.filter(
+      (project) =>
+        project.category === "wardrobe" &&
+        project.wardrobe_type !== "sliding",
+    ).length,
+    slidingWardrobes: projectsData.filter(
+      (project) =>
+        project.category === "wardrobe" &&
+        project.wardrobe_type === "sliding",
+    ).length,
+    furniture: projectsData.filter(
+      (project) => project.category === "furniture",
+    ).length,
+  };
 
   const projectIds = projectsData.map(
     (project) => project.id,
@@ -141,6 +162,9 @@ export default async function AdminPortfolioPage() {
     });
 
   return (
-    <PortfolioBoard projects={projects} />
+    <PortfolioBoard
+      projects={projects}
+      counts={portfolioCounts}
+    />
   );
 }
