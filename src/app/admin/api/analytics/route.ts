@@ -354,15 +354,56 @@ export async function GET(request: Request) {
         .map((project) => [project.slug, project.title]),
     );
 
+    const timelineRows =
+      typeof timeline === "object" &&
+      timeline !== null &&
+      "data" in timeline &&
+      Array.isArray(timeline.data)
+        ? timeline.data
+        : [];
+
+    const todayTimelineTotal =
+      period === "today"
+        ? timelineRows.reduce(
+            (sum, row) => {
+              if (typeof row !== "object" || row === null) {
+                return sum;
+              }
+
+              const pageviews =
+                "pageviews" in row &&
+                typeof row.pageviews === "number"
+                  ? row.pageviews
+                  : 0;
+              const visitors =
+                "visitors" in row &&
+                typeof row.visitors === "number"
+                  ? row.visitors
+                  : 0;
+
+              return {
+                pageviews: sum.pageviews + pageviews,
+                visitors: sum.visitors + visitors,
+              };
+            },
+            { pageviews: 0, visitors: 0 },
+          )
+        : null;
+
+    const normalizedTotals =
+      todayTimelineTotal !== null
+        ? { data: todayTimelineTotal }
+        : totals;
+
 const totalVisitors =
-  typeof totals === "object" &&
-  totals !== null &&
-  "data" in totals &&
-  typeof totals.data === "object" &&
-  totals.data !== null &&
-  "visitors" in totals.data &&
-  typeof totals.data.visitors === "number"
-    ? totals.data.visitors
+  typeof normalizedTotals === "object" &&
+  normalizedTotals !== null &&
+  "data" in normalizedTotals &&
+  typeof normalizedTotals.data === "object" &&
+  normalizedTotals.data !== null &&
+  "visitors" in normalizedTotals.data &&
+  typeof normalizedTotals.data.visitors === "number"
+    ? normalizedTotals.data.visitors
     : 0;
 
 const conversion =
@@ -384,7 +425,7 @@ const conversion =
       },
       updatedAt: new Date().toISOString(),
       analytics: {
-        totals,
+        totals: normalizedTotals,
         timeline,
         pages,
         referrers,
